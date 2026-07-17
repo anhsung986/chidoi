@@ -25,26 +25,60 @@
         </p>
     </div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const user = document.getElementById('regUser').value;
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPass').value;
+<!-- Nhúng thư viện Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-            if (pass.length < 6) {
-                alert("Độ bảo mật kém! Mật khẩu phải từ 6 ký tự trở lên.");
-                return;
+<script>
+    // CẤU HÌNH FIREBASE CHÍNH XÁC CỦA BẠN
+    const firebaseConfig = {
+        apiKey: "AIzaSyB0EJxNNis2NB-JjsiihieWVzFYwsgvRi8",
+        authDomain: "chidoi.firebaseapp.com",
+        databaseURL: "https://chidoi-default-rtdb.firebaseio.com",
+        projectId: "chidoi",
+        storageBucket: "chidoi.appspot.com",
+        messagingSenderId: "523119718926",
+        appId: "1:523119718926:web:2dcdd49145b01755ed825f",
+        measurementId: "G-RFKJHW3S97"
+    };
+    
+    // Khởi tạo Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Xử lý sự kiện đăng ký tài khoản
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const user = document.getElementById('regUser').value;
+        const email = document.getElementById('regEmail').value;
+        const pass = document.getElementById('regPass').value;
+
+        if (pass.length < 6) {
+            alert("Mật khẩu tối thiểu phải từ 6 ký tự!");
+            return;
+        }
+
+        // Kiểm tra tài khoản trùng lặp trên Database
+        database.ref('users/' + user).once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                alert("Tên đăng nhập này đã có người sử dụng rồi!");
+            } else {
+                // Lưu vào Database thật
+                database.ref('users/' + user).set({
+                    username: user,
+                    email: email,
+                    password: pass
+                }).then(() => {
+                    alert("Đăng ký tài khoản và lưu vào Database thành công!");
+                    window.location.href = "login.html";
+                }).catch((error) => {
+                    alert("Lỗi lưu dữ liệu: " + error.message);
+                });
             }
-
-            // Tiến hành lưu dữ liệu tài khoản mới do người dùng tự tạo
-            const newUser = { username: user, email: email, password: pass };
-            localStorage.setItem(user, JSON.stringify(newUser));
-
-            alert("Đăng ký tài khoản mới thành công! Hệ thống sẽ chuyển bạn sang trang Đăng nhập.");
-            window.location.href = "login.html";
         });
-    </script>
+    });
+</script>
+    
 </body>
 </html>
 
