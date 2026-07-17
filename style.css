@@ -1,0 +1,128 @@
+/* ==========================================
+   1. CẤU HÌNH HỆ THỐNG & BIẾN MÀU CẦU VỒNG
+   ========================================== */
+:root {
+    --rainbow: linear-gradient(45deg, #ff007f, #ff7f00, #ffeb3b, #00ff00, #00ffff, #0055ff, #7f00ff);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #ffffff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #0f172a; /* Nền tối để làm nổi bật dải màu cầu vồng */
+    overflow: hidden;
+}
+
+/* ==========================================
+   2. KHUNG CHỨA CHÍNH (WELCOME BOX)
+   ========================================== */
+.welcome-container {
+    text-align: center;
+    background: #1e293b;
+    padding: 45px 35px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    border: 3px solid transparent;
+    background-image: linear-gradient(#1e293b, #1e293b), var(--rainbow);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-size: 400% 400%;
+    animation: rainbow-animation 8s ease infinite;
+}
+
+/* ==========================================
+   3. CHỮ CẦU VỒNG & ĐƯỜNG LINK
+   ========================================== */
+.logo {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    background: var(--rainbow);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow-animation 8s ease infinite;
+}
+
+.subtitle, p, a {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #00ffff; /* Di chuột vào link đổi sang màu xanh neon */
+}
+
+/* ==========================================
+   4. INPUT NHẬP LIỆU
+   ========================================== */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: white;
+    outline: none;
+    transition: all 0.3s;
+}
+
+input:focus {
+    border-color: transparent;
+    background-image: linear-gradient(#0f172a, #0f172a), var(--rainbow);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+/* ==========================================
+   5. NÚT BẤM CẦU VỒNG
+   ========================================== */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--rainbow);
+    background-size: 300% 100%;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+    text-align: center;
+}
+
+.btn:hover {
+    background-position: 100% 0;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
+}
+
+/* ==========================================
+   6. HIỆU ỨNG CHUYỂN ĐỘNG CẦU VỒNG
+   ========================================== */
+@keyframes rainbow-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
