@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Tin Cá Nhân</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ HỆ THỐNG */
+        body {
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* KHUNG CHÍNH NỀN TỐI + VIỀN CẦU VỒNG LED */
+        .container {
+            position: relative;
+            width: 100%; max-width: 380px;
+            background: #111827; border-radius: 24px; padding: 35px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center;
+        }
+
+        /* HIỆU ỨNG LED RGB CHẠY VÔ HẠN */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(8px);
+            border-radius: 27px;
+            animation: steam 20s linear infinite;
+        }
+
+        @keyframes steam {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* NÚT BACK NEON ĐỎ */
+        .back-btn {
+            position: absolute; top: 25px; left: 20px;
+            padding: 6px 14px; background: transparent; border: 1px solid #ff3b30;
+            border-radius: 8px; text-decoration: none; color: #ff3b30; font-size: 12px; font-weight: 600;
+            transition: 0.2s;
+        }
+        .back-btn:hover { 
+            background: #ff3b30; color: white;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+        }
+
+        /* TIÊU ĐỀ GRADIENT CẦU VỒNG */
+        .header-title {
+            font-size: 22px; font-weight: 600; margin: 20px 0 25px 0;
+            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        /* CÁC DÒNG THÔNG TIN */
+        .info-group {
+            margin-bottom: 18px; text-align: left;
+        }
+        .info-label {
+            font-weight: 600; font-size: 11px; margin-bottom: 6px;
+            display: block; color: rgba(255, 255, 255, 0.4); letter-spacing: 1px;
+        }
+        
+        /* Ô INPUT CHỨA THÔNG TIN TỰ NHẬP */
+        .info-row {
+            display: flex; align-items: center;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 6px 14px; gap: 10px;
+            transition: 0.3s;
+        }
+        .info-row:focus-within {
+            border-color: #00ffd5;
+            box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+        }
+        .info-icon { font-size: 18px; }
+        
+        .info-row input {
+            background: transparent; border: none; outline: none;
+            color: #eee; font-size: 14px; width: 100%; font-weight: 500;
+        }
+        .info-row input::placeholder { color: rgba(255,255,255,0.2); }
+
+        /* NÚT LƯU THÔNG TIN PHÁT SÁNG CẦU VỒNG */
+        .save-btn {
+            background: linear-gradient(45deg, #ff0055, #7a00ff);
+            color: white; border: none; padding: 13px; border-radius: 50px;
+            font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 15px;
+            width: 100%; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 213, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="home.html" class="back-btn">⬅ BACK</a>
+    
+    <div class="header-title">THÔNG TIN CỦA BẠN</div>
+
+    <div class="info-group">
+        <span class="info-label">HỌ VÀ TÊN</span>
+        <div class="info-row">
+            <span class="info-icon">👤</span>
+            <input type="text" id="username" placeholder="Nhập họ và tên...">
+        </div>
+    </div>
+
+    <div class="info-group">
+        <span class="info-label">NGÀY SINH</span>
+        <div class="info-row">
+            <span class="info-icon">🎂</span>
+            <input type="text" id="birthday" placeholder="Ví dụ: 10/03/2012...">
+        </div>
+    </div>
+
+    <div class="info-group">
+        <span class="info-label">BIỆT DANH</span>
+        <div class="info-row">
+            <span class="info-icon">✨</span>
+            <input type="text" id="nickname" placeholder="Nhập biệt danh của bạn...">
+        </div>
+    </div>
+
+    <div class="info-group">
+        <span class="info-label">SỞ THÍCH</span>
+        <div class="info-row">
+            <span class="info-icon">🎮</span>
+            <input type="text" id="hobby" placeholder="Sở thích của bạn là gì...">
+        </div>
+    </div>
+
+    <button class="save-btn" onclick="saveData()">LƯU THÔNG TIN</button>
+</div>
+
+<script>
+    // Khi trang vừa load, tự động kiểm tra xem máy đã từng lưu thông tin chưa
+    window.onload = function() {
+        if(localStorage.getItem('my_username')) document.getElementById('username').value = localStorage.getItem('my_username');
+        if(localStorage.getItem('my_birthday')) document.getElementById('birthday').value = localStorage.getItem('my_birthday');
+        if(localStorage.getItem('my_nickname')) document.getElementById('nickname').value = localStorage.getItem('my_nickname');
+        if(localStorage.getItem('my_hobby')) document.getElementById('hobby').value = localStorage.getItem('my_hobby');
+    }
+
+    // Hàm thực hiện nhiệm vụ lưu thông tin vào LocalStorage của thiết bị
+    function saveData() {
+        const name = document.getElementById('username').value;
+        const birth = document.getElementById('birthday').value;
+        const nick = document.getElementById('nickname').value;
+        const hobby = document.getElementById('hobby').value;
+
+        localStorage.setItem('my_username', name);
+        localStorage.setItem('my_birthday', birth);
+        localStorage.setItem('my_nickname', nick);
+        localStorage.setItem('my_hobby', hobby);
+
+        alert("🎉 Đã lưu thông tin cá nhân thành công!");
+    }
+</script>
+
+</body>
+</html>
+
