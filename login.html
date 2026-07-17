@@ -53,7 +53,11 @@
         // Tài khoản admin dự phòng cứng
         if (user === "admin" && pass === "123456") {
             alert("Đăng nhập thành công với quyền Admin!");
-            window.location.href = "index.html";
+             
+       // Đảm bảo có dòng này để truyền tên user qua trang home:
+            localStorage.setItem("loggedInUser", user); 
+            
+            window.location.href = "home.html";
             return;
         }
 
