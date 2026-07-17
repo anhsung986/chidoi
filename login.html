@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Đăng Nhập - Chidoi</title>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1 class="logo">LOGIN</h1>
+        
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Tên đăng nhập" required>
+            <input type="password" id="password" placeholder="Mật khẩu" required>
+            <button type="submit" class="btn">Xác Nhận Đăng Nhập</button>
+        </form>
+        
+        <p style="margin-top: 25px;">
+            Chưa có tài khoản? <a href="register.html" style="font-weight: bold; color: #00ffff;">Đăng ký ngay</a>
+        </p>
+        <p style="margin-top: 10px;">
+            <a href="index.html">← Quay lại trang chủ</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            // Kiểm tra tài khoản trong bộ nhớ máy (LocalStorage)
+            const savedData = localStorage.getItem(user);
+
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                if (parsed.password === pass) {
+                    alert("Đăng nhập thành công! Chào mừng " + user);
+                    window.location.href = "index.html";
+                } else {
+                    alert("Mật khẩu nhập chưa đúng rồi!");
+                }
+            } else {
+                // Tài khoản admin dự phòng
+                if (user === "admin" && pass === "123456") {
+                    alert("Đăng nhập thành công với quyền Admin!");
+                    window.location.href = "index.html";
+                } else {
+                    alert("Tài khoản này chưa tồn tại trên hệ thống!");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
