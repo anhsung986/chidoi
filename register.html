@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Đăng Ký - Chidoi</title>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1 class="logo">REGISTER</h1>
+        
+        <form id="registerForm">
+            <input type="text" id="regUser" placeholder="Tên đăng nhập mới" required>
+            <input type="email" id="regEmail" placeholder="Địa chỉ Email" required>
+            <input type="password" id="regPass" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" required>
+            <button type="submit" class="btn">Tạo Tài Khoản</button>
+        </form>
+        
+        <p style="margin-top: 25px;">
+            Đã có tài khoản? <a href="login.html" style="font-weight: bold; color: #00ffff;">Đăng nhập ngay</a>
+        </p>
+        <p style="margin-top: 10px;">
+            <a href="index.html">← Quay lại trang chủ</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('regUser').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+
+            if (pass.length < 6) {
+                alert("Độ bảo mật kém! Mật khẩu phải từ 6 ký tự trở lên.");
+                return;
+            }
+
+            // Tiến hành lưu dữ liệu tài khoản mới do người dùng tự tạo
+            const newUser = { username: user, email: email, password: pass };
+            localStorage.setItem(user, JSON.stringify(newUser));
+
+            alert("Đăng ký tài khoản mới thành công! Hệ thống sẽ chuyển bạn sang trang Đăng nhập.");
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+</html>
+
