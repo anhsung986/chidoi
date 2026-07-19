@@ -39,29 +39,38 @@
     .menu-btn.active span:nth-child(2) { opacity: 0; }
     .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-    /* --- SIDEBAR --- */
+    /* --- SIDEBAR CHUẨN HÓA ĐÓNG/MỞ --- */
     .sidebar {
         position: fixed;
-        top: 20px;                    /* Cách mép trên màn hình 20px */
-        left: 20px;                   /* Cách mép trái màn hình 20px */
-        height: auto !important;       /* Tự co theo độ dài của chữ */
-        border-radius: 12px;          /* Bo tròn đều cả 4 góc */
+        top: 20px;
+        left: -300px;                 /* Giấu menu hoàn toàn về bên trái khi mặc định */
+        width: 250px;                 /* Đặt độ rộng cố định cho menu */
+        height: auto !important;
+        background: #111827;          /* Màu nền tối giống container */
+        border-radius: 12px;
         padding: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Đổ bóng cho menu nổi lên */
+        padding-top: 80px;            /* Chừa khoảng trống cho nút bấm */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99; padding-top: 90px;
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 99;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .sidebar.active { left: 0; }
+    
+    /* Khi hoạt động (được mở), đẩy menu lùi vào cách lề 20px */
+    .sidebar.active { 
+        left: 20px; 
+    }
+
     .sidebar a {
-        display: block; padding: 16px 28px;
+        display: block; padding: 12px 20px;
         color: #eee; text-decoration: none;
         font-weight: 500; font-size: 15px;
         border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
+        border-radius: 6px;
     }
     .sidebar a:hover {
         background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
-        color: white; padding-left: 35px;
+        color: white; padding-left: 25px;
     }
 
     .overlay {
@@ -71,7 +80,7 @@
     }
     .overlay.active { display: block; }
 
-    /* --- MAIN CONTAINER KHUNG VIỀN CẦU VỒNG LED CHẠY --- */
+    /* --- MAIN CONTAINER --- */
     .container {
         position: relative;
         width: 90%; max-width: 380px;
@@ -81,7 +90,6 @@
         color: white; text-align: center;
     }
 
-    /* HIỆU ỨNG LED RGB PHÁT SÁNG XOAY TRÒN QUANH KHUNG CHÍNH */
     .container::before {
         content: '';
         position: absolute;
@@ -100,7 +108,6 @@
         100% { background-position: 0 0; }
     }
 
-    /* CHỮ ĐỔI MÀU GRADIENT CẦU VỒNG */
     .title { 
         font-size: 28px; 
         font-weight: 600; 
@@ -113,7 +120,6 @@
     .welcome-text { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
     .welcome-text span { color: #00ffd5; font-weight: 600; }
     
-    /* --- CÁC NÚT CARD CHỌN CHỨC NĂNG --- */
     .card {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -122,7 +128,6 @@
     }
     .card h2 { font-size: 17px; font-weight: 500; letter-spacing: 1px; color: #fff; }
     
-    /* Hover vào nút hiệu ứng cầu vồng neon sáng bừng */
     .card:hover {
         background: rgba(255, 255, 255, 0.08);
         transform: translateY(-4px) scale(1.02);
@@ -130,7 +135,6 @@
         box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
     }
 
-    /* NÚT ĐĂNG XUẤT NEON ĐỎ */
     .logout-btn {
         width: 100%; padding: 15px;
         border: 2px solid #ff3b30; border-radius: 14px;
@@ -154,12 +158,14 @@
         }
     </script>
 
+    <!-- Nút Menu đóng/mở -->
     <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
         <span></span>
         <span></span>
         <span></span>
     </div>
 
+    <!-- Thanh Sidebar ngắn gọn -->
     <div class="sidebar" id="mySidebar">
         <a href="#">🏠 Trang chủ</a>
         <a href="canhan.html">👤 Thông tin cá nhân</a>
@@ -169,6 +175,7 @@
         <a href="index.html" onclick="logout()" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
     </div>
 
+    <!-- Nền mờ phía sau giúp click ra ngoài tự đóng -->
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="container">
@@ -199,6 +206,7 @@
             document.getElementById("userDisplay").innerText = loggedInUser;
         }
 
+        // Hàm xử lý đóng mở đồng bộ bằng cách thêm/xóa class active
         function toggleMenu() {
             const sidebar = document.getElementById("mySidebar");
             const overlay = document.getElementById("overlay");
