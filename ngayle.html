@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Các Ngày Lễ & Thời Gian</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+        }
+
+        /* Đồng hồ thời gian thực */
+        #clock-container {
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+        }
+
+        main {
+            max-width: 1000px;
+            width: 90%;
+            margin: 2rem 0;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-top: 2rem;
+        }
+
+        /* Bảng danh sách ngày lễ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+            transition: background 0.2s;
+        }
+
+        .date-badge {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .lunar-badge {
+            background-color: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        footer {
+            margin-top: auto;
+            background: var(--primary-color);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Lịch Các Ngày Lễ & Thời Gian</h1>
+        <div id="clock-container">
+            Hôm nay: <span id="current-time">Đang tải...</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- NGÀY LỄ VIỆT NAM (ĐƯỢC NGHỈ) -->
+        <h2 class="section-title">Các Ngày Lễ Nghỉ Chính Thức Tại Việt Nam</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Thời gian</th>
+                    <th style="width: 35%;">Tên Ngày Lễ</th>
+                    <th style="width: 45%;">Ghi chú / Ý nghĩa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="date-badge">1 tháng 1</span></td>
+                    <td><strong>Tết Dương Lịch</strong></td>
+                    <td>Ngày đầu tiên của năm mới theo Dương lịch. Nghỉ 1 ngày.</td>
+                </tr>
+                <tr>
+                    <td><span class="lunar-badge">1 tháng 1 (Âm lịch)</span></td>
+                    <td><strong>Tết Nguyên Đán</strong></td>
+                    <td>Tết cổ truyền của dân tộc. Thường nghỉ từ 5 đến 7 ngày.</td>
+                </tr>
+                <tr>
+                    <td><span class="lunar-badge">10 tháng 3 (Âm lịch)</span></td>
+                    <td><strong>Giỗ Tổ Hùng Vương</strong></td>
+                    <td>Ngày hội truyền thống tưởng nhớ công lao dựng nước của các vua Hùng. Nghỉ 1 ngày.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">30 tháng 4</span></td>
+                    <td><strong>Ngày Giải phóng miền Nam</strong></td>
+                    <td>Ngày Giải phóng miền Nam, Thống nhất đất nước. Nghỉ 1 ngày.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">1 tháng 5</span></td>
+                    <td><strong>Ngày Quốc tế Lao động</strong></td>
+                    <td>Ngày kỷ niệm phong trào công nhân quốc tế. Nghỉ 1 ngày.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">2 tháng 9</span></td>
+                    <td><strong>Ngày Quốc khánh Việt Nam</strong></td>
+                    <td>Kỷ niệm Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập tại Quảng trường Ba Đình (1945). Nghỉ 2 ngày (gồm cả ngày liền kề).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- CÁC NGÀY KỶ NIỆM LỚN KHÁC TRONG NƯỚC -->
+        <h2 class="section-title">Các Ngày Kỷ Niệm Lớn Trong Nước</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Thời gian</th>
+                    <th style="width: 35%;">Tên Ngày Kỷ Niệm</th>
+                    <th style="width: 45%;">Ý nghĩa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="date-badge">3 tháng 2</span></td>
+                    <td>Ngày thành lập Đảng Cộng sản Việt Nam</td>
+                    <td>Kỷ niệm ngày thành lập Đảng (1930).</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">27 tháng 2</span></td>
+                    <td>Ngày Thầy thuốc Việt Nam</td>
+                    <td>Tôn vinh các y bác sĩ và người làm trong ngành y tế.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">26 tháng 3</span></td>
+                    <td>Ngày thành lập Đoàn TNCS Hồ Chí Minh</td>
+                    <td>Ngày truyền thống của thế hệ trẻ và Đoàn viên.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">7 tháng 5</span></td>
+                    <td>Ngày Chiến thắng Điện Biên Phủ</td>
+                    <td>Kỷ niệm chiến thắng "lừng lẫy năm châu, chấn động địa cầu" (1954).</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">19 tháng 5</span></td>
+                    <td>Ngày sinh Chủ tịch Hồ Chí Minh</td>
+                    <td>Kỷ niệm ngày sinh của vị Lãnh tụ vĩ đại của dân tộc (1890).</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">27 tháng 7</span></td>
+                    <td>Ngày Thương binh - Liệt sĩ</td>
+                    <td>Ngày tri ân các anh hùng, thương binh đã hy sinh vì tổ quốc.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">20 tháng 10</span></td>
+                    <td>Ngày Phụ nữ Việt Nam</td>
+                    <td>Tôn vinh và khẳng định vai trò của người phụ nữ Việt Nam.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">20 tháng 11</span></td>
+                    <td>Ngày Nhà giáo Việt Nam</td>
+                    <td>Ngày "Tôn sư trọng đạo", tri ân công ơn của các thầy cô giáo.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">22 tháng 12</span></td>
+                    <td>Ngày thành lập Quân đội Nhân dân VN</td>
+                    <td>Ngày hội Quốc phòng toàn dân.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- CÁC NGÀY LỄ QUỐC TẾ PHỔ BIẾN -->
+        <h2 class="section-title">Các Ngày Lễ Quốc Tế Phổ Biến</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Thời gian</th>
+                    <th style="width: 35%;">Tên Ngày Lễ</th>
+                    <th style="width: 45%;">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="date-badge">14 tháng 2</span></td>
+                    <td>Ngày Lễ Tình Nhân (Valentine)</td>
+                    <td>Ngày tôn vinh tình yêu đôi lứa trên toàn thế giới.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">8 tháng 3</span></td>
+                    <td>Ngày Quốc tế Phụ nữ</td>
+                    <td>Ngày đấu tranh vì quyền lợi và tôn vinh phụ nữ toàn cầu.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">1 tháng 6</span></td>
+                    <td>Ngày Quốc tế Thiếu nhi</td>
+                    <td>Ngày dành riêng cho việc bảo vệ và chăm sóc trẻ em.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">31 tháng 10</span></td>
+                    <td>Ngày Lễ Hóa Lộ (Halloween)</td>
+                    <td>Lễ hội hóa trang phương Tây phổ biến trên thế giới.</td>
+                </tr>
+                <tr>
+                    <td><span class="date-badge">25 tháng 12</span></td>
+                    <td>Ngày Lễ Giáng Sinh (Noel)</td>
+                    <td>Kỷ niệm ngày sinh của Chúa Giê-su (Đêm Noel diễn ra vào 24/12).</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <p>&copy; Trang thông tin Lịch & Ngày lễ tự động cập nhật thời gian thực</p>
+    </footer>
+
+    <script>
+        // Hàm cập nhật đồng hồ thời gian thực
+        function updateClock() {
+            const now = new Date();
+            
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            
+            // Định dạng ngày tiếng Việt
+            const dateStr = now.toLocaleDateString('vi-VN', options);
+            
+            // Định dạng giờ phút giây
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}:${seconds}`;
+
+            // Hiển thị ra màn hình
+            document.getElementById('current-time').textContent = `${dateStr} - ${timeStr}`;
+        }
+
+        // Chạy đồng hồ ngay lập tức và cập nhật mỗi giây
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
+
