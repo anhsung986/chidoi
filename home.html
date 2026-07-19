@@ -41,11 +41,13 @@
 
     /* --- SIDEBAR --- */
     .sidebar {
-        position: fixed; top: 0; left: -260px;
-        width: 260px; height: 100%;
-        background: rgba(11, 15, 25, 0.9);
-        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+        position: fixed;
+        top: 20px;                    /* Cách mép trên màn hình 20px */
+        left: 20px;                   /* Cách mép trái màn hình 20px */
+        height: auto !important;       /* Tự co theo độ dài của chữ */
+        border-radius: 12px;          /* Bo tròn đều cả 4 góc */
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Đổ bóng cho menu nổi lên */
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 99; padding-top: 90px;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
