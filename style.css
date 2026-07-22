@@ -18,8 +18,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #0f172a; /* Nền tối để làm nổi bật dải màu cầu vồng */
+    background-color: #0f172a; /* Nền tối */
     padding: 20px 10px;
+    overflow-y: auto; /* SỬA LỖI: Cho phép cuộn trang thay vì khóa cứng màn hình */
 }
 
 /* ==========================================
@@ -28,11 +29,11 @@ body {
 .welcome-container {
     text-align: center;
     background: #1e293b;
-    padding: 35px 25px;
+    padding: 25px 20px;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    max-width: 400px;
-    width: 100%;
+    max-width: 90%; /* SỬA LỖI: Co giãn theo màn hình di động */
+    width: 420px;   /* Độ rộng tối đa chuẩn */
     position: relative;
     border: 3px solid transparent;
     background-image: linear-gradient(#1e293b, #1e293b), var(--rainbow);
@@ -40,10 +41,12 @@ body {
     background-clip: padding-box, border-box;
     background-size: 400% 400%;
     animation: rainbow-animation 8s ease infinite;
+    box-sizing: border-box;
 }
 
 .guide-page-container {
-    max-width: 480px;
+    max-width: 92%;
+    width: 450px;
     text-align: left;
 }
 
@@ -51,7 +54,7 @@ body {
    3. CHỮ CẦU VỒNG & ĐƯỜNG LINK
    ========================================== */
 .logo {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 900;
     letter-spacing: 2px;
     margin-bottom: 20px;
@@ -71,7 +74,7 @@ body {
 }
 
 a:hover {
-    color: #00ffff; /* Di chuột vào link đổi sang màu xanh neon */
+    color: #00ffff;
 }
 
 /* ==========================================
@@ -167,13 +170,15 @@ input:focus {
 }
 
 /* ==========================================
-   7. STYLING CHO TRANG HUONGDAN.HTML
+   7. STYLING CHO TRANG HUONGDAN.HTML (ĐÃ SỬA LỖI ẢNH)
    ========================================== */
 .guide-box-detail {
     background-color: #0f172a;
     border: 1px solid #334155;
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .guide-box-title {
@@ -184,18 +189,26 @@ input:focus {
     padding-bottom: 8px;
 }
 
+/* SỬA LỖI: Thu nhỏ ảnh gọn vào trong khung */
 .img-preview {
     width: 100%;
-    margin-bottom: 12px;
+    max-height: 180px; /* Giới hạn chiều cao để ảnh không quá to */
+    margin: 10px 0 15px 0;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #334155;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0f172a;
 }
 
 .img-preview img {
     width: 100%;
+    max-height: 180px;
     height: auto;
     display: block;
+    object-fit: contain; /* Ép ảnh đúng tỉ lệ, không tràn khung */
 }
 
 .guide-list-detail {
