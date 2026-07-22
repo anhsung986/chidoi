@@ -31,7 +31,7 @@ jobs:
           npm init -y
           npm install @capacitor/core@5.7.0 @capacitor/cli@5.7.0 @capacitor/android@5.7.0 @capacitor/assets --save-dev
           
-          # Tao file config JSON truc tiep de tranh loi typescript/commonjs
+          # Tao file config JSON
           echo '{"appId":"com.anhsung.chidoi","appName":"Chidoi App","webDir":"www"}' > capacitor.config.json
           
           npx cap add android
@@ -54,18 +54,23 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Sign APK Release
+      - name: Zipalign & Sign APK V2 (Chuẩn Android hiện đại)
         run: |
+          # Lay đường dẫn android sdk build-tools
+          BUILD_TOOLS=$ANDROID_HOME/build-tools/34.0.0
+          
+          # Tao Keystore Release
           keytool -genkey -v -keystore release.keystore -storepass chidoi123 -alias chidoikey -keypass chidoi123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Chidoi App,O=Chidoi,C=VN"
           
-          # Dung apksigner neu co hoac jarsigner de ky file release
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore -storepass chidoi123 android/app/build/outputs/apk/release/app-release-unsigned.apk chidoikey
+          # Zipalign toi uu bộ nhớ APK
+          $BUILD_TOOLS/zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/ChidoiApp_aligned.apk
           
-          mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/ChidoiApp.apk
+          # Ky V2 Signature cho Android
+          $BUILD_TOOLS/apksigner sign --ks release.keystore --ks-pass pass:chidoi123 --ks-key-alias chidoikey --key-pass pass:chidoi123 --out android/app/build/outputs/apk/release/ChidoiApp.apk android/app/build/outputs/apk/release/ChidoiApp_aligned.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chidoi-app-release
+          name: chidoi-app-release-v2
           path: android/app/build/outputs/apk/release/ChidoiApp.apk
           
