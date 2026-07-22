@@ -110,103 +110,138 @@
     <div class="container">
         <h2 class="header-title">📌 BẢNG THÔNG BÁO</h2>
 
-        <!-- Khung soạn thảo của Admin (Bình thường ẩn đi) -->
+        <!-- Khung soạn thảo của Admin -->
         <div class="admin-panel" id="adminPanel">
             <textarea id="notifyInput" placeholder="Nhập nội dung thông báo mới tại đây..."></textarea>
             <div class="admin-btns">
-                <button class="btn btn-cancel" onclick="closeAdminPanel()">Đóng</button>
-                <button class="btn btn-post" onclick="addNotification()">ĐĂNG THÔNG BÁO</button>
+                <button class="btn btn-cancel" id="btnCancel">Đóng</button>
+                <button class="btn btn-post" id="btnPost">ĐĂNG THÔNG BÁO</button>
             </div>
         </div>
 
         <!-- Vùng hiển thị danh sách bài đăng -->
         <div class="notify-list" id="notifyList">
-            <!-- Nếu không có dữ liệu, thông báo mẫu sẽ hiện -->
+            <div class="notify-item">
+                <span class="notify-time">Hệ Thống • Vừa xong</span>
+                <p class="notify-content">Đang tải thông báo từ Firebase...</p>
+            </div>
         </div>
 
-        <!-- Nút bấm ẩn dưới chân trang để đăng nhập Admin -->
-        <span class="admin-trigger" onclick="loginAdmin()">Chế độ Admin</span>
+        <!-- Nút kích hoạt Admin -->
+        <span class="admin-trigger" id="adminTrigger">Chế độ Admin</span>
     </div>
 
-    <script>
+    <!-- TÍCH HỢP FIREBASE REALTIME DATABASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Cấu hình Firebase thongbao-e6205 từ thông tin của bạn
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWz9LghmamJdHkkUnz26VldvUieFePcqQ",
+            authDomain: "thongbao-e6205.firebaseapp.com",
+            databaseURL: "https://thongbao-e6205-default-rtdb.firebaseio.com",
+            projectId: "thongbao-e6205",
+            storageBucket: "thongbao-e6205.firebasestorage.app",
+            messagingSenderId: "188839127850",
+            appId: "1:188839127850:web:dae5119a37beb222bf0c53",
+            measurementId: "G-Y8PDQZYBPR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const notifyRef = ref(db, 'notifications');
+
         const ADMIN_KEY = "sungtuananh";
         let isAdminMode = false;
 
-        window.onload = function() {
-            loadNotifications();
-        };
-
-        // Hàm lấy danh sách từ LocalStorage ra hiển thị
-        function loadNotifications() {
+        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE
+        onValue(notifyRef, (snapshot) => {
             const list = document.getElementById('notifyList');
-            let data = JSON.parse(localStorage.getItem('my_notifications')) || [];
-            
-            if (data.length === 0) {
+            const data = snapshot.val();
+
+            if (!data) {
                 list.innerHTML = `
                     <div class="notify-item">
                         <span class="notify-time">Hệ Thống • Vừa xong</span>
-                        <p class="notify-content">Chào mừng bạn đến với bảng thông báo! Hãy bấm vào chữ "Chế độ Admin" phía dưới để đăng thông tin mới nhé. 🎉</p>
+                        <p class="notify-content">Chưa có thông báo nào. Bấm "Chế độ Admin" bên dưới để đăng thông báo đầu tiên! 🎉</p>
                     </div>`;
                 return;
             }
 
-            list.innerHTML = data.map(item => `
+            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu
+            const items = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).reverse();
+
+            list.innerHTML = items.map(item => `
                 <div class="notify-item">
                     <span class="notify-time">⏱ ${item.time}</span>
                     <p class="notify-content">${item.text}</p>
-                    <button class="btn-delete-item" style="display: ${isAdminMode ? 'block' : 'none'}" onclick="deleteNotification(${item.id})">🗑</button>
+                    <button class="btn-delete-item" style="display: ${isAdminMode ? 'block' : 'none'}" data-id="${item.id}">🗑</button>
                 </div>
             `).join('');
+
+            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin
+            document.querySelectorAll('.btn-delete-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    deleteNotification(id);
+                });
+            });
+        });
+
+        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE
+        document.getElementById('btnPost').addEventListener('click', async () => {
+            const text = document.getElementById('notifyInput').value.trim();
+            if (!text) return alert("Vui lòng nhập nội dung!");
+
+            const now = new Date();
+            const timeString = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} lúc ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            try {
+                await push(notifyRef, {
+                    time: timeString,
+                    text: text,
+                    createdAt: Date.now()
+                });
+                document.getElementById('notifyInput').value = "";
+                alert("🎉 Đã đăng thông báo lên Firebase thành công!");
+            } catch (error) {
+                alert("❌ Lỗi: " + error.message);
+            }
+        });
+
+        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE
+        async function deleteNotification(id) {
+            if(confirm("Bạn có chắc chắn muốn xóa thông báo này không?")) {
+                try {
+                    await remove(ref(db, 'notifications/' + id));
+                } catch (error) {
+                    alert("❌ Lỗi khi xóa: " + error.message);
+                }
+            }
         }
 
-        // Đăng nhập quyền Admin
-        function loginAdmin() {
+        // 4. KÍCH HOẠT QUYỀN ADMIN
+        document.getElementById('adminTrigger').addEventListener('click', () => {
             let pass = prompt("QUYỀN QUẢN TRỊ\nNhập mật mã để kích hoạt tính năng đăng bài:");
             if (pass === ADMIN_KEY) {
                 isAdminMode = true;
                 document.getElementById('adminPanel').style.display = "block";
-                loadNotifications();
+                // Hiện nút xóa bài
+                document.querySelectorAll('.btn-delete-item').forEach(btn => btn.style.display = 'block');
                 alert("Xác thực Admin thành công! Bạn có thể ĐĂNG hoặc XÓA thông báo.");
             } else if (pass !== null) {
                 alert("Mật mã không chính xác!");
             }
-        }
+        });
 
-        function closeAdminPanel() {
+        // Đóng khung Admin
+        document.getElementById('btnCancel').addEventListener('click', () => {
             document.getElementById('adminPanel').style.display = "none";
-        }
-
-        // Thêm thông báo mới
-        function addNotification() {
-            const text = document.getElementById('notifyInput').value.trim();
-            if (!text) return alert("Vui lòng nhập nội dung!");
-
-            let data = JSON.parse(localStorage.getItem('my_notifications')) || [];
-            
-            const now = new Date();
-            const timeString = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} lúc ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-            data.unshift({
-                id: Date.now(),
-                time: timeString,
-                text: text
-            });
-
-            localStorage.setItem('my_notifications', JSON.stringify(data));
-            document.getElementById('notifyInput').value = "";
-            loadNotifications();
-        }
-
-        // Xóa thông báo bất kỳ
-        function deleteNotification(id) {
-            if(confirm("Bạn có chắc chắn muốn xóa dòng thông báo này không?")) {
-                let data = JSON.parse(localStorage.getItem('my_notifications')) || [];
-                data = data.filter(item => item.id !== id);
-                localStorage.setItem('my_notifications', JSON.stringify(data));
-                loadNotifications();
-            }
-        }
+        });
     </script>
 </body>
 </html>
-
