@@ -23,7 +23,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
 
       - name: Prepare Web Directory & Install Capacitor
         run: |
@@ -39,6 +38,7 @@ jobs:
           cd android
           sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle 2>/dev/null || true
           chmod +x gradlew
+          rm -rf ~/.gradle/caches/
           ./gradlew assembleDebug --no-daemon -Dorg.gradle.parallel=false
 
       - name: Upload APK Artifact
