@@ -144,34 +144,83 @@
         </div>
     </div>
 
-    <button class="save-btn" onclick="saveData()">LƯU THÔNG TIN</button>
+    <button class="save-btn" id="saveBtn">LƯU THÔNG TIN</button>
 </div>
 
-<script>
-    // Khi trang vừa load, tự động kiểm tra xem máy đã từng lưu thông tin chưa
-    window.onload = function() {
-        if(localStorage.getItem('my_username')) document.getElementById('username').value = localStorage.getItem('my_username');
-        if(localStorage.getItem('my_birthday')) document.getElementById('birthday').value = localStorage.getItem('my_birthday');
-        if(localStorage.getItem('my_nickname')) document.getElementById('nickname').value = localStorage.getItem('my_nickname');
-        if(localStorage.getItem('my_hobby')) document.getElementById('hobby').value = localStorage.getItem('my_hobby');
+<!-- TÍCH HỢP FIREBASE DATABASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Cấu hình Firebase dự án thongtin-21697 của bạn
+  const firebaseConfig = {
+    apiKey: "AIzaSyBAWnGJ0m3RYEFba6QLQ4ajsqJ3rwhd34Q",
+    authDomain: "thongtin-21697.firebaseapp.com",
+    projectId: "thongtin-21697",
+    storageBucket: "thongtin-21697.firebasestorage.app",
+    messagingSenderId: "724627524685",
+    appId: "1:724627524685:web:670c7c38fc60e4ad526004",
+    measurementId: "G-NJRPJ4XF62"
+  };
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Tạo / Lấy User ID riêng cho trình duyệt hiện tại
+  let userId = localStorage.getItem("user_id");
+  if (!userId) {
+    userId = "user_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("user_id", userId);
+  }
+
+  // 1. Tự động lấy dữ liệu từ Firebase về khi vừa load trang
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const docRef = doc(db, "users", userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.username) document.getElementById('username').value = data.username;
+        if (data.birthday) document.getElementById('birthday').value = data.birthday;
+        if (data.nickname) document.getElementById('nickname').value = data.nickname;
+        if (data.hobby) document.getElementById('hobby').value = data.hobby;
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu từ Firebase:", error);
     }
+  });
 
-    // Hàm thực hiện nhiệm vụ lưu thông tin vào LocalStorage của thiết bị
-    function saveData() {
-        const name = document.getElementById('username').value;
-        const birth = document.getElementById('birthday').value;
-        const nick = document.getElementById('nickname').value;
-        const hobby = document.getElementById('hobby').value;
+  // 2. Xử lý khi nhấn nút LƯU THÔNG TIN -> Đưa dữ liệu lên Firebase
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+    const name = document.getElementById('username').value;
+    const birth = document.getElementById('birthday').value;
+    const nick = document.getElementById('nickname').value;
+    const hobby = document.getElementById('hobby').value;
 
-        localStorage.setItem('my_username', name);
-        localStorage.setItem('my_birthday', birth);
-        localStorage.setItem('my_nickname', nick);
-        localStorage.setItem('my_hobby', hobby);
+    try {
+      await setDoc(doc(db, "users", userId), {
+        username: name,
+        birthday: birth,
+        nickname: nick,
+        hobby: hobby,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
 
-        alert("🎉 Đã lưu thông tin cá nhân thành công!");
+      // Lưu dự phòng vào LocalStorage
+      localStorage.setItem('my_username', name);
+      localStorage.setItem('my_birthday', birth);
+      localStorage.setItem('my_nickname', nick);
+      localStorage.setItem('my_hobby', hobby);
+
+      alert("🎉 Đã lưu thông tin cá nhân lên Firebase thành công!");
+    } catch (error) {
+      console.error("Lỗi khi lưu lên Firebase:", error);
+      alert("❌ Có lỗi xảy ra: " + error.message);
     }
+  });
 </script>
 
 </body>
 </html>
-
