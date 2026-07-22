@@ -189,10 +189,10 @@ input:focus {
     padding-bottom: 8px;
 }
 
-/* SỬA LỖI: Thu nhỏ ảnh gọn vào trong khung */
+/* Sửa riêng đoạn này trong style.css */
 .img-preview {
     width: 100%;
-    max-height: 180px; /* Giới hạn chiều cao để ảnh không quá to */
+    max-height: 120px; /* Ép chiều cao tối đa xuống 120px (nhỏ gọn hẳn) */
     margin: 10px 0 15px 0;
     border-radius: 8px;
     overflow: hidden;
@@ -204,11 +204,12 @@ input:focus {
 }
 
 .img-preview img {
-    width: 100%;
-    max-height: 180px;
-    height: auto;
+    width: auto;       /* Để chiều rộng tự điều chỉnh theo tỉ lệ */
+    max-width: 100%;
+    height: 100%;
+    max-height: 120px; /* Đảm bảo ảnh không bao giờ cao quá 120px */
     display: block;
-    object-fit: contain; /* Ép ảnh đúng tỉ lệ, không tràn khung */
+    object-fit: contain;
 }
 
 .guide-list-detail {
