@@ -30,10 +30,13 @@ jobs:
           cp -r *.html *.css *.js www/ 2>/dev/null || true
           npm init -y
           npm install @capacitor/core@5.7.0 @capacitor/cli@5.7.0 @capacitor/android@5.7.0 @capacitor/assets --save-dev
-          npx cap init "Chidoi App" "com.anhsung.chidoi" --web-dir www
+          
+          # Tao file config JSON truc tiep de tranh loi typescript/commonjs
+          echo '{"appId":"com.anhsung.chidoi","appName":"Chidoi App","webDir":"www"}' > capacitor.config.json
+          
           npx cap add android
 
-          # Tự đổi Icon nếu có file icon.png
+          # Tu dong tao Icon neu co file icon.png
           if [ -f "icon.png" ]; then
             npx capacitor-assets generate --android
           fi
@@ -51,15 +54,13 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Sign APK Release (Tạo chữ ký chính thức)
+      - name: Sign APK Release
         run: |
-          # Tạo khóa Keystore Release chuẩn
           keytool -genkey -v -keystore release.keystore -storepass chidoi123 -alias chidoikey -keypass chidoi123 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Chidoi App,O=Chidoi,C=VN"
           
-          # Ký trực tiếp vào file APK Release
+          # Dung apksigner neu co hoac jarsigner de ky file release
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore -storepass chidoi123 android/app/build/outputs/apk/release/app-release-unsigned.apk chidoikey
           
-          # Đổi tên cho dễ cài
           mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/ChidoiApp.apk
 
       - name: Upload APK Artifact
