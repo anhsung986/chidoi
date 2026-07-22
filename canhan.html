@@ -147,15 +147,16 @@
     <button class="save-btn" id="saveBtn">LƯU THÔNG TIN</button>
 </div>
 
-<!-- TÍCH HỢP FIREBASE DATABASE -->
+<!-- TÍCH HỢP FIREBASE REALTIME DATABASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // Cấu hình Firebase dự án thongtin-21697 của bạn
+  // Cấu hình Firebase có databaseURL
   const firebaseConfig = {
     apiKey: "AIzaSyBAWnGJ0m3RYEFba6QLQ4ajsqJ3rwhd34Q",
     authDomain: "thongtin-21697.firebaseapp.com",
+    databaseURL: "https://thongtin-21697-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "thongtin-21697",
     storageBucket: "thongtin-21697.firebasestorage.app",
     messagingSenderId: "724627524685",
@@ -163,36 +164,33 @@
     measurementId: "G-NJRPJ4XF62"
   };
 
-  // Khởi tạo Firebase
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  const db = getDatabase(app);
 
-  // Tạo / Lấy User ID riêng cho trình duyệt hiện tại
   let userId = localStorage.getItem("user_id");
   if (!userId) {
     userId = "user_" + Math.random().toString(36).substr(2, 9);
     localStorage.setItem("user_id", userId);
   }
 
-  // 1. Tự động lấy dữ liệu từ Firebase về khi vừa load trang
+  // 1. Lấy dữ liệu về khi load trang
   window.addEventListener("DOMContentLoaded", async () => {
     try {
-      const docRef = doc(db, "users", userId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+      const dbRef = ref(db);
+      const snapshot = await get(child(dbRef, `users/${userId}`));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
         if (data.username) document.getElementById('username').value = data.username;
         if (data.birthday) document.getElementById('birthday').value = data.birthday;
         if (data.nickname) document.getElementById('nickname').value = data.nickname;
         if (data.hobby) document.getElementById('hobby').value = data.hobby;
       }
     } catch (error) {
-      console.error("Lỗi khi tải dữ liệu từ Firebase:", error);
+      console.error("Lỗi:", error);
     }
   });
 
-  // 2. Xử lý khi nhấn nút LƯU THÔNG TIN -> Đưa dữ liệu lên Firebase
+  // 2. Lưu thông tin vào Realtime Database
   document.getElementById("saveBtn").addEventListener("click", async () => {
     const name = document.getElementById('username').value;
     const birth = document.getElementById('birthday').value;
@@ -200,24 +198,17 @@
     const hobby = document.getElementById('hobby').value;
 
     try {
-      await setDoc(doc(db, "users", userId), {
+      await set(ref(db, 'users/' + userId), {
         username: name,
         birthday: birth,
         nickname: nick,
         hobby: hobby,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
+        updatedAt: new Date().toISOString()
+      });
 
-      // Lưu dự phòng vào LocalStorage
-      localStorage.setItem('my_username', name);
-      localStorage.setItem('my_birthday', birth);
-      localStorage.setItem('my_nickname', nick);
-      localStorage.setItem('my_hobby', hobby);
-
-      alert("🎉 Đã lưu thông tin cá nhân lên Firebase thành công!");
+      alert("🎉 Đã lưu thông tin lên Realtime Database thành công!");
     } catch (error) {
-      console.error("Lỗi khi lưu lên Firebase:", error);
-      alert("❌ Có lỗi xảy ra: " + error.message);
+      alert("❌ Lỗi: " + error.message);
     }
   });
 </script>
