@@ -23,6 +23,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Prepare Web Directory & Install Capacitor
         run: |
@@ -32,25 +33,13 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Chidoi App" "com.anhsung.chidoi" --web-dir www
           npx cap add android
-          
-          # Fix lỗi Gradle cache / BouncyCastle jar
-          cd android
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-          echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
-          
-          # Hạ Gradle wrapper về bản ổn định không bị lỗi jar
-          ./gradlew wrapper --gradle-version 8.0.2
-
-          # Sync lại project
-          cd ..
-          npx cap sync android
 
       - name: Build APK via Gradle
         run: |
           cd android
+          sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle 2>/dev/null || true
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -Dorg.gradle.parallel=false
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
