@@ -28,22 +28,21 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
-      - name: Configure Android Compatibility (Min SDK & Universal ABI)
+      - name: Configure Android Compatibility
         run: |
-          # Hạ min SDK xuống 22 (Android 5.1 trở lên) để chạy được trên cả máy Android rất cũ
           sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' android/variables.gradle 2>/dev/null || true
 
       - name: Build APK via Gradle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=512m"
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
