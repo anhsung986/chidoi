@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch Các Ngày Lễ & Thời Gian</title>
+    <!-- Nhúng thư viện LunarCalendarJS để tính toán ngày Âm lịch chính xác -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-calendar-js@1.0.4/LunarCalendar.min.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -46,6 +48,32 @@
             border-radius: 50px;
             display: inline-block;
             backdrop-filter: blur(5px);
+        }
+
+        /* --- KHUNG THÔNG BÁO SẮP ĐẾN NGÀY LỄ --- */
+        #holiday-alert-banner {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px 0 -10px 0;
+            background: linear-gradient(135deg, #ff9966, #ff5e62);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(255, 94, 98, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            animation: pulse-banner 2s infinite;
+        }
+        #holiday-alert-banner span {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        @keyframes pulse-banner {
+            0% { box-shadow: 0 0 0 0 rgba(255, 94, 98, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 94, 98, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 94, 98, 0); }
         }
 
         main {
@@ -129,16 +157,15 @@
     background-color: #1a252f;
     padding: 12px 20px;
     display: flex;
-    justify-content: flex-start; /* Dồn tất cả về bên trái */
+    justify-content: flex-start;
     align-items: center;
-    gap: 20px; /* Khoảng cách giữa Logo và Nút bấm */
+    gap: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
 ">
-    <!-- 1. Thành phần Logo -->
     <div style="color: white; font-size: 1.2rem; font-weight: bold;">📅 FestivalCalendar</div>
     
-    <!-- 2. Thành phần Nút bấm (Nằm ngang hàng với Logo) -->
     <a href="home.html" style="
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.4);
@@ -156,8 +183,6 @@
         🏠 Quay về Trang chủ
     </a>
 </nav>
-
-
     
     <header>
         <h1>Lịch Các Ngày Lễ & Thời Gian</h1>
@@ -165,6 +190,11 @@
             Hôm nay: <span id="current-time">Đang tải...</span>
         </div>
     </header>
+
+    <!-- KHUNG THÔNG BÁO TỰ ĐỘNG (DƯƠNG & ÂM LỊCH) -->
+    <div id="holiday-alert-banner" style="display: none;">
+        <div id="holiday-alert-text">🎉 Đang tải thông tin ngày lễ...</div>
+    </div>
 
     <main>
         <!-- NGÀY LỄ VIỆT NAM (ĐƯỢC NGHỈ) -->
@@ -315,34 +345,124 @@
     </footer>
 
     <script>
-        // Hàm cập nhật đồng hồ thời gian thực
+        // 1. Danh sách ngày lễ DƯƠNG LỊCH
+        const solarHolidays = [
+            { name: "Tết Dương Lịch", day: 1, month: 1 },
+            { name: "Ngày thành lập Đảng CS Việt Nam", day: 3, month: 2 },
+            { name: "Ngày Lễ Tình Nhân (Valentine)", day: 14, month: 2 },
+            { name: "Ngày Thầy thuốc Việt Nam", day: 27, month: 2 },
+            { name: "Ngày Quốc tế Phụ nữ", day: 8, month: 3 },
+            { name: "Ngày thành lập Đoàn TNCS Hồ Chí Minh", day: 26, month: 3 },
+            { name: "Ngày Giải phóng miền Nam", day: 30, month: 4 },
+            { name: "Ngày Quốc tế Lao động", day: 1, month: 5 },
+            { name: "Ngày Chiến thắng Điện Biên Phủ", day: 7, month: 5 },
+            { name: "Ngày sinh Chủ tịch Hồ Chí Minh", day: 19, month: 5 },
+            { name: "Ngày Quốc tế Thiếu nhi", day: 1, month: 6 },
+            { name: "Ngày Thương binh - Liệt sĩ", day: 27, month: 7 },
+            { name: "Ngày Quốc khánh Việt Nam", day: 2, month: 9 },
+            { name: "Ngày Phụ nữ Việt Nam", day: 20, month: 10 },
+            { name: "Ngày Lễ Hóa Lộ (Halloween)", day: 31, month: 10 },
+            { name: "Ngày Nhà giáo Việt Nam", day: 20, month: 11 },
+            { name: "Ngày thành lập Quân đội Nhân dân VN", day: 22, month: 12 },
+            { name: "Ngày Lễ Giáng Sinh (Noel)", day: 25, month: 12 }
+        ];
+
+        // 2. Danh sách ngày lễ ÂM LỊCH chính
+        const lunarHolidays = [
+            { name: "Tết Nguyên Đán (Mùng 1 Tết)", day: 1, month: 1 },
+            { name: "Giỗ Tổ Hùng Vương", day: 10, month: 3 }
+        ];
+
+        // Hàm quy đổi ngày Âm lịch sang ngày Dương lịch trong năm hiện tại để tính số ngày còn lại
+        function getSolarDateFromLunar(lunarYear, lunarMonth, lunarDay) {
+            try {
+                // Thư viện hỗ trợ chuyển đổi ngược từ Âm sang Dương
+                let converted = LunarCalendar.lunarToSolar(lunarYear, lunarMonth, lunarDay, false);
+                if (converted && converted.date) {
+                    return new Date(converted.year, converted.month - 1, converted.day);
+                }
+            } catch (e) {
+                console.error("Lỗi chuyển đổi âm lịch", e);
+            }
+            return null;
+        }
+
+        function checkUpcomingHolidays() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            
+            let nearestHolidayName = "";
+            let nearestHolidayDateStr = "";
+            let minDaysLeft = 999;
+
+            // Kiểm tra các ngày Dương lịch
+            solarHolidays.forEach(h => {
+                let hDate = new Date(currentYear, h.month - 1, h.day);
+                let diffTime = hDate - now;
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) {
+                    hDate = new Date(currentYear + 1, h.month - 1, h.day);
+                    diffTime = hDate - now;
+                    diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
+
+                if (diffDays >= 0 && diffDays <= 7 && diffDays < minDaysLeft) {
+                    minDaysLeft = diffDays;
+                    nearestHolidayName = h.name;
+                    nearestHolidayDateStr = `${h.day} tháng ${h.month} (Dương lịch)`;
+                }
+            });
+
+            // Kiểm tra các ngày Âm lịch trong năm nay và năm sau
+            [currentYear, currentYear + 1].forEach(y => {
+                lunarHolidays.forEach(lh => {
+                    let solarDate = getSolarDateFromLunar(y, lh.month, lh.day);
+                    if (solarDate) {
+                        let diffTime = solarDate - now;
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (diffDays >= 0 && diffDays <= 7 && diffDays < minDaysLeft) {
+                            minDaysLeft = diffDays;
+                            nearestHolidayName = lh.name;
+                            nearestHolidayDateStr = `${lh.day}/${lh.month} Âm lịch`;
+                        }
+                    }
+                });
+            });
+
+            const banner = document.getElementById("holiday-alert-banner");
+            const alertText = document.getElementById("holiday-alert-text");
+
+            if (minDaysLeft <= 7) {
+                banner.style.display = "flex";
+                if (minDaysLeft === 0) {
+                    alertText.innerHTML = `🎉 Hôm nay là <span>${nearestHolidayName}</span>! Chúc bạn có một ngày lễ thật ý nghĩa!`;
+                } else {
+                    alertText.innerHTML = `⏳ Sắp đến <span>${nearestHolidayName}</span> (${nearestHolidayDateStr}) - Còn lại ${minDaysLeft} ngày nữa!`;
+                }
+            } else {
+                banner.style.display = "none";
+            }
+        }
+
+        // Cập nhật đồng hồ thời gian thực
         function updateClock() {
             const now = new Date();
-            
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            
-            // Định dạng ngày tiếng Việt
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateStr = now.toLocaleDateString('vi-VN', options);
-            
-            // Định dạng giờ phút giây
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const timeStr = `${hours}:${minutes}:${seconds}`;
 
-            // Hiển thị ra màn hình
             document.getElementById('current-time').textContent = `${dateStr} - ${timeStr}`;
         }
 
-        // Chạy đồng hồ ngay lập tức và cập nhật mỗi giây
         updateClock();
+        checkUpcomingHolidays();
         setInterval(updateClock, 1000);
     </script>
 </body>
-</html>
-
+    </html>
+    
