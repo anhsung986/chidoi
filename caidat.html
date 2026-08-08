@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cài Đặt Hệ Thống - Cầu Vồng</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background-color: #ffb3b3;
+        min-height: 100vh;
+        display: flex; justify-content: center; align-items: center;
+        overflow: hidden;
+    }
+
+    /* --- MENU BTN --- */
+    .menu-btn {
+        position: absolute; top: 25px; left: 25px;
+        width: 45px; height: 45px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px; cursor: pointer;
+        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+        z-index: 100; transition: 0.3s;
+    }
+    .menu-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .menu-btn span {
+        display: block; width: 22px; height: 3px;
+        background: white; border-radius: 2px; transition: 0.3s;
+    }
+    .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-btn.active span:nth-child(2) { opacity: 0; }
+    .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+        position: fixed;
+        top: 20px; left: -300px;
+        width: 250px; height: auto !important;
+        background: #111827;
+        border-radius: 12px; padding: 15px; padding-top: 80px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 99;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .sidebar.active { left: 20px; }
+    .sidebar a {
+        display: block; padding: 12px 20px;
+        color: #eee; text-decoration: none;
+        font-weight: 500; font-size: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
+        border-radius: 6px;
+    }
+    .sidebar a:hover {
+        background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
+        color: white; padding-left: 25px;
+    }
+
+    .overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+        display: none; z-index: 98;
+    }
+    .overlay.active { display: block; }
+
+    /* --- MAIN CONTAINER --- */
+    .container {
+        position: relative;
+        width: 90%; max-width: 420px;
+        background: #111827;
+        border-radius: 28px; padding: 35px 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        color: white;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: -3px; left: -3px; right: -3px; bottom: -3px;
+        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+        background-size: 400%;
+        z-index: -1;
+        filter: blur(8px);
+        border-radius: 31px;
+        animation: steam 20s linear infinite;
+    }
+
+    @keyframes steam {
+        0% { background-position: 0 0; }
+        50% { background-position: 400% 0; }
+        100% { background-position: 0 0; }
+    }
+
+    .title { 
+        font-size: 26px; 
+        font-weight: 600; 
+        margin-bottom: 25px; 
+        letter-spacing: 2px;
+        text-align: center;
+        background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* --- GIAO DIỆN FORM CÀI ĐẶT --- */
+    .setting-group {
+        margin-bottom: 20px;
+    }
+    .setting-group label {
+        display: block;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    .setting-group input[type="text"], 
+    .setting-group select {
+        width: 100%; padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white; font-size: 14px;
+        outline: none; transition: 0.3s;
+    }
+    .setting-group input:focus, 
+    .setting-group select:focus {
+        border-color: #00ffd5;
+        box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+    }
+
+    /* Tùy chỉnh lựa chọn cho ô Select option ẩn */
+    .setting-group select option {
+        background: #111827;
+        color: white;
+    }
+
+    /* Hàng chứa công tắc gạt (Switch) */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 20px;
+    }
+    .toggle-row span {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Khung nút gạt On/Off */
+    .switch {
+        position: relative; display: inline-block;
+        width: 46px; height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute; cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #4b5563;
+        transition: .3s; border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute; content: "";
+        height: 18px; width: 18px; left: 3px; bottom: 3px;
+        background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #00ffd5; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* NÚT LƯU CÀI ĐẶT NEON XANH */
+    .save-btn {
+        width: 100%; padding: 14px;
+        border: none; border-radius: 14px;
+        background: linear-gradient(45deg, #00ffd5, #7a00ff);
+        color: white; font-size: 15px; font-weight: 600;
+        cursor: pointer; transition: 0.3s; margin-top: 10px;
+    }
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(0, 255, 213, 0.5);
+    }
+</style>
+</head>
+<body>
+
+    <script>
+        // Bảo mật kiểm tra trạng thái đăng nhập
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            alert("Bạn cần phải đăng nhập trước!");
+            window.location.href = "đăng nhập.html"; 
+        }
+    </script>
+
+    <!-- Nút Hamburger Menu điều hướng -->
+    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Thanh Sidebar rút gọn -->
+    <div class="sidebar" id="mySidebar">
+        <a href="home.html">🏠 Trang chủ</a>
+        <a href="canhan.html">👤 Thông tin cá nhân</a>
+        <a href="caidat.html">⚙️ Cài đặt</a>
+        <a href="thongbao.html">🔔 Thông báo</a>
+        <a href="ngayle.html">🥳 Các ngày lễ</a>
+        <a href="index.html" onclick="logout()" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- KHUNG FORM CHÍNH -->
+    <div class="container">
+        <div class="title">CÀI ĐẶT HỆ THỐNG</div>
+
+        <form id="settingsForm" onsubmit="saveSettings(event)">
+            <!-- Nhập Tên Hiển Thị -->
+            <div class="setting-group">
+                <label for="usernameInput">Thay đổi tên hiển thị 👤</label>
+                <input type="text" id="usernameInput" required>
+            </div>
+
+            <!-- Lựa chọn Ngôn ngữ -->
+            <div class="setting-group">
+                <label for="languageSelect">Ngôn ngữ hệ thống 🌐</label>
+                <select id="languageSelect">
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <!-- Công tắc Nhận Thông Báo -->
+            <div class="toggle-row">
+                <span>Nhận thông báo ứng dụng 🔔</span>
+                <label class="switch">
+                    <input type="checkbox" id="notifyToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Công tắc Chế độ ban đêm -->
+            <div class="toggle-row">
+                <span>Chế độ ban đêm (Dark Mode) 🌙</span>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <button type="submit" class="save-btn">Lưu Cài Đặt</button>
+        </form>
+    </div>
+
+    <script>
+        // Tự động load tên người dùng hiện tại vào ô Input
+        if (loggedInUser) {
+            document.getElementById("usernameInput").value = loggedInUser;
+        }
+
+        // Hàm xử lý đóng mở thanh Menu trái
+        function toggleMenu() {
+            const sidebar = document.getElementById("mySidebar");
+            const overlay = document.getElementById("overlay");
+            const menuBtn = document.getElementById("menuBtn");
+            
+            sidebar.classList.toggle("active");
+            overlay.classList.toggle("active");
+            menuBtn.classList.toggle("active");
+        }
+
+        // Hàm xử lý lưu thông tin cài đặt vào dữ liệu máy (localStorage)
+        function saveSettings(e) {
+            e.preventDefault();
+            const newName = document.getElementById("usernameInput").value.trim();
+            
+            if(newName) {
+                localStorage.setItem("loggedInUser", newName); // Cập nhật lại tên đăng nhập
+                alert("Đã lưu các tùy chỉnh cài đặt thành công! ✨");
+                window.location.href = "home.html"; // Quay về trang chủ để thấy tên mới cập nhật
+            }
+        }
+
+        function logout() {
+            if (confirm("Bạn có chắc chắn muốn thoát hệ thống không?")) {
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "index.html"; 
+            }
+        }
+    </script>
+</body>
+</html>
+

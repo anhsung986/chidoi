@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự Đoán Tình Yêu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ HỆ THỐNG */
+        body {
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        /* NÚT HOME PHONG CÁCH NEON ĐỎ */
+        .btn-back {
+            align-self: flex-start;
+            text-decoration: none;
+            color: #ff3b30;
+            background: transparent;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+            border: 1px solid #ff3b30;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            background: #ff3b30;
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+            transform: translateX(-3px);
+        }
+
+        /* KHUNG CHÍNH NỀN TỐI + VIỀN CẦU VỒNG LED CHẠY */
+        .main-card {
+            position: relative;
+            background: #111827;
+            border-radius: 24px;
+            padding: 30px 25px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            margin-bottom: 25px;
+        }
+
+        /* HIỆU ỨNG LED RGB CHẠY QUANH KHUNG CHÍNH */
+        .main-card::before, .history-box::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(8px);
+            border-radius: 27px;
+            animation: steam 20s linear infinite;
+        }
+
+        @keyframes steam {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* TIÊU ĐỀ ĐỔI MÀU GRADIENT CẦU VỒNG */
+        .card-title {
+            margin: 0; 
+            font-size: 22px; 
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* KHUNG NHẬP LIỆU TỐI NEON XINH HƠN */
+        .input-pair {
+            display: flex;
+            justify-content: center;
+            background: #1f2937;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 10px;
+            margin: 15px 0;
+            transition: 0.3s;
+        }
+        
+        .input-pair:focus-within {
+            border-color: #00ffd5;
+            box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+        }
+
+        input[type="number"] {
+            width: 60px;
+            border: none;
+            outline: none;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: transparent;
+        }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* NÚT KIỂM TRA PHÁT SÁNG CẦU VỒNG */
+        button.btn-main {
+            background: linear-gradient(45deg, #ff0055, #7a00ff);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+        }
+
+        button.btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 213, 0.6);
+        }
+
+        /* KHUNG LỊCH SỬ CÓ VIỀN LED */
+        .history-box {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            background: #111827;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .history-box::before { border-radius: 23px; }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #00ffd5;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-delete-selected {
+            color: #ff3b30;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .history-item input[type="checkbox"] {
+            margin-right: 12px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: #00ffd5;
+        }
+
+        .item-info {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #eee;
+        }
+        .item-info strong { color: #fffb00; }
+
+        /* SỐ PHẦN TRĂM KẾT QUẢ PHÁT SÁNG NEON */
+        #result { 
+            font-size: 38px; 
+            margin: 15px 0; 
+            font-weight: 700; 
+            color: #00ffd5; 
+            text-shadow: 0 0 15px rgba(0, 255, 213, 0.6); 
+        }
+    </style>
+</head>
+<body>
+
+    <a href="home.html" class="btn-back">⬅ Home</a>
+
+    <div class="main-card">
+        <h2 class="card-title">CHỈ SỐ YÊU ❤️</h2>
+        
+        <div class="input-pair">
+            <input type="number" id="d1" placeholder="NGÀY" max="31">
+            <span style="color:rgba(255,255,255,0.3)">/</span>
+            <input type="number" id="m1" placeholder="THÁNG" max="12">
+        </div>
+        <div style="font-size: 20px; margin: 5px 0; filter: drop-shadow(0 0 5px #ff0055);">💖</div>
+        <div class="input-pair">
+            <input type="number" id="d2" placeholder="NGÀY" max="31">
+            <span style="color:rgba(255,255,255,0.3)">/</span>
+            <input type="number" id="m2" placeholder="THÁNG" max="12">
+        </div>
+        
+        <button class="btn-main" onclick="calculate()">KIỂM TRA NGAY</button>
+        <div id="result">??%</div>
+    </div>
+
+    <div class="history-box">
+        <div class="history-header">
+            <span>DANH SÁCH LỊCH SỬ</span>
+            <span class="btn-delete-selected" onclick="deleteSelected()">Xóa lịch sử</span>
+        </div>
+        <ul class="history-list" id="historyList"></ul>
+    </div>
+
+    <script>
+        const ADMIN_KEY = "sungtuananh"; // Giữ nguyên key admin của bạn[span_2](start_span)[span_2](end_span)
+
+        window.onload = loadHistory; // Giữ nguyên chức năng load khi mở trang[span_3](start_span)[span_3](end_span)
+
+        function calculate() {
+            const d1 = document.getElementById('d1').value;
+            const m1 = document.getElementById('m1').value;
+            const d2 = document.getElementById('d2').value;
+            const m2 = document.getElementById('m2').value;
+
+            if (!d1 || !m1 || !d2 || !m2) return alert("Vui lòng điền đầy đủ thông tin ngày tháng!"); // Giữ nguyên xác thực trống[span_4](start_span)[span_4](end_span)
+            
+            // Kiểm tra tính hợp lệ ngày tháng cơ bản
+            if (d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31 || m1 < 1 || m1 > 12 || m2 < 1 || m2 > 12) {
+                return alert("Ngày hoặc tháng nhập vào không hợp lệ!");
+            }
+
+            // THUẬT TOÁN ĐÃ ĐƯỢC TỐI ƯU: Kết hợp băm chuỗi giúp tạo chỉ số tình yêu ổn định, ngẫu nhiên từ 60% - 100%
+            let combinedString = `${d1}-${m1}-${d2}-${m2}`;
+            let reversedString = `${d2}-${m2}-${d1}-${m1}`; // Để A & B hay B & A đều ra chung kết quả
+            let finalStr = combinedString < reversedString ? combinedString : reversedString;
+            
+            let hash = 0;
+            for (let i = 0; i < finalStr.length; i++) {
+                hash = finalStr.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            let score = Math.abs(hash % 41) + 60; // Trả về kết quả từ 60% đến 100% rất tích cực và mượt mà
+            
+            document.getElementById('result').innerText = score + "%";
+
+            let history = JSON.parse(localStorage.getItem('love_v4')) || []; // Giữ nguyên key lưu trữ love_v4[span_5](start_span)[span_5](end_span)
+            let infoKey = `${d1}/${m1} & ${d2}/${m2}`;
+
+            let existingIndex = history.findIndex(item => item.info === infoKey); // Giữ nguyên logic kiểm tra trùng lịch sử[span_6](start_span)[span_6](end_span)
+            if (existingIndex !== -1) { history.splice(existingIndex, 1); }
+
+            history.unshift({ id: Date.now(), info: infoKey, val: score + "%" }); // Giữ nguyên cấu trúc lưu lịch sử[span_7](start_span)[span_7](end_span)
+            localStorage.setItem('love_v4', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const list = document.getElementById('historyList');
+            let history = JSON.parse(localStorage.getItem('love_v4')) || []; // Giữ nguyên key lịch sử[span_8](start_span)[span_8](end_span)
+            list.innerHTML = history.map(item => `
+                <li class="history-item">
+                    <input type="checkbox" class="del-check" data-id="${item.id}">
+                    <div class="item-info">
+                        <span>${item.info}</span>
+                        <strong>${item.val}</strong>
+                    </div>
+                </li>
+            `).join(''); // Giữ nguyên cấu trúc map giao diện lịch sử[span_9](start_span)[span_9](end_span)
+        }
+
+        function deleteSelected() {
+            const checkboxes = document.querySelectorAll('.del-check:checked'); // Giữ nguyên truy vấn checkbox[span_10](start_span)[span_10](end_span)
+            if (checkboxes.length === 0) return alert("Vui lòng tích chọn mục cần xóa trong danh sách!"); // Giữ nguyên thông báo lỗi[span_11](start_span)[span_11](end_span)
+
+            let pass = prompt("HỆ THỐNG BẢO MẬT\nNhập mật mã Admin để xác nhận xóa:"); // Giữ nguyên hộp thoại prompt bảo mật[span_12](start_span)[span_12](end_span)
+            if (pass === ADMIN_KEY) { // Giữ nguyên kiểm tra key mật mã[span_13](start_span)[span_13](end_span)
+                let history = JSON.parse(localStorage.getItem('love_v4')) || [];
+                const idsToDelete = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
+                let newHistory = history.filter(item => !idsToDelete.includes(item.id));
+                localStorage.setItem('love_v4', JSON.stringify(newHistory));
+                loadHistory();
+                alert("Hệ thống đã xóa dữ liệu thành công."); // Giữ nguyên thông báo thành công[span_14](start_span)[span_14](end_span)
+            } else if (pass !== null) {
+                alert("Mật mã quản trị không chính xác!"); // Giữ nguyên thông báo sai pass[span_15](start_span)[span_15](end_span)
+            }
+        }
+    </script>
+</body>
+</html>

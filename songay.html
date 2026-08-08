@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Số Ngày Tự Động</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ */
+        body {
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* KHUNG CHÍNH NỀN TỐI + VIỀN CẦU VỒNG LED */
+        .container {
+            position: relative;
+            width: 100%; max-width: 390px;
+            background: #111827; border-radius: 24px; padding: 35px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center;
+        }
+
+        /* HIỆU ỨNG LED RGB CHẠY QUANH KHUNG */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(8px);
+            border-radius: 27px;
+            animation: steam 20s linear infinite;
+        }
+
+        @keyframes steam {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* NÚT BACK PHONG CÁCH NEON ĐỎ */
+        .back-btn {
+            position: absolute; top: 25px; left: 20px;
+            padding: 6px 14px; background: transparent; border: 1px solid #ff3b30;
+            border-radius: 8px; text-decoration: none; color: #ff3b30; font-size: 12px; font-weight: 600;
+            transition: 0.2s;
+        }
+        .back-btn:hover { 
+            background: #ff3b30; color: white;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+        }
+
+        /* TIÊU ĐỀ GRADIENT CẦU VỒNG */
+        .header-title { 
+            font-size: 22px; font-weight: 600; margin: 25px 0 20px 0;
+            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        /* KHUNG CHỌN NGÀY TỐI NEON */
+        .settings {
+            background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 14px; margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Ô INPUT ĐỔI MÀU */
+        input[type="date"] { 
+            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); 
+            font-size: 14px; outline: none; background: #1f2937; color: white; cursor: pointer;
+            transition: 0.3s;
+        }
+        input[type="date"]:focus {
+            border-color: #00ffd5;
+            box-shadow: 0 0 10px rgba(0, 255, 213, 0.4);
+        }
+
+        /* DÒNG HIỂN THỊ NGÀY SINH */
+        .date-display {
+            background: #1f2937; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px;
+            padding: 12px; font-size: 15px; font-weight: 500; margin-bottom: 25px; color: #00ffd5;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* CÁC HỘP THỐNG KÊ SỐ NGÀY/THÁNG/NĂM PHÁT SÁNG */
+        .stat-group { margin-bottom: 20px; text-align: left; }
+        .stat-label { font-weight: 600; font-size: 11px; margin-bottom: 6px; display: block; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px;
+            padding: 14px; font-size: 26px; font-weight: 600; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        /* Từng ô sẽ có một màu Neon phát sáng riêng cực đẹp */
+        #resDays { color: #ff7300; text-shadow: 0 0 10px rgba(255, 115, 0, 0.3); }
+        #resMonths { color: #fffb00; text-shadow: 0 0 10px rgba(255, 251, 0, 0.3); }
+        #resYears { color: #00ffd5; text-shadow: 0 0 10px rgba(0, 255, 213, 0.3); }
+
+        .stat-box:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="home.html" class="back-btn">⬅ BACK</a>
+    <div class="header-title">THỜI GIAN ĐÃ SỐNG</div>
+
+    <div class="settings">
+        <input type="date" id="birthDateInput" onchange="saveAndCalc()">
+    </div>
+
+    <div class="date-display" id="infoText">Đang tính toán dữ liệu...</div>
+
+    <div class="stat-group">
+        <span class="stat-label">TỔNG SỐ NGÀY SỐNG</span>
+        <div class="stat-box" id="resDays">0</div>
+    </div>
+
+    <div class="stat-group">
+        <span class="stat-label">TỔNG SỐ THÁNG SỐNG</span>
+        <div class="stat-box" id="resMonths">0</div>
+    </div>
+
+    <div class="stat-group">
+        <span class="stat-label">TỔNG SỐ NĂM SỐNG</span>
+        <div class="stat-box" id="resYears">0</div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        const savedBirth = localStorage.getItem('userBirthDate');
+        if (savedBirth) {
+            document.getElementById('birthDateInput').value = savedBirth;
+            calculateLife(savedBirth);
+        } else {
+            document.getElementById('infoText').innerText = "Vui lòng chọn ngày sinh";
+        }
+    };
+
+    function saveAndCalc() {
+        const birthValue = document.getElementById('birthDateInput').value;
+        localStorage.setItem('userBirthDate', birthValue);
+        calculateLife(birthValue);
+    }
+
+    function calculateLife(birthInput) {
+        const today = new Date();
+        const birthDate = new Date(birthInput.replace(/-/g, '\/'));
+        
+        if (isNaN(birthDate)) return;
+
+        const diffTime = today - birthDate;
+        const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        let years = today.getFullYear() - birthDate.getFullYear();
+        let months = today.getMonth() - birthDate.getMonth();
+        
+        if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+            years--;
+            months += 12;
+        }
+
+        const totalMonths = (years * 12) + months;
+
+        document.getElementById('infoText').innerText = `Sinh ngày: ${birthDate.getDate()}/${birthDate.getMonth()+1}/${birthDate.getFullYear()}`;
+        document.getElementById('resDays').innerText = totalDays.toLocaleString();
+        document.getElementById('resMonths').innerText = totalMonths.toLocaleString();
+        document.getElementById('resYears').innerText = years;
+    }
+</script>
+
+</body>
+</html>
+
