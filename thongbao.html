@@ -3,244 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Thông Báo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
-        /* NỀN ĐỎ NHẠT ĐỒNG BỘ */
-        body {
-            background-color: #ffb3b3;
-            min-height: 100vh;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
-        }
-
-        /* NÚT BACK CHUẨN NEON ĐỎ */
-        .back-btn {
-            align-self: flex-start; text-decoration: none; color: #ff3b30; background: transparent;
-            padding: 8px 18px; border-radius: 50px; font-size: 13px; font-weight: 600;
-            transition: 0.3s; border: 1px solid #ff3b30; margin-bottom: 20px; max-width: 100px; text-align: center;
-        }
-        .back-btn:hover {
-            background: #ff3b30; color: white; box-shadow: 0 0 10px rgba(255, 59, 48, 0.5); transform: translateX(-3px);
-        }
-
-        /* KHUNG CHÍNH NỀN TỐI + VIỀN LED RGB VÔ HẠN */
-        .container {
-            position: relative;
-            width: 100%; max-width: 450px;
-            background: #111827; border-radius: 24px; padding: 30px 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center;
-        }
-
-        .container::before {
-            content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-            background-size: 400%; z-index: -1; filter: blur(8px); border-radius: 27px;
-            animation: steam 20s linear infinite;
-        }
-
-        @keyframes steam {
-            0% { background-position: 0 0; }
-            50% { background-position: 400% 0; }
-            100% { background-position: 0 0; }
-        }
-
-        /* TIÊU ĐỀ GRADIENT CẦU VỒNG */
-        .header-title {
-            font-size: 22px; font-weight: 600; margin-bottom: 20px;
-            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-
-        /* KHU VỰC ĐĂNG BÀI CHO ADMIN (ẨN/HIỆN THÔNG MINH) */
-        .admin-panel {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px; padding: 15px; margin-bottom: 20px; text-align: left; display: none;
-        }
-        .admin-panel textarea {
-            width: 100%; height: 80px; background: #1f2937; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px; padding: 10px; color: white; font-size: 13px; resize: none; outline: none;
-        }
-        .admin-panel textarea:focus { border-color: #00ffd5; box-shadow: 0 0 8px rgba(0, 255, 213, 0.3); }
-        
-        .admin-btns { display: flex; justify-content: space-between; margin-top: 10px; gap: 10px; }
-        .btn {
-            padding: 8px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-post { background: linear-gradient(45deg, #ff0055, #7a00ff); color: white; flex: 1; }
-        .btn-post:hover { box-shadow: 0 0 10px rgba(0, 255, 213, 0.4); }
-        .btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
-
-        /* DANH SÁCH THÔNG BÁO CUỘN MƯỢT MÀ */
-        .notify-list { max-height: 400px; overflow-y: auto; padding-right: 5px; text-align: left; }
-        .notify-list::-webkit-scrollbar { width: 4px; }
-        .notify-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-        /* TỪNG Ô THÔNG BÁO PHÁT SÁNG */
-        .notify-item {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px; padding: 16px; margin-bottom: 12px; position: relative;
-            transition: 0.3s; animation: fadeIn 0.4s ease;
-        }
-        .notify-item:hover { background: rgba(255, 255, 255, 0.05); border-color: #00ffd5; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .notify-time { font-size: 11px; color: #fffb00; margin-bottom: 6px; font-weight: 500; display: block; }
-        .notify-content { font-size: 13.5px; color: #eee; line-height: 1.5; white-space: pre-wrap; }
-        
-        /* NÚT XÓA BÀI ĐĂNG CỦA ADMIN */
-        .btn-delete-item {
-            position: absolute; top: 12px; right: 14px; background: transparent; border: none;
-            color: #ff3b30; font-size: 16px; cursor: pointer; display: none;
-        }
-
-        /* NÚT KÍCH HOẠT QUYỀN ADMIN */
-        .admin-trigger {
-            font-size: 11px; color: rgba(255,255,255,0.2); cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block;
-        }
-    </style>
+    <title>Thông Báo</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="app-container">
+        <!-- Thanh Sidebar hoặc Menu chính -->
+        <aside class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="home.html">Trang chủ</a>[span_0](start_span)[span_0](end_span)</li>
+                <li><a href="canhan.html">Thông tin cá nhân</a>[span_1](start_span)[span_1](end_span)[span_2](start_span)[span_2](end_span)</li>
+                <li><a href="caidat.html">Cài đặt</a>[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)</li>
+                <li><a href="thongbao.html">Thông báo</a>[span_5](start_span)[span_5](end_span)[span_6](start_span)[span_6](end_span)</li>
+                <li><a href="ngayle.html">Các ngày lễ</a>[span_7](start_span)[span_7](end_span)[span_8](start_span)[span_8](end_span)</li>
+                <li><a href="index.html" class="logout">Đăng xuất</a>[span_9](start_span)[span_9](end_span)[span_10](start_span)[span_10](end_span)</li>
+            </ul>
+        </aside>
 
-    <a href="home.html" class="back-btn">⬅ Home</a>
+        <!-- Nội dung chính của Thông báo -->
+        <main class="main-content">
+            <header class="content-header">
+                <a href="home.html" class="back-btn">⬅ Trang chủ</a>[span_11](start_span)[span_11](end_span)[span_12](start_span)[span_12](end_span)
+                <h1>Bảng Thông Báo</h1>
+            </header>
+            
+            <section class="notification-list">
+                <div class="notification-card">
+                    <h3>Cập nhật hệ thống</h3>
+                    <p>Hệ thống đã bổ sung tính năng đồng bộ giao diện Dark Mode tự động cho tất cả các trang.</p>
+                    <span class="time">Hôm nay</span>
+                </div>
 
-    <div class="container">
-        <h2 class="header-title">📌 BẢNG THÔNG BÁO</h2>
-
-        <!-- Khung soạn thảo của Admin -->
-        <div class="admin-panel" id="adminPanel">
-            <textarea id="notifyInput" placeholder="Nhập nội dung thông báo mới tại đây..."></textarea>
-            <div class="admin-btns">
-                <button class="btn btn-cancel" id="btnCancel">Đóng</button>
-                <button class="btn btn-post" id="btnPost">ĐĂNG THÔNG BÁO</button>
-            </div>
-        </div>
-
-        <!-- Vùng hiển thị danh sách bài đăng -->
-        <div class="notify-list" id="notifyList">
-            <div class="notify-item">
-                <span class="notify-time">Hệ Thống • Vừa xong</span>
-                <p class="notify-content">Đang tải thông báo từ Firebase...</p>
-            </div>
-        </div>
-
-        <!-- Nút kích hoạt Admin -->
-        <span class="admin-trigger" id="adminTrigger">Chế độ Admin</span>
+                <div class="notification-card">
+                    <h3>Nhắc nhở sự kiện</h3>
+                    <p>Hãy kiểm tra danh sách các ngày lễ và mốc thời gian kỷ niệm sắp tới trong phần Các ngày lễ và Số ngày.</p>
+                    <span class="time">Gần đây</span>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- TÍCH HỢP FIREBASE REALTIME DATABASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Cấu hình Firebase thongbao-e6205 từ thông tin của bạn
-        const firebaseConfig = {
-            apiKey: "AIzaSyDWz9LghmamJdHkkUnz26VldvUieFePcqQ",
-            authDomain: "thongbao-e6205.firebaseapp.com",
-            databaseURL: "https://thongbao-e6205-default-rtdb.firebaseio.com",
-            projectId: "thongbao-e6205",
-            storageBucket: "thongbao-e6205.firebasestorage.app",
-            messagingSenderId: "188839127850",
-            appId: "1:188839127850:web:dae5119a37beb222bf0c53",
-            measurementId: "G-Y8PDQZYBPR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const notifyRef = ref(db, 'notifications');
-
-        const ADMIN_KEY = "sungtuananh";
-        let isAdminMode = false;
-
-        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE
-        onValue(notifyRef, (snapshot) => {
-            const list = document.getElementById('notifyList');
-            const data = snapshot.val();
-
-            if (!data) {
-                list.innerHTML = `
-                    <div class="notify-item">
-                        <span class="notify-time">Hệ Thống • Vừa xong</span>
-                        <p class="notify-content">Chưa có thông báo nào. Bấm "Chế độ Admin" bên dưới để đăng thông báo đầu tiên! 🎉</p>
-                    </div>`;
-                return;
+    <!-- Script đồng bộ tự động cho trang -->
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            // 1. Đồng bộ Dark Mode
+            const isDarkMode = localStorage.getItem("appDarkMode") === "true";
+            if (isDarkMode) {
+                document.body.style.backgroundColor = "#0b0f19";
+                document.body.style.color = "#f3f4f6";
+            } else {
+                document.body.style.backgroundColor = "";
+                document.body.style.color = "";
             }
 
-            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu
-            const items = Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-            })).reverse();
-
-            list.innerHTML = items.map(item => `
-                <div class="notify-item">
-                    <span class="notify-time">⏱ ${item.time}</span>
-                    <p class="notify-content">${item.text}</p>
-                    <button class="btn-delete-item" style="display: ${isAdminMode ? 'block' : 'none'}" data-id="${item.id}">🗑</button>
-                </div>
-            `).join('');
-
-            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin
-            document.querySelectorAll('.btn-delete-item').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    deleteNotification(id);
-                });
-            });
-        });
-
-        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE
-        document.getElementById('btnPost').addEventListener('click', async () => {
-            const text = document.getElementById('notifyInput').value.trim();
-            if (!text) return alert("Vui lòng nhập nội dung!");
-
-            const now = new Date();
-            const timeString = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} lúc ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-            try {
-                await push(notifyRef, {
-                    time: timeString,
-                    text: text,
-                    createdAt: Date.now()
-                });
-                document.getElementById('notifyInput').value = "";
-                alert("🎉 Đã đăng thông báo lên Firebase thành công!");
-            } catch (error) {
-                alert("❌ Lỗi: " + error.message);
+            // 2. Đồng bộ tên hiển thị (nếu có phần tử hiển thị tên)
+            const savedUser = localStorage.getItem("loggedInUser");
+            const userDisplayEl = document.getElementById("userDisplay");
+            if (savedUser && userDisplayEl) {
+                userDisplayEl.innerText = savedUser;
             }
-        });
-
-        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE
-        async function deleteNotification(id) {
-            if(confirm("Bạn có chắc chắn muốn xóa thông báo này không?")) {
-                try {
-                    await remove(ref(db, 'notifications/' + id));
-                } catch (error) {
-                    alert("❌ Lỗi khi xóa: " + error.message);
-                }
-            }
-        }
-
-        // 4. KÍCH HOẠT QUYỀN ADMIN
-        document.getElementById('adminTrigger').addEventListener('click', () => {
-            let pass = prompt("QUYỀN QUẢN TRỊ\nNhập mật mã để kích hoạt tính năng đăng bài:");
-            if (pass === ADMIN_KEY) {
-                isAdminMode = true;
-                document.getElementById('adminPanel').style.display = "block";
-                // Hiện nút xóa bài
-                document.querySelectorAll('.btn-delete-item').forEach(btn => btn.style.display = 'block');
-                alert("Xác thực Admin thành công! Bạn có thể ĐĂNG hoặc XÓA thông báo.");
-            } else if (pass !== null) {
-                alert("Mật mã không chính xác!");
-            }
-        });
-
-        // Đóng khung Admin
-        document.getElementById('btnCancel').addEventListener('click', () => {
-            document.getElementById('adminPanel').style.display = "none";
         });
     </script>
 </body>
