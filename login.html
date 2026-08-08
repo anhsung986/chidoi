@@ -19,17 +19,65 @@
             width: 90%; max-width: 380px;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h2 {
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
         input {
             width: 100%; padding: 12px; margin: 10px 0;
             border-radius: 8px; border: 1px solid #374151;
             background: #1f2937; color: white;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #4facfe;
         }
         button {
             width: 100%; padding: 12px; margin-top: 15px;
             background: linear-gradient(45deg, #4facfe, #00f2fe);
             border: none; border-radius: 8px; color: white;
             font-weight: bold; cursor: pointer;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* --- STYLING CHO THÔNG BÁO Ở DƯỚI CÙNG (TOAST) --- */
+        #custom-toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            white-space: nowrap;
+        }
+        #custom-toast.show {
+            bottom: 30px;
+        }
+        #custom-toast.success span {
+            color: #4cd137;
+        }
+        #custom-toast.error span {
+            color: #ff4757;
         }
     </style>
 </head>
@@ -43,6 +91,9 @@
             <button type="submit">Vào Hệ Thống</button>
         </form>
     </div>
+
+    <!-- Khung thông báo trượt lên ở dưới cùng -->
+    <div id="custom-toast"><span id="toast-icon">✨</span> <span id="toast-msg">Thông báo</span></div>
 
     <!-- Nhúng thư viện Firebase cấu hình của bạn -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -63,6 +114,20 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        let toastTimer = null;
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('custom-toast');
+            const msgEl = document.getElementById('toast-msg');
+            
+            msgEl.innerText = message;
+            toast.className = "show " + type;
+            
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.className = "";
+            }, 2500);
+        }
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const user = document.getElementById('username').value;
@@ -73,21 +138,23 @@
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === pass) {
-                        alert("Đăng nhập thành công! Chào mừng " + user);
+                        showToast("Đăng nhập thành công! Chào mừng " + user, "success");
                         
                         // LƯU TRẠNG THÁI ĐĂNG NHẬP CHUẨN
                         localStorage.setItem("loggedInUser", user);
                         
-                        // CHUYỂN HƯỚNG SANG HOME.HTML
-                        window.location.href = "home.html";
+                        // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY ĐỂ KỊP THẤY THÔNG BÁO
+                        setTimeout(() => {
+                            window.location.href = "home.html";
+                        }, 1000);
                     } else {
-                        alert("Mật khẩu nhập chưa đúng!");
+                        showToast("Mật khẩu nhập chưa đúng!", "error");
                     }
                 } else {
-                    alert("Tài khoản này không tồn tại!");
+                    showToast("Tài khoản này không tồn tại!", "error");
                 }
             }).catch((error) => {
-                alert("Lỗi kết nối: " + error.message);
+                showToast("Lỗi kết nối: " + error.message, "error");
             });
         });
     </script>
