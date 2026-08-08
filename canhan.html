@@ -107,6 +107,30 @@
 </head>
 <body>
 
+    <!-- Dán đoạn script của bạn vào đây, ngay trước thẻ đóng body -->
+<script>
+    // Tự động áp dụng cài đặt chung cho mọi trang khi được tải xong
+    window.addEventListener("DOMContentLoaded", () => {
+        // 1. Đồng bộ Dark Mode
+        const isDarkMode = localStorage.getItem("appDarkMode") === "true";
+        if (isDarkMode) {
+            // Thêm class đổi màu tối (Bạn có thể tùy chỉnh CSS nền tối theo ý muốn bên dưới)
+            document.body.style.backgroundColor = "#0b0f19";
+            document.body.style.color = "#f3f4f6";
+        } else {
+            document.body.style.backgroundColor = "";
+            document.body.style.color = "";
+        }
+
+        // 2. Đồng bộ tên hiển thị (nếu trang đó có chỗ hiển thị tên như trang chủ)
+        const savedUser = localStorage.getItem("loggedInUser");
+        const userDisplayEl = document.getElementById("userDisplay");
+        if (savedUser && userDisplayEl) {
+            userDisplayEl.innerText = savedUser;
+        }
+    });
+</script>
+
 <div class="container">
     <a href="home.html" class="back-btn">⬅ BACK</a>
     
