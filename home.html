@@ -1,336 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trang Chủ Hệ Thống</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<style>
-    * {
-        margin: 0; padding: 0; box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
-    }
-
-    /* NỀN TỐI ĐỂ LÀM NỔI BẬT ĐÈN LED CẦU VỒNG */
-    body {
-        background-color: #ffb3b3;
-        min-height: 100vh;
-        display: flex; justify-content: center; align-items: center;
-        overflow: hidden;
-    }
-
-    /* --- MENU BTN --- */
-    .menu-btn {
-        position: absolute; top: 25px; left: 25px;
-        width: 45px; height: 45px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px; cursor: pointer;
-        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
-        z-index: 100; transition: 0.3s;
-    }
-    .menu-btn:hover { background: rgba(255, 255, 255, 0.15); }
-    .menu-btn span {
-        display: block; width: 22px; height: 3px;
-        background: white; border-radius: 2px; transition: 0.3s;
-    }
-    .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-    .menu-btn.active span:nth-child(2) { opacity: 0; }
-    .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-    /* --- SIDEBAR CHUẨN HÓA ĐÓNG/MỞ --- */
-    .sidebar {
-        position: fixed;
-        top: 20px;
-        left: -300px;
-        width: 250px;
-        height: auto !important;
-        background: #111827;
-        border-radius: 12px;
-        padding: 15px;
-        padding-top: 80px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .sidebar.active { 
-        left: 20px; 
-    }
-
-    .sidebar a {
-        display: block; padding: 12px 20px;
-        color: #eee; text-decoration: none;
-        font-weight: 500; font-size: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
-        border-radius: 6px;
-    }
-    .sidebar a:hover {
-        background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
-        color: white; padding-left: 25px;
-    }
-
-    .overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-        display: none; z-index: 98;
-    }
-    .overlay.active { display: block; }
-
-    /* --- MAIN CONTAINER --- */
-    .container {
-        position: relative;
-        width: 90%; max-width: 380px;
-        background: #111827;
-        border-radius: 28px; padding: 35px 25px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        color: white; text-align: center;
-    }
-
-    .container::before {
-        content: '';
-        position: absolute;
-        top: -3px; left: -3px; right: -3px; bottom: -3px;
-        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-        background-size: 400%;
-        z-index: -1;
-        filter: blur(8px);
-        border-radius: 31px;
-        animation: steam 20s linear infinite;
-    }
-
-    @keyframes steam {
-        0% { background-position: 0 0; }
-        50% { background-position: 400% 0; }
-        100% { background-position: 0 0; }
-    }
-
-    .title { 
-        font-size: 28px; 
-        font-weight: 600; 
-        margin-bottom: 5px; 
-        letter-spacing: 3px;
-        background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .welcome-text { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
-    .welcome-text span { color: #00ffd5; font-weight: 600; }
-    
-    .card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 20px; margin-bottom: 18px;
-        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
-    }
-    .card h2 { font-size: 17px; font-weight: 500; letter-spacing: 1px; color: #fff; }
-    
-    .card:hover {
-        background: rgba(255, 255, 255, 0.08);
-        transform: translateY(-4px) scale(1.02);
-        border-color: #00ffd5;
-        box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
-    }
-
-    .logout-btn {
-        width: 100%; padding: 15px;
-        border: 2px solid #ff3b30; border-radius: 14px;
-        background: transparent; color: #ff3b30;
-        font-size: 15px; font-weight: 600;
-        cursor: pointer; transition: 0.3s;
-    }
-    .logout-btn:hover {
-        background: #ff3b30; color: white;
-        box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
-    }
-
-    /* --- TOAST & CUSTOM MODAL Ở DƯỚI CÙNG --- */
-    #custom-toast {
-        position: fixed;
-        bottom: -120px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(20, 20, 30, 0.95);
-        backdrop-filter: blur(10px);
-        color: #fff;
-        padding: 16px 24px;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        font-size: 14px;
-        font-weight: 500;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 9999;
-        width: 90%;
-        max-width: 380px;
-        text-align: center;
-    }
-    #custom-toast.show {
-        bottom: 30px;
-    }
-    .toast-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-    .toast-btn {
-        padding: 8px 20px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 13px;
-        transition: 0.2s;
-    }
-    .toast-btn.confirm {
-        background: #ff3b30;
-        color: white;
-    }
-    .toast-btn.confirm:hover {
-        background: #e02e25;
-    }
-    .toast-btn.cancel {
-        background: rgba(255,255,255,0.1);
-        color: white;
-    }
-    .toast-btn.cancel:hover {
-        background: rgba(255,255,255,0.2);
-    }
-    .toast-btn.ok {
-        background: #00ffd5;
-        color: #111827;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="app-container">
+        <!-- Thanh Sidebar hoặc Menu chính -->
+        <aside class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="home.html">Trang chủ</a></li>
+                <li><a href="canhan.html">Thông tin cá nhân</a></li>
+                <li><a href="caidat.html">Cài đặt</a></li>
+                <li><a href="thongbao.html">Thông báo</a></li>
+                <li><a href="ngayle.html">Các ngày lễ</a></li>
+                <li><a href="index.html" class="logout">Đăng xuất</a></li>
+            </ul>
+        </aside>
 
-    <script>
-        const loggedInUser = localStorage.getItem("loggedInUser");
-        if (!loggedInUser) {
-            // Thay alert bằng cơ chế hiển thị mượt mà bên dưới
-            window.addEventListener("DOMContentLoaded", () => {
-                showCustomToast("Bạn cần phải đăng nhập trước!", "alert", () => {
-                    window.location.href = "đăng nhập.html";
-                });
-            });
-        }
-    </script>
-
-    <!-- Nút Menu đóng/mở -->
-    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-
-    <!-- Thanh Sidebar ngắn gọn -->
-    <div class="sidebar" id="mySidebar">
-        <a href="#">🏠 Trang chủ</a>
-        <a href="canhan.html">👤 Thông tin cá nhân</a>
-        <a href="caidat.html">⚙️ Cài đặt</a>
-        <a href="thongbao.html">🔔 Thông báo</a>
-        <a href="ngayle.html">🥳 Các ngày lễ</a>
-        <a href="#" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
-    </div>
-
-    <!-- Nền mờ phía sau giúp click ra ngoài tự đóng -->
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
-    <div class="container">
-        <div class="title">MENU CHÍNH</div>
-        <div class="welcome-text">Xin chào, <span id="userDisplay">...</span> ✨</div>
-
-        <a href="hoten.html" style="text-decoration: none; color: inherit;">
-            <div class="card"><h2>HỌ TÊN 👤</h2></div>
-        </a>
-
-        <a href="songay.html" style="text-decoration: none; color: inherit;">
-            <div class="card"><h2>SỐ NGÀY 📅</h2></div>
-        </a>
-
-        <a href="tinhyeu.html" style="text-decoration: none; color: inherit;">
-            <div class="card"><h2>TÍNH TOÁN ❤️</h2></div>
-        </a>
-
-        <a href="ngayle.html" style="text-decoration: none; color: inherit;">
-            <div class="card"><h2>CÁC NGÀY LỄ 🥳</h2></div>
-        </a>
-
-        <button class="logout-btn" onclick="logout(event)">Đăng xuất</button>
-    </div>
-
-    <!-- Hộp thông báo tùy chỉnh ở dưới cùng -->
-    <div id="custom-toast">
-        <div id="toast-message">Thông báo hệ thống</div>
-        <div class="toast-actions" id="toast-actions"></div>
-    </div>
-
-    <script>
-        if (loggedInUser) {
-            document.getElementById("userDisplay").innerText = loggedInUser;
-        }
-
-        function toggleMenu() {
-            const sidebar = document.getElementById("mySidebar");
-            const overlay = document.getElementById("overlay");
-            const menuBtn = document.getElementById("menuBtn");
+        <!-- Nội dung chính của Trang Chủ -->
+        <main class="main-content">
+            <header>
+                <h1>Chào mừng, <span id="userDisplay">Bạn</span>!</h1>
+            </header>
             
-            sidebar.classList.toggle("active");
-            overlay.classList.toggle("active");
-            menuBtn.classList.toggle("active");
-        }
+            <section class="dashboard-grid">
+                <!-- Các thẻ điều hướng tính năng -->
+                <div class="card">
+                    <h3>Thông tin cá nhân</h3>
+                    <p>Xem và chỉnh sửa hồ sơ cá nhân của bạn.</p>
+                    <a href="canhan.html" class="btn">Truy cập</a>
+                </div>
 
-        // Hàm hiển thị thông báo thay thế alert / confirm
-        function showCustomToast(message, type, onConfirm) {
-            const toast = document.getElementById("custom-toast");
-            const msgEl = document.getElementById("toast-message");
-            const actionsEl = document.getElementById("toast-actions");
+                <div class="card">
+                    <h3>Danh sách thành viên / Họ tên</h3>
+                    <p>Xem danh sách tên và thông tin các thành viên.</p>
+                    <a href="hoten.html" class="btn">Truy cập</a>
+                </div>
 
-            msgEl.innerText = message;
-            actionsEl.innerHTML = "";
+                <div class="card">
+                    <h3>Bộ đếm số ngày</h3>
+                    <p>Theo dõi mốc thời gian và số ngày kỷ niệm quan trọng.</p>
+                    <a href="songay.html" class="btn">Truy cập</a>
+                </div>
 
-            if (type === "confirm") {
-                const btnCancel = document.createElement("button");
-                btnCancel.className = "toast-btn cancel";
-                btnCancel.innerText = "Hủy";
-                btnCancel.onclick = () => { toast.classList.remove("show"); };
+                <div class="card">
+                    <h3>Dự đoán tình yêu</h3>
+                    <p>Khám phá công cụ tính toán và dự đoán tình yêu.</p>
+                    <a href="tinhyeu.html" class="btn">Truy cập</a>
+                </div>
 
-                const btnOk = document.createElement("button");
-                btnOk.className = "toast-btn confirm";
-                btnOk.innerText = "Xác nhận";
-                btnOk.onclick = () => {
-                    toast.classList.remove("show");
-                    if (onConfirm) onConfirm();
-                };
+                <div class="card">
+                    <h3>Các ngày lễ</h3>
+                    <p>Kiểm tra danh sách các ngày lễ và sự kiện sắp tới.</p>
+                    <a href="ngayle.html" class="btn">Truy cập</a>
+                </div>
 
-                actionsEl.appendChild(btnCancel);
-                actionsEl.appendChild(btnOk);
+                <div class="card">
+                    <h3>Thông báo hệ thống</h3>
+                    <p>Cập nhật các tin tức và thông báo mới nhất.</p>
+                    <a href="thongbao.html" class="btn">Truy cập</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script đồng bộ tự động cho trang -->
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            // 1. Đồng bộ Dark Mode
+            const isDarkMode = localStorage.getItem("appDarkMode") === "true";
+            if (isDarkMode) {
+                document.body.style.backgroundColor = "#0b0f19";
+                document.body.style.color = "#f3f4f6";
             } else {
-                const btnOk = document.createElement("button");
-                btnOk.className = "toast-btn ok";
-                btnOk.innerText = "OK";
-                btnOk.onclick = () => {
-                    toast.classList.remove("show");
-                    if (onConfirm) onConfirm();
-                };
-                actionsEl.appendChild(btnOk);
+                document.body.style.backgroundColor = "";
+                document.body.style.color = "";
             }
 
-            toast.classList.add("show");
-        }
-
-        function logout(e) {
-            if (e) e.preventDefault();
-            showCustomToast("Bạn có chắc chắn muốn thoát hệ thống không?", "confirm", () => {
-                localStorage.removeItem("loggedInUser");
-                window.location.href = "index.html"; 
-            });
-        }
+            // 2. Đồng bộ tên hiển thị
+            const savedUser = localStorage.getItem("loggedInUser");
+            const userDisplayEl = document.getElementById("userDisplay");
+            if (savedUser && userDisplayEl) {
+                userDisplayEl.innerText = savedUser;
+            }
+        });
     </script>
 </body>
 </html>
