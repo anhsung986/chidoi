@@ -1,251 +1,232 @@
-/* ==========================================
-   1. CẤU HÌNH HỆ THỐNG & BIẾN MÀU CẦU VỒNG
-   ========================================== */
-:root {
-    --rainbow: linear-gradient(45deg, #ff007f, #ff7f00, #ffeb3b, #00ff00, #00ffff, #0055ff, #7f00ff);
-}
-
+/* Thiết lập chung và reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #ffffff;
 }
 
 body {
+    background-color: #f4f6f9;
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Bố cục chính cho ứng dụng */
+.app-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
-    background-color: #0f172a; /* Nền tối */
-    padding: 20px 10px;
-    overflow-y: auto; /* SỬA LỖI: Cho phép cuộn trang thay vì khóa cứng màn hình */
 }
 
-/* ==========================================
-   2. KHUNG CHỨA CHÍNH (WELCOME BOX)
-   ========================================== */
-.welcome-container {
-    text-align: center;
-    background: #1e293b;
-    padding: 25px 20px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    max-width: 90%; /* SỬA LỖI: Co giãn theo màn hình di động */
-    width: 420px;   /* Độ rộng tối đa chuẩn */
-    position: relative;
-    border: 3px solid transparent;
-    background-image: linear-gradient(#1e293b, #1e293b), var(--rainbow);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-    background-size: 400% 400%;
-    animation: rainbow-animation 8s ease infinite;
-    box-sizing: border-box;
-}
-
-.guide-page-container {
-    max-width: 92%;
-    width: 450px;
-    text-align: left;
-}
-
-/* ==========================================
-   3. CHỮ CẦU VỒNG & ĐƯỜNG LINK
-   ========================================== */
-.logo {
-    font-size: 2.5rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    background: var(--rainbow);
-    background-size: 400% 400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: rainbow-animation 8s ease infinite;
-}
-
-.subtitle, p, a {
-    color: #94a3b8;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-a:hover {
-    color: #00ffff;
-}
-
-/* ==========================================
-   4. INPUT NHẬP LIỆU
-   ========================================== */
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    background: #0f172a;
-    color: white;
-    outline: none;
-    transition: all 0.3s;
-}
-
-input:focus {
-    border-color: transparent;
-    background-image: linear-gradient(#0f172a, #0f172a), var(--rainbow);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-}
-
-/* ==========================================
-   5. NÚT BẤM CẦU VỒNG
-   ========================================== */
-.btn {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: 50px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: var(--rainbow);
-    background-size: 300% 100%;
+/* Thanh Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: #1e293b;
     color: #ffffff;
-    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    font-size: 1.25rem;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #334155;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin-bottom: 12px;
+}
+
+.sidebar ul li a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: block;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+    background-color: #334155;
+    color: #ffffff;
+}
+
+.sidebar ul li a.logout {
+    color: #f87171;
+}
+
+.sidebar ul li a.logout:hover {
+    background-color: #7f1d1d;
+    color: #ffffff;
+}
+
+/* Nội dung chính */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.main-content header {
+    margin-bottom: 30px;
+}
+
+.main-content header h1 {
+    font-size: 1.8rem;
+    color: inherit;
+}
+
+.content-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.back-btn {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 6px 12px;
+    background-color: #eff6ff;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background-color: #dbeafe;
+}
+
+/* Lưới hiển thị các thẻ chức năng (Dashboard) */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+    color: inherit;
+}
+
+.card p {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+/* Nút bấm trong card */
+.btn {
+    display: inline-block;
     text-align: center;
+    text-decoration: none;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
 }
 
 .btn:hover {
-    background-position: 100% 0;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
+    background-color: #1d4ed8;
 }
 
-/* ==========================================
-   6. THẺ HƯỚNG DẪN Ở TRANG CHỦ (INDEX)
-   ========================================== */
-.guide-card-link {
-    display: block;
-    margin-top: 25px;
-    text-decoration: none;
-    text-align: left;
-    padding: 15px;
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 12px;
-    border: 1px dashed #334155;
-    transition: border-color 0.3s;
-}
-
-.guide-card-link:hover {
-    border-color: #00ffff;
-}
-
-.guide-item {
-    margin-bottom: 8px;
+/* Danh sách thông báo */
+.notification-list {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.arrow-icon {
-    font-size: 15px;
-    margin-right: 6px;
-}
-
-.guide-text-inline {
-    color: #cbd5e1;
-    font-size: 13px;
-    font-style: italic;
-}
-
-.guide-cta {
-    margin-top: 10px;
-    text-align: center;
-    color: #00ffff;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-/* ==========================================
-   7. STYLING CHO TRANG HUONGDAN.HTML (ĐÃ SỬA LỖI ẢNH)
-   ========================================== */
-.guide-box-detail {
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 15px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.guide-box-title {
-    color: #00ffff;
-    font-size: 1rem;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 8px;
-}
-
-/* Sửa riêng đoạn này trong style.css */
-.img-preview {
-    width: 100%;
-    max-height: 120px; /* Ép chiều cao tối đa xuống 120px (nhỏ gọn hẳn) */
-    margin: 10px 0 15px 0;
+.notification-card {
+    background-color: #ffffff;
+    padding: 20px;
     border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #334155;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #0f172a;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    position: relative;
 }
 
-.img-preview img {
-    width: auto;       /* Để chiều rộng tự điều chỉnh theo tỉ lệ */
-    max-width: 100%;
-    height: 100%;
-    max-height: 120px; /* Đảm bảo ảnh không bao giờ cao quá 120px */
-    display: block;
-    object-fit: contain;
-}
-
-.guide-list-detail {
-    padding-left: 18px;
-    color: #cbd5e1;
-    font-size: 0.88rem;
-    line-height: 1.6;
-}
-
-.guide-list-detail li {
+.notification-card h3 {
+    font-size: 1.05rem;
     margin-bottom: 6px;
 }
 
-.btn-back {
-    display: block;
-    text-align: center;
-    padding: 12px;
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    color: #ffffff;
-    border-radius: 50px;
+.notification-card p {
     font-size: 0.9rem;
-    font-weight: bold;
-    transition: all 0.3s;
+    color: #475569;
+    margin-bottom: 10px;
 }
 
-.btn-back:hover {
-    background-color: #334155;
-    color: #00ffff;
+.notification-card .time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
-/* ==========================================
-   8. HIỆU ỨNG CHUYỂN ĐỘNG CẦU VỒNG
-   ========================================== */
-@keyframes rainbow-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* Responsive cho thiết bị nhỏ */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .sidebar h2 {
+        margin-bottom: 15px;
+    }
+
+    .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 0;
+    }
+
+    .sidebar ul li a {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
 }
