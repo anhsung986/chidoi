@@ -1,4 +1,4 @@
-name: Build Chidoi App APK
+name: Build Chidoi APK
 
 on:
   push:
@@ -15,62 +15,78 @@ jobs:
       contents: write
 
     steps:
-      # ==============================
+
+      # ==========================================
       # 1. Lấy source code
-      # ==============================
+      # ==========================================
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ==============================
+
+      # ==========================================
       # 2. Cài Node.js
-      # ==============================
+      # ==========================================
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # ==============================
+
+      # ==========================================
       # 3. Cài Java 17
-      # ==============================
+      # ==========================================
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: temurin
 
-      # ==============================
-      # 4. Chuẩn bị Web App
-      # ==============================
-      - name: Prepare Web Directory
+
+      # ==========================================
+      # 4. Kiểm tra icon
+      # ==========================================
+      - name: Check Chidoi Icon
         run: |
-          mkdir -p www
-          mkdir -p assets
+          echo "===== Kiểm tra icon ====="
 
-          # Copy website
-          cp -r *.html www/ 2>/dev/null || true
-          cp -r *.css www/ 2>/dev/null || true
-          cp -r *.js www/ 2>/dev/null || true
-
-          # Copy icon Chidoi
-          if [ -f "icon.png" ]; then
-            cp icon.png www/icon.png
-            cp icon.png assets/icon.png
-            echo "Icon Chidoi đã được tìm thấy."
-          else
-            echo "Không tìm thấy icon.png"
+          if [ ! -f "icon.png" ]; then
+            echo "❌ KHÔNG TÌM THẤY icon.png"
+            echo "Hãy đặt icon.png ở thư mục gốc repository."
             exit 1
           fi
 
-          # Kiểm tra
-          echo "===== WWW ====="
+          file icon.png
+          ls -lh icon.png
+
+          echo "✅ Đã tìm thấy icon.png"
+
+
+      # ==========================================
+      # 5. Tạo thư mục Web
+      # ==========================================
+      - name: Prepare Web Directory
+        run: |
+          mkdir -p www
+
+          # Copy HTML
+          cp *.html www/ 2>/dev/null || true
+
+          # Copy CSS
+          cp *.css www/ 2>/dev/null || true
+
+          # Copy JS
+          cp *.js www/ 2>/dev/null || true
+
+          # Copy icon cho website
+          cp icon.png www/icon.png
+
+          echo "===== Nội dung www ====="
           ls -lah www
 
-          echo "===== ASSETS ====="
-          ls -lah assets
 
-      # ==============================
-      # 5. Tạo package.json
-      # ==============================
+      # ==========================================
+      # 6. Tạo Node Project
+      # ==========================================
       - name: Initialize Node Project
         run: |
           npm init -y
@@ -78,18 +94,18 @@ jobs:
           npm install \
             @capacitor/core@5.7.0 \
             @capacitor/cli@5.7.0 \
-            @capacitor/android@5.7.0 \
-            @capacitor/assets@3.0.5
+            @capacitor/android@5.7.0
 
-      # ==============================
-      # 6. Tạo Capacitor Config
-      # ==============================
+
+      # ==========================================
+      # 7. Tạo Capacitor Config
+      # ==========================================
       - name: Create Capacitor Config
         run: |
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.anhsung.chidoi",
-            "appName": "Chidoi App",
+            "appName": "Chidoi",
             "webDir": "www",
             "server": {
               "url": "https://anhsung986.github.io/chidoi/",
@@ -98,42 +114,125 @@ jobs:
           }
           EOF
 
+          echo "===== capacitor.config.json ====="
           cat capacitor.config.json
 
-      # ==============================
-      # 7. Tạo Android Project
-      # ==============================
+
+      # ==========================================
+      # 8. Tạo Android Project
+      # ==========================================
       - name: Add Android Platform
         run: |
           npx cap add android
           npx cap sync android
 
-      # ==============================
-      # 8. Tạo Android Icon
-      # ==============================
-      - name: Generate Android App Icon
-        run: |
-          npx capacitor-assets generate --android
 
-      # ==============================
-      # 9. Cấu hình Android
-      # ==============================
+      # ==========================================
+      # 9. Gắn ICON trực tiếp vào Android
+      # ==========================================
+      - name: Install Chidoi Android Icon
+        run: |
+          echo "===== Cài icon Chidoi ====="
+
+          # Tạo thư mục drawable
+          mkdir -p android/app/src/main/res/drawable
+
+          # Copy icon 1024x1024
+          cp icon.png \
+            android/app/src/main/res/drawable/chidoi_icon.png
+
+          # Kiểm tra icon
+          ls -lh android/app/src/main/res/drawable/chidoi_icon.png
+
+          echo "===== Sửa AndroidManifest.xml ====="
+
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+
+          # Đổi icon launcher
+          sed -i \
+            's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/chidoi_icon"|g' \
+            "$MANIFEST"
+
+          # Đổi round icon nếu có
+          sed -i \
+            's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' \
+            "$MANIFEST"
+
+          # Đảm bảo tên app là Chidoi
+          sed -i \
+            's|android:label="@string/app_name"|android:label="Chidoi"|g' \
+            "$MANIFEST"
+
+          # Nếu manifest chưa có icon thì thêm trực tiếp
+          if ! grep -q 'android:icon=' "$MANIFEST"; then
+            sed -i \
+              's|<application|<application android:icon="@drawable/chidoi_icon"|' \
+              "$MANIFEST"
+          fi
+
+          echo ""
+          echo "===== AndroidManifest.xml ====="
+          grep -n -E 'application|android:icon|android:roundIcon|android:label' "$MANIFEST"
+
+
+      # ==========================================
+      # 10. Cấu hình tên app Chidoi
+      # ==========================================
+      - name: Set App Name Chidoi
+        run: |
+          STRINGS="android/app/src/main/res/values/strings.xml"
+
+          if [ -f "$STRINGS" ]; then
+
+            # Thay app_name nếu đã tồn tại
+            sed -i \
+              's|<string name="app_name">.*</string>|<string name="app_name">Chidoi</string>|g' \
+              "$STRINGS"
+
+          else
+
+            mkdir -p android/app/src/main/res/values
+
+            cat > "$STRINGS" <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Chidoi</string>
+          </resources>
+          EOF
+
+          fi
+
+          echo "===== strings.xml ====="
+          cat "$STRINGS"
+
+
+      # ==========================================
+      # 11. Cấu hình Android / Gradle
+      # ==========================================
       - name: Configure Android
         run: |
           cd android
 
           echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
+
           echo "android.useAndroidX=true" >> gradle.properties
+
           echo "android.enableJetifier=true" >> gradle.properties
 
-          # Kiểm tra minSdk nếu file tồn tại
+          # minSdk 22
           if [ -f "variables.gradle" ]; then
-            sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle
+            sed -i \
+              's/minSdkVersion = .*/minSdkVersion = 22/' \
+              variables.gradle
           fi
 
-      # ==============================
-      # 10. Build APK
-      # ==============================
+          echo "===== Gradle Properties ====="
+          cat gradle.properties
+
+
+      # ==========================================
+      # 12. Build APK
+      # ==========================================
       - name: Build Chidoi APK
         run: |
           cd android
@@ -142,45 +241,83 @@ jobs:
 
           ./gradlew assembleDebug --no-daemon
 
-          mkdir -p app/build/outputs/debug
+          echo "===== APK đã build ====="
 
-          cp app/build/outputs/apk/debug/app-debug.apk \
-             app/build/outputs/debug/ChidoiApp.apk
+          ls -lh app/build/outputs/apk/debug/
 
-      # ==============================
-      # 11. Kiểm tra APK
-      # ==============================
-      - name: Check APK
+
+      # ==========================================
+      # 13. Đổi tên APK
+      # ==========================================
+      - name: Rename APK
         run: |
-          ls -lh android/app/build/outputs/debug/ChidoiApp.apk
+          mkdir -p output
 
-      # ==============================
-      # 12. Tạo Release Tag
-      # ==============================
+          cp \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            output/Chidoi.apk
+
+          echo "===== APK cuối cùng ====="
+          ls -lh output/Chidoi.apk
+
+
+      # ==========================================
+      # 14. Kiểm tra APK
+      # ==========================================
+      - name: Check Final APK
+        run: |
+          if [ ! -f "output/Chidoi.apk" ]; then
+            echo "❌ Không tìm thấy Chidoi.apk"
+            exit 1
+          fi
+
+          echo "✅ Build thành công!"
+          echo "📱 Tên: Chidoi"
+          echo "🎨 Icon: icon.png"
+          echo "📦 APK:"
+          ls -lh output/Chidoi.apk
+
+
+      # ==========================================
+      # 15. Tạo Release Tag
+      # ==========================================
       - name: Create Release Tag
         id: tag
         run: |
-          echo "TAG_NAME=v1.0.$(date +%s)" >> $GITHUB_ENV
+          echo "TAG_NAME=v1.0.$(date +%s)" >> "$GITHUB_ENV"
 
-      # ==============================
-      # 13. Tạo GitHub Release
-      # ==============================
+
+      # ==========================================
+      # 16. Tạo GitHub Release
+      # ==========================================
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
+
         with:
-          files: android/app/build/outputs/debug/ChidoiApp.apk
+          files: output/Chidoi.apk
+
           tag_name: ${{ env.TAG_NAME }}
-          name: Chidoi App ${{ env.TAG_NAME }}
+
+          name: Chidoi ${{ env.TAG_NAME }}
+
           body: |
-            📱 Chidoi App
+            # 📱 Chidoi
 
-            Bản APK được tự động build từ GitHub Actions.
+            APK được build tự động bằng GitHub Actions.
 
-            ✅ Android APK
-            ✅ Chidoi Icon
-            ✅ Capacitor
-            ✅ Tự động cập nhật Release
+            ## Thông tin
+
+            - 📱 App: Chidoi
+            - 🎨 Icon: icon.png
+            - 📦 Android APK
+            - 🌐 Website: https://anhsung986.github.io/chidoi/
+
+            ## Cài đặt
+
+            Tải `Chidoi.apk` và cài đặt trên Android.
+
           draft: false
           prerelease: false
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
