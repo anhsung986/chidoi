@@ -28,42 +28,5 @@
             </div>
         </a>
     </div>
-
-    <!-- SCRIPT KIỂM TRA VÀ TỰ ĐỘNG CẬP NHẬT APK TỪ GITHUB RELEASES -->
-    <script>
-        async function checkAppUpdate() {
-            try {
-                // 1. Gọi GitHub API để lấy thông tin release mới nhất
-                const response = await fetch('https://api.github.com/repos/anhsung986/chidoi/releases/latest');
-                const data = await response.json();
-                
-                const latestReleaseTime = new Date(data.published_at).getTime(); // Thời gian bản release mới nhất trên GitHub
-                const downloadUrl = data.assets && data.assets.length > 0 ? data.assets[0].browser_download_url : null;
-                
-                // 2. Kiểm tra mốc thời gian lưu trên thiết bị người dùng
-                let installedTime = localStorage.getItem('app_installed_time');
-                if (!installedTime) {
-                    // Mốc thời gian mặc định lần đầu tiên cài app (Thay đổi ngày này theo ngày bạn build bản đầu tiên)
-                    installedTime = new Date("2026-06-05T00:00:00Z").getTime(); 
-                    localStorage.setItem('app_installed_time', installedTime);
-                }
-                
-                // 3. Nếu bản trên GitHub có thời gian mới hơn -> Hiển thị hộp thoại cập nhật
-                if (latestReleaseTime > installedTime && downloadUrl) {
-                    if (confirm("Đã có bản cập nhật mới! Bạn có muốn tải về để cập nhật ngay không?")) {
-                        window.open(downloadUrl, '_system');
-                        
-                        // Lưu lại mốc thời gian mới để không hỏi lại liên tục
-                        localStorage.setItem('app_installed_time', latestReleaseTime);
-                    }
-                }
-            } catch (error) {
-                console.log("Không thể kiểm tra cập nhật lúc này:", error);
-            }
-        }
-
-        // Chạy kiểm tra ngay khi mở trang chủ ứng dụng
-        window.addEventListener('DOMContentLoaded', checkAppUpdate);
-    </script>
 </body>
 </html>
