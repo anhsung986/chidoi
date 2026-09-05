@@ -105,7 +105,7 @@ jobs:
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.anhsung.chidoi",
-            "appName": "Chidoi",
+            "appName": "Chi Đội",
             "webDir": "www",
             "server": {
               "url": "https://anhsung986.github.io/chidoi/",
