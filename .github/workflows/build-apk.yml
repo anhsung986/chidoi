@@ -1,77 +1,186 @@
-name: Build Web App to Universal APK
+name: Build Chidoi App APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: write  # Cấp quyền ghi trực tiếp cho job này
+      contents: write
 
     steps:
+      # ==============================
+      # 1. Lấy source code
+      # ==============================
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ==============================
+      # 2. Cài Node.js
+      # ==============================
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # ==============================
+      # 3. Cài Java 17
+      # ==============================
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
 
-      - name: Prepare Web Directory & Install Capacitor
+      # ==============================
+      # 4. Chuẩn bị Web App
+      # ==============================
+      - name: Prepare Web Directory
         run: |
           mkdir -p www
-          cp -r *.html *.css *.js www/ 2>/dev/null || true
+          mkdir -p assets
+
+          # Copy website
+          cp -r *.html www/ 2>/dev/null || true
+          cp -r *.css www/ 2>/dev/null || true
+          cp -r *.js www/ 2>/dev/null || true
+
+          # Copy icon Chidoi
+          if [ -f "icon.png" ]; then
+            cp icon.png www/icon.png
+            cp icon.png assets/icon.png
+            echo "Icon Chidoi đã được tìm thấy."
+          else
+            echo "Không tìm thấy icon.png"
+            exit 1
+          fi
+
+          # Kiểm tra
+          echo "===== WWW ====="
+          ls -lah www
+
+          echo "===== ASSETS ====="
+          ls -lah assets
+
+      # ==============================
+      # 5. Tạo package.json
+      # ==============================
+      - name: Initialize Node Project
+        run: |
           npm init -y
-          npm install @capacitor/core@5.7.0 @capacitor/cli@5.7.0 @capacitor/android@5.7.0 @capacitor/assets --save-dev
-          
-          # Tao config JSON
-          echo '{"appId":"com.anhsung.chidoi","appName":"Chidoi App","webDir":"www","server":{"url":"https://anhsung986.github.io/chidoi/","cleartext":true}}' > capacitor.config.json
-          
+
+          npm install \
+            @capacitor/core@5.7.0 \
+            @capacitor/cli@5.7.0 \
+            @capacitor/android@5.7.0 \
+            @capacitor/assets@3.0.5
+
+      # ==============================
+      # 6. Tạo Capacitor Config
+      # ==============================
+      - name: Create Capacitor Config
+        run: |
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.anhsung.chidoi",
+            "appName": "Chidoi App",
+            "webDir": "www",
+            "server": {
+              "url": "https://anhsung986.github.io/chidoi/",
+              "cleartext": true
+            }
+          }
+          EOF
+
+          cat capacitor.config.json
+
+      # ==============================
+      # 7. Tạo Android Project
+      # ==============================
+      - name: Add Android Platform
+        run: |
           npx cap add android
           npx cap sync android
 
-          # Tao Icon neu co
-          if [ -f "icon.png" ]; then
-            npx capacitor-assets generate --android
-          fi
+      # ==============================
+      # 8. Tạo Android Icon
+      # ==============================
+      - name: Generate Android App Icon
+        run: |
+          npx capacitor-assets generate --android
 
+      # ==============================
+      # 9. Cấu hình Android
+      # ==============================
+      - name: Configure Android
+        run: |
           cd android
+
           echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
-          sed -i 's/gradle-8.2.1-all.zip/gradle-8.0.2-all.zip/g' gradle/wrapper/gradle-wrapper.properties
 
-      - name: Build APK Debug (Cài trực tiếp ngon lành)
+          # Kiểm tra minSdk nếu file tồn tại
+          if [ -f "variables.gradle" ]; then
+            sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle
+          fi
+
+      # ==============================
+      # 10. Build APK
+      # ==============================
+      - name: Build Chidoi APK
         run: |
           cd android
-          sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle 2>/dev/null || true
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/ChidoiApp.apk
 
-      - name: Tạo Tag tự động theo thời gian
+          chmod +x gradlew
+
+          ./gradlew assembleDebug --no-daemon
+
+          mkdir -p app/build/outputs/debug
+
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             app/build/outputs/debug/ChidoiApp.apk
+
+      # ==============================
+      # 11. Kiểm tra APK
+      # ==============================
+      - name: Check APK
+        run: |
+          ls -lh android/app/build/outputs/debug/ChidoiApp.apk
+
+      # ==============================
+      # 12. Tạo Release Tag
+      # ==============================
+      - name: Create Release Tag
         id: tag
         run: |
           echo "TAG_NAME=v1.0.$(date +%s)" >> $GITHUB_ENV
 
-      - name: Tự động tạo Release và đính kèm APK lên GitHub
+      # ==============================
+      # 13. Tạo GitHub Release
+      # ==============================
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: android/app/build/outputs/apk/debug/ChidoiApp.apk
+          files: android/app/build/outputs/debug/ChidoiApp.apk
           tag_name: ${{ env.TAG_NAME }}
-          name: Cập nhật tự động ${{ env.TAG_NAME }}
-          body: "Bản cập nhật tự động được build từ GitHub Actions."
+          name: Chidoi App ${{ env.TAG_NAME }}
+          body: |
+            📱 Chidoi App
+
+            Bản APK được tự động build từ GitHub Actions.
+
+            ✅ Android APK
+            ✅ Chidoi Icon
+            ✅ Capacitor
+            ✅ Tự động cập nhật Release
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
