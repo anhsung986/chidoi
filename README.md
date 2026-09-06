@@ -24,4 +24,5 @@ Câu nói tưởng chừng đơn giản ấy lại như một liều thuốc tin
 Phía xa, bầu trời chuyển sang một màu cam đỏ rực rỡ, những đám mây trôing chầm chậm như ôm trọn lấy khoảng không gian bình yên của tuổi học trò. Hai bóng người cứ thế thong thả đạp xe đi qua từng góc phố nhỏ, mang theo tiếng cười nói rôm rả và cả những hoài bão thanh xuân đang từ từ đơm hoa kết trái. Ở cái tuổi mà mọi thứ đều chông chênh và nhiều bỡ ngỡ này, có một người bạn đồng hành để cùng chia sẻ buồn vui, để nhắc nhở nhau sống chậm lại và mỉm cười nhiều hơn, chính là món quà tuyệt vời nhất mà thời gian ban tặng.
 
 Email: anhsung986@gmail.com
+
 Link : HTTPS://cd.chidoi.gt.tc
