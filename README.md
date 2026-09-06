@@ -27,4 +27,6 @@ Email: anhsung986@gmail.com
 
 Link :  https://cd.chidoi.gt.tc
 
-Discord : 
+Discord : https://discord.gg/aK8wpPkf8
+
+Download: https://download.chidoi.gt.tc/
