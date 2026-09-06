@@ -18,5 +18,11 @@ Linh khựng lại một nhịp, rồi thở dài nhè nhẹ: "Khó chết đi �
 — "Thế mà lúc nãy còn cười tươi thế cơ à."
 
 — "Thì buồn cũng có giải quyết được gì đâu," Linh quay sang nhìn An, đôi mắt trong veo phản chiếu ánh hoàng hôn đang dần buông xuống cuối phố. "Thi cử thì qua rồi, điểm cũng không sửa lại được. Quan trọng là tụi mình còn cơ hội ở bài kiểm tra sau mà. Với lại... cuối tuần rồi, nghĩ nhiều làm gì cho mệt óc."
+
 Câu nói tưởng chừng đơn giản ấy lại như một liều thuốc tinh thần xoa dịu tâm trí An. Cậu gật đầu, nhận ra bấy lâu nay bản thân cứ tự áp đặt lên vai những kỳ vọng quá lớn, để rồi tự làm mình chìm đắm trong áp lực vô hình. Cuộc sống vốn dĩ không phải lúc nào cũng theo ý muốn, nhưng cách chúng ta đối mặt với nó mới là điều định nghĩa nên con người mình.
+
 Phía xa, bầu trời chuyển sang một màu cam đỏ rực rỡ, những đám mây trôing chầm chậm như ôm trọn lấy khoảng không gian bình yên của tuổi học trò. Hai bóng người cứ thế thong thả đạp xe đi qua từng góc phố nhỏ, mang theo tiếng cười nói rôm rả và cả những hoài bão thanh xuân đang từ từ đơm hoa kết trái. Ở cái tuổi mà mọi thứ đều chông chênh và nhiều bỡ ngỡ này, có một người bạn đồng hành để cùng chia sẻ buồn vui, để nhắc nhở nhau sống chậm lại và mỉm cười nhiều hơn, chính là món quà tuyệt vời nhất mà thời gian ban tặng.
+
+Email: anhsung986@gmail.com
+
+Link : HTTPS://cd.chidoi.gt.tc
