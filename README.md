@@ -25,4 +25,6 @@ Phía xa, bầu trời chuyển sang một màu cam đỏ rực rỡ, những đ
 
 Email: anhsung986@gmail.com
 
-Link : HTTPS://cd.chidoi.gt.tc
+Link :  https://cd.chidoi.gt.tc
+
+Discord : 
