@@ -18,7 +18,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #25e5e5; /* Nền tối */
+    background-color: #0f172a; /* Nền tối */
     padding: 20px 10px;
     overflow-y: auto; /* SỬA LỖI: Cho phép cuộn trang thay vì khóa cứng màn hình */
 }
