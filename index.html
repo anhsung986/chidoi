@@ -55,6 +55,8 @@
             font-size: 14px;
             font-weight: bold;
             letter-spacing: 1px;
+            text-align: center;
+            padding: 0 20px;
         }
         @keyframes pulse {
             0% { transform: scale(1); opacity: 0.8; }
@@ -70,7 +72,7 @@
         <div class="progress-bar-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-        <div class="progress-text" id="progressText">Đang tải tài nguyên... 1%</div>
+        <div class="progress-text" id="progressText">Đang khởi tạo hệ thống... 1%</div>
     </div>
 
     <div class="welcome-container">
@@ -107,17 +109,38 @@
                 document.body.style.fontFamily = savedFont;
             }
 
-            // Logic màn hình chờ với các mốc dừng chính xác
+            // Danh sách các thông điệp tải tài nguyên đa dạng theo yêu cầu
+            const loadingMessages = [
+                "Đang tải tài nguyên...",
+                "Đang đồng bộ dữ liệu hệ thống...",
+                "Đang tải thông tin tài khoản người dùng...",
+                "Đang cập nhật ngày tháng năm và lịch biểu...",
+                "Đang thiết lập cấu hình giao diện...",
+                "Đang kiểm tra kết nối cơ sở dữ liệu...",
+                "Đang chuẩn bị không gian trải nghiệm..."
+            ];
+
             let progress = 1;
             const bar = document.getElementById('progressBar');
             const text = document.getElementById('progressText');
             const loader = document.getElementById('game-loader');
 
+            // Tạo danh sách các mốc % ngẫu nhiên sẽ dừng lại
+            let pauseMilestones = [];
+            while (pauseMilestones.length < 4) {
+                let randomStop = Math.floor(Math.random() * 80) + 10;
+                if (!pauseMilestones.includes(randomStop)) {
+                    pauseMilestones.push(randomStop);
+                }
+            }
+            pauseMilestones.sort((a, b) => a - b);
+            if (!pauseMilestones.includes(99)) pauseMilestones.push(99);
+
             function runLoader() {
                 if (progress >= 100) {
                     progress = 100;
                     bar.style.width = '100%';
-                    text.innerText = `Đang tải tài nguyên... 100%`;
+                    text.innerText = `Hoàn tất tải tài nguyên... 100%`;
                     setTimeout(() => {
                         loader.style.opacity = '0';
                         setTimeout(() => {
@@ -128,27 +151,28 @@
                 }
 
                 bar.style.width = progress + '%';
-                text.innerText = `Đang tải tài nguyên... ${progress}%`;
+                
+                // Chọn ngẫu nhiên một thông điệp tải tài nguyên ứng với % hiện tại
+                const randomMsg = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+                text.innerText = `${randomMsg} ${progress}%`;
 
-                let stepDelay = 40; // Tốc độ chạy bình thường giữa các %
+                let stepDelay = 60;
 
-                // Xử lý các khoảng dừng theo yêu cầu
-                if (progress >= 15 && progress < 37) {
-                    // Dừng tổng cộng khoảng 16 giây rải đều qua các % từ 15 đến 37
-                    stepDelay = 16000 / (37 - 15); 
-                } else if (progress === 67 || progress === 69) {
-                    stepDelay = 3000; // Dừng tại mốc 67 và 69
-                } else if (progress === 88) {
-                    stepDelay = 4000; // Dừng tại mốc 88
-                } else if (progress === 99) {
-                    stepDelay = 2500; // Dừng đúng 25 giây ở mốc 99%
+                if (pauseMilestones.includes(progress)) {
+                    if (progress === 99) {
+                        stepDelay = 10000; // Giảm thời gian dừng ở mốc 99% xuống còn 10 giây
+                    } else {
+                        stepDelay = Math.floor(Math.random() * 10000) + 3000; // Random thời gian dừng từ 3 đến 13 giây
+                    }
                 }
 
-                progress++;
+                let randomIncrement = Math.floor(Math.random() * 3) + 1;
+                progress += randomIncrement;
+                if (progress > 100) progress = 100;
+
                 setTimeout(runLoader, stepDelay);
             }
 
-            // Bắt đầu chạy màn hình chờ
             setTimeout(runLoader, 100);
         });
     </script>
