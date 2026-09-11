@@ -9,7 +9,7 @@
             margin: 0; padding: 20px;
             background: #0b0f19;
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: var(--app-font-family, 'Segoe UI', sans-serif);
             min-height: 100vh;
         }
         .container {
@@ -94,7 +94,7 @@
         </div>
 
         <div style="margin-top: 20px;">
-            <a href="login.html"><button style="background: #374151;">← Quay lại đăng nhập</button></a>
+            <a href="login_2.html"><button style="background: #374151;">← Quay lại đăng nhập</button></a>
         </div>
     </div>
 
@@ -126,7 +126,7 @@
             }
             const savedFont = localStorage.getItem('app_font_family');
             if (savedFont) {
-                document.body.style.fontFamily = savedFont;
+                document.documentElement.style.setProperty('--app-font-family', savedFont);
                 document.getElementById('fontSelect').value = savedFont;
             }
 
@@ -140,7 +140,7 @@
         }
 
         function applyFontFamily(font) {
-            document.body.style.fontFamily = font;
+            document.documentElement.style.setProperty('--app-font-family', font);
             localStorage.setItem('app_font_family', font);
             alert("Đã thay đổi phông chữ toàn app!");
         }
@@ -202,4 +202,3 @@
     </script>
 </body>
 </html>
-
