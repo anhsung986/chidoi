@@ -6,7 +6,7 @@
     <title>Bảng Thông Báo</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins'), sans-serif; }
         
         /* NỀN ĐỎ NHẠT ĐỒNG BỘ */
         body {
@@ -104,8 +104,19 @@
     </style>
 </head>
 <body>
+    <script>
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
 
-    <a href="home.html" class="back-btn">⬅ Home</a>
+    <a href="home_2.html" class="back-btn">⬅ Home</a>
 
     <div class="container">
         <h2 class="header-title">📌 BẢNG THÔNG BÁO</h2>
@@ -136,7 +147,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Cấu hình Firebase thongbao-e6205 từ thông tin của bạn
+        // Cấu hình Firebase thongbao-e6205 từ thông tin của bạn[span_0](start_span)[span_0](end_span)
         const firebaseConfig = {
             apiKey: "AIzaSyDWz9LghmamJdHkkUnz26VldvUieFePcqQ",
             authDomain: "thongbao-e6205.firebaseapp.com",
@@ -155,7 +166,7 @@
         const ADMIN_KEY = "sungtuananh";
         let isAdminMode = false;
 
-        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE
+        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE[span_1](start_span)[span_1](end_span)
         onValue(notifyRef, (snapshot) => {
             const list = document.getElementById('notifyList');
             const data = snapshot.val();
@@ -169,7 +180,7 @@
                 return;
             }
 
-            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu
+            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu[span_2](start_span)[span_2](end_span)
             const items = Object.keys(data).map(key => ({
                 id: key,
                 ...data[key]
@@ -183,7 +194,7 @@
                 </div>
             `).join('');
 
-            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin
+            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin[span_3](start_span)[span_3](end_span)
             document.querySelectorAll('.btn-delete-item').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = e.target.getAttribute('data-id');
@@ -192,7 +203,7 @@
             });
         });
 
-        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE
+        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE[span_4](start_span)[span_4](end_span)
         document.getElementById('btnPost').addEventListener('click', async () => {
             const text = document.getElementById('notifyInput').value.trim();
             if (!text) return alert("Vui lòng nhập nội dung!");
@@ -213,7 +224,7 @@
             }
         });
 
-        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE
+        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE[span_5](start_span)[span_5](end_span)
         async function deleteNotification(id) {
             if(confirm("Bạn có chắc chắn muốn xóa thông báo này không?")) {
                 try {
@@ -224,13 +235,13 @@
             }
         }
 
-        // 4. KÍCH HOẠT QUYỀN ADMIN
+        // 4. KÍCH HOẠT QUYỀN ADMIN[span_6](start_span)[span_6](end_span)
         document.getElementById('adminTrigger').addEventListener('click', () => {
             let pass = prompt("QUYỀN QUẢN TRỊ\nNhập mật mã để kích hoạt tính năng đăng bài:");
             if (pass === ADMIN_KEY) {
                 isAdminMode = true;
                 document.getElementById('adminPanel').style.display = "block";
-                // Hiện nút xóa bài
+                // Hiện nút xóa bài[span_7](start_span)[span_7](end_span)
                 document.querySelectorAll('.btn-delete-item').forEach(btn => btn.style.display = 'block');
                 alert("Xác thực Admin thành công! Bạn có thể ĐĂNG hoặc XÓA thông báo.");
             } else if (pass !== null) {
@@ -238,7 +249,7 @@
             }
         });
 
-        // Đóng khung Admin
+        // Đóng khung Admin[span_8](start_span)[span_8](end_span)
         document.getElementById('btnCancel').addEventListener('click', () => {
             document.getElementById('adminPanel').style.display = "none";
         });
