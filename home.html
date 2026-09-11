@@ -245,7 +245,7 @@
         <a href="caidat.html">⚙️ Cài đặt</a>
         <a href="thongbao.html">🔔 Thông báo</a>
         <a href="ngayle.html">🥳 Các ngày lễ</a>
-        <a href="#" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
+        <a href="auth.html" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
     </div>
 
     <!-- Nền mờ phía sau giúp click ra ngoài tự đóng -->
@@ -338,7 +338,7 @@
             if (e) e.preventDefault();
             showCustomToast("Bạn có chắc chắn muốn thoát hệ thống không?", "confirm", () => {
                 localStorage.removeItem("loggedInUser");
-                window.location.href = "auth_2.html"; 
+                window.location.href = "auth.html"; 
             });
         }
     </script>
