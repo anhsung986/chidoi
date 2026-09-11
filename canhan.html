@@ -6,20 +6,20 @@
     <title>Thông Tin Cá Nhân</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins', sans-serif); }
         
         /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ HỆ THỐNG */
         body {
             background-color: #ffb3b3;
             min-height: 100vh;
-            display: flex; justify-content: center; align-items: center; padding: 20px;
+            display: flex; justify-content: center; align-items: center; padding: 20px 15px;
         }
 
         /* KHUNG CHÍNH NỀN TỐI + VIỀN CẦU VỒNG LED */
         .container {
             position: relative;
             width: 100%; max-width: 380px;
-            background: #111827; border-radius: 24px; padding: 35px 25px;
+            background: #111827; border-radius: 24px; padding: 35px 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center;
         }
 
@@ -76,11 +76,11 @@
         .info-row {
             display: flex; align-items: center;
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px; padding: 6px 14px; gap: 10px;
+            border-radius: 12px; padding: 8px 14px; gap: 10px;
             transition: 0.3s;
         }
         .info-row:focus-within {
-            border-color: #00ffd5;
+            border-color: var(--app-primary-color, #00ffd5);
             box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
         }
         .info-icon { font-size: 18px; }
@@ -91,9 +91,9 @@
         }
         .info-row input::placeholder { color: rgba(255,255,255,0.2); }
 
-        /* NÚT LƯU THÔNG TIN PHÁT SÁNG CẦU VỒNG */
+        /* NÚT LƯU THÔNG TIN PHÁT SÁNG CẦU VỒNG HOẶC THEO MÀU CHỦ ĐẠO */
         .save-btn {
-            background: linear-gradient(45deg, #ff0055, #7a00ff);
+            background: var(--app-primary-color, linear-gradient(45deg, #ff0055, #7a00ff));
             color: white; border: none; padding: 13px; border-radius: 50px;
             font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 15px;
             width: 100%; transition: 0.3s;
@@ -107,14 +107,22 @@
 </head>
 <body>
 
-    <!-- Dán đoạn script của bạn vào đây, ngay trước thẻ đóng body -->
 <script>
+    // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang
+    const savedColor = localStorage.getItem('app_theme_color');
+    if (savedColor) {
+        document.documentElement.style.setProperty('--app-primary-color', savedColor);
+    }
+    const savedFont = localStorage.getItem('app_font_family');
+    if (savedFont) {
+        document.documentElement.style.setProperty('--app-font-family', savedFont);
+    }
+
     // Tự động áp dụng cài đặt chung cho mọi trang khi được tải xong
     window.addEventListener("DOMContentLoaded", () => {
         // 1. Đồng bộ Dark Mode
         const isDarkMode = localStorage.getItem("appDarkMode") === "true";
         if (isDarkMode) {
-            // Thêm class đổi màu tối (Bạn có thể tùy chỉnh CSS nền tối theo ý muốn bên dưới)
             document.body.style.backgroundColor = "#0b0f19";
             document.body.style.color = "#f3f4f6";
         } else {
