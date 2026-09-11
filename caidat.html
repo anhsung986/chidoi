@@ -219,7 +219,7 @@
         <a href="caidat.html">⚙️ Cài đặt</a>
         <a href="thongbao.html">🔔 Thông báo</a>
         <a href="ngayle.html">🥳 Các ngày lễ</a>
-        <a href="index.html" onclick="logout()" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
+        <a href="auth.html" onclick="logout()" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -335,7 +335,7 @@
         function logout() {
             if (confirm("Bạn có chắc chắn muốn thoát hệ thống không?")) {
                 localStorage.removeItem("loggedInUser");
-                window.location.href = "index.html"; 
+                window.location.href = "auth.html"; 
             }
         }
     </script>
