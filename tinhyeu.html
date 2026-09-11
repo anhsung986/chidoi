@@ -242,9 +242,9 @@
     </div>
 
     <script>
-        const ADMIN_KEY = "sungtuananh"; // Giữ nguyên key admin của bạn[span_2](start_span)[span_2](end_span)
+        const ADMIN_KEY = "sungtuananh";
 
-        window.onload = loadHistory; // Giữ nguyên chức năng load khi mở trang[span_3](start_span)[span_3](end_span)
+        window.onload = loadHistory;
 
         function calculate() {
             const d1 = document.getElementById('d1').value;
@@ -252,40 +252,40 @@
             const d2 = document.getElementById('d2').value;
             const m2 = document.getElementById('m2').value;
 
-            if (!d1 || !m1 || !d2 || !m2) return alert("Vui lòng điền đầy đủ thông tin ngày tháng!"); // Giữ nguyên xác thực trống[span_4](start_span)[span_4](end_span)
+            if (!d1 || !m1 || !d2 || !m2) return alert("Vui lòng điền đầy đủ thông tin ngày tháng!");
             
-            // Kiểm tra tính hợp lệ ngày tháng cơ bản
             if (d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31 || m1 < 1 || m1 > 12 || m2 < 1 || m2 > 12) {
                 return alert("Ngày hoặc tháng nhập vào không hợp lệ!");
             }
 
-            // THUẬT TOÁN ĐÃ ĐƯỢC TỐI ƯU: Kết hợp băm chuỗi giúp tạo chỉ số tình yêu ổn định, ngẫu nhiên từ 60% - 100%
-            let combinedString = `${d1}-${m1}-${d2}-${m2}`;
-            let reversedString = `${d2}-${m2}-${d1}-${m1}`; // Để A & B hay B & A đều ra chung kết quả
-            let finalStr = combinedString < reversedString ? combinedString : reversedString;
+            // THUẬT TOÁN MỚI ĐÃ TỐI ƯU: Sử dụng trọng số toán học đối xứng (hoán đổi vị trí 2 người vẫn giữ nguyên kết quả) 
+            // và phân bổ kết quả dao động mượt mà từ 50% đến 100%.
+            const val1 = parseInt(d1) * 31 + parseInt(m1);
+            const val2 = parseInt(d2) * 31 + parseInt(m2);
             
-            let hash = 0;
-            for (let i = 0; i < finalStr.length; i++) {
-                hash = finalStr.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            let score = Math.abs(hash % 41) + 60; // Trả về kết quả từ 60% đến 100% rất tích cực và mượt mà
+            const sumVal = val1 + val2;
+            const diffVal = Math.abs(val1 - val2);
+            const prodVal = (val1 * val2) % 997;
+            
+            let rawScore = (sumVal * 7 + prodVal * 13 - diffVal * 3) % 51;
+            let score = 50 + Math.abs(rawScore);
             
             document.getElementById('result').innerText = score + "%";
 
-            let history = JSON.parse(localStorage.getItem('love_v4')) || []; // Giữ nguyên key lưu trữ love_v4[span_5](start_span)[span_5](end_span)
+            let history = JSON.parse(localStorage.getItem('love_v4')) || [];
             let infoKey = `${d1}/${m1} & ${d2}/${m2}`;
 
-            let existingIndex = history.findIndex(item => item.info === infoKey); // Giữ nguyên logic kiểm tra trùng lịch sử[span_6](start_span)[span_6](end_span)
+            let existingIndex = history.findIndex(item => item.info === infoKey);
             if (existingIndex !== -1) { history.splice(existingIndex, 1); }
 
-            history.unshift({ id: Date.now(), info: infoKey, val: score + "%" }); // Giữ nguyên cấu trúc lưu lịch sử[span_7](start_span)[span_7](end_span)
+            history.unshift({ id: Date.now(), info: infoKey, val: score + "%" });
             localStorage.setItem('love_v4', JSON.stringify(history));
             loadHistory();
         }
 
         function loadHistory() {
             const list = document.getElementById('historyList');
-            let history = JSON.parse(localStorage.getItem('love_v4')) || []; // Giữ nguyên key lịch sử[span_8](start_span)[span_8](end_span)
+            let history = JSON.parse(localStorage.getItem('love_v4')) || [];
             list.innerHTML = history.map(item => `
                 <li class="history-item">
                     <input type="checkbox" class="del-check" data-id="${item.id}">
@@ -294,23 +294,23 @@
                         <strong>${item.val}</strong>
                     </div>
                 </li>
-            `).join(''); // Giữ nguyên cấu trúc map giao diện lịch sử[span_9](start_span)[span_9](end_span)
+            `).join('');
         }
 
         function deleteSelected() {
-            const checkboxes = document.querySelectorAll('.del-check:checked'); // Giữ nguyên truy vấn checkbox[span_10](start_span)[span_10](end_span)
-            if (checkboxes.length === 0) return alert("Vui lòng tích chọn mục cần xóa trong danh sách!"); // Giữ nguyên thông báo lỗi[span_11](start_span)[span_11](end_span)
+            const checkboxes = document.querySelectorAll('.del-check:checked');
+            if (checkboxes.length === 0) return alert("Vui lòng tích chọn mục cần xóa trong danh sách!");
 
-            let pass = prompt("HỆ THỐNG BẢO MẬT\nNhập mật mã Admin để xác nhận xóa:"); // Giữ nguyên hộp thoại prompt bảo mật[span_12](start_span)[span_12](end_span)
-            if (pass === ADMIN_KEY) { // Giữ nguyên kiểm tra key mật mã[span_13](start_span)[span_13](end_span)
+            let pass = prompt("HỆ THỐNG BẢO MẬT\nNhập mật mã Admin để xác nhận xóa:");
+            if (pass === ADMIN_KEY) {
                 let history = JSON.parse(localStorage.getItem('love_v4')) || [];
                 const idsToDelete = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
                 let newHistory = history.filter(item => !idsToDelete.includes(item.id));
                 localStorage.setItem('love_v4', JSON.stringify(newHistory));
                 loadHistory();
-                alert("Hệ thống đã xóa dữ liệu thành công."); // Giữ nguyên thông báo thành công[span_14](start_span)[span_14](end_span)
+                alert("Hệ thống đã xóa dữ liệu thành công.");
             } else if (pass !== null) {
-                alert("Mật mã quản trị không chính xác!"); // Giữ nguyên thông báo sai pass[span_15](start_span)[span_15](end_span)
+                alert("Mật mã quản trị không chính xác!");
             }
         }
     </script>
