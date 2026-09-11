@@ -6,7 +6,7 @@
     <title>Tính Số Ngày Tự Động</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins'), sans-serif; }
         
         /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ */
         body {
@@ -110,16 +110,27 @@
     </style>
 </head>
 <body>
+    <script>
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
 
 <div class="container">
-    <a href="home.html" class="back-btn">⬅ BACK</a>
+    <a href="home_2.html" class="back-btn">⬅ BACK</a>
     <div class="header-title">THỜI GIAN ĐÃ SỐNG</div>
 
     <div class="settings">
         <input type="date" id="birthDateInput" onchange="saveAndCalc()">
     </div>
 
-    <div class="date-display" id="infoText">Đang tính toán dữ liệu...</div>
+    <div class="date-display" id="infoText">Đang tính toán dữ liệu...[span_0](start_span)[span_0](end_span)</div>
 
     <div class="stat-group">
         <span class="stat-label">TỔNG SỐ NGÀY SỐNG</span>
@@ -144,7 +155,7 @@
             document.getElementById('birthDateInput').value = savedBirth;
             calculateLife(savedBirth);
         } else {
-            document.getElementById('infoText').innerText = "Vui lòng chọn ngày sinh";
+            document.getElementById('infoText').innerText = "Vui lòng chọn ngày sinh";[span_1](start_span)[span_1](end_span)
         }
     };
 
@@ -156,12 +167,12 @@
 
     function calculateLife(birthInput) {
         const today = new Date();
-        const birthDate = new Date(birthInput.replace(/-/g, '\/'));
+        const birthDate = new Date(birthInput.replace(/-/g, '\/'));[span_2](start_span)[span_2](end_span)
         
         if (isNaN(birthDate)) return;
 
         const diffTime = today - birthDate;
-        const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));[span_3](start_span)[span_3](end_span)
 
         let years = today.getFullYear() - birthDate.getFullYear();
         let months = today.getMonth() - birthDate.getMonth();
@@ -171,15 +182,14 @@
             months += 12;
         }
 
-        const totalMonths = (years * 12) + months;
+        const totalMonths = (years * 12) + months;[span_4](start_span)[span_4](end_span)
 
-        document.getElementById('infoText').innerText = `Sinh ngày: ${birthDate.getDate()}/${birthDate.getMonth()+1}/${birthDate.getFullYear()}`;
-        document.getElementById('resDays').innerText = totalDays.toLocaleString();
-        document.getElementById('resMonths').innerText = totalMonths.toLocaleString();
-        document.getElementById('resYears').innerText = years;
+        document.getElementById('infoText').innerText = `Sinh ngày: ${birthDate.getDate()}/${birthDate.getMonth()+1}/${birthDate.getFullYear()}`;[span_5](start_span)[span_5](end_span)
+        document.getElementById('resDays').innerText = totalDays.toLocaleString();[span_6](start_span)[span_6](end_span)
+        document.getElementById('resMonths').innerText = totalMonths.toLocaleString();[span_7](start_span)[span_7](end_span)
+        document.getElementById('resYears').innerText = years;[span_8](start_span)[span_8](end_span)
     }
 </script>
 
 </body>
 </html>
-
