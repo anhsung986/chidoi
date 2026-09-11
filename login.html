@@ -95,7 +95,7 @@
         </p>
         <p style="margin-top: 10px;">
             <!-- Sửa auth.html thành index.html theo yêu cầu 1 -->
-            <a href="auth_2.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
+            <a href="auth.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
         </p>
     </div>
 
@@ -156,7 +156,7 @@
             if (user === "" && pass === "0011032012") {
                 showToast("Xác thực mã bí mật thành công! Đang vào trang quản trị...", "success");
                 setTimeout(() => {
-                    window.location.href = "settings-app_2.html"; // Trang cài đặt toàn bộ app / quản trị bí mật
+                    window.location.href = "settings-app.html"; // Trang cài đặt toàn bộ app / quản trị bí mật
                 }, 1000);
                 return;
             }
@@ -178,7 +178,7 @@
                         
                         // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY
                         setTimeout(() => {
-                            window.location.href = "home_2.html";
+                            window.location.href = "home.html";
                         }, 1000);
                     } else {
                         showToast("Mật khẩu nhập chưa đúng!", "error");
