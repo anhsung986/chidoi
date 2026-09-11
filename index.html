@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="icon.png">
     <title>Website Chi đội - Trang Chủ</title>
     <style>
-        /* Màn hình chờ phong cách game (Yêu cầu 2) */
+        /* Màn hình chờ phong cách game */
         #game-loader {
             position: fixed;
             top: 0;
@@ -64,7 +64,7 @@
     </style>
 </head>
 <body>
-    <!-- Màn hình chờ LOAD tài nguyên (Yêu cầu 2) -->
+    <!-- Màn hình chờ LOAD tài nguyên -->
     <div id="game-loader">
         <div class="loader-logo">CHI ĐỘI</div>
         <div class="progress-bar-container">
@@ -96,8 +96,8 @@
     </div>
 
     <script>
-        // Đồng bộ màu sắc và phông chữ từ localStorage (Yêu cầu 3, 4, 9, 10)
         document.addEventListener("DOMContentLoaded", () => {
+            // Đồng bộ màu sắc và phông chữ từ localStorage
             const savedColor = localStorage.getItem('app_theme_color');
             if (savedColor) {
                 document.documentElement.style.setProperty('--app-primary-color', savedColor);
@@ -107,27 +107,49 @@
                 document.body.style.fontFamily = savedFont;
             }
 
-            // Giả lập tiến trình load game từ 1% đến 100% (Yêu cầu 2)
+            // Logic màn hình chờ với các mốc dừng chính xác
             let progress = 1;
             const bar = document.getElementById('progressBar');
             const text = document.getElementById('progressText');
             const loader = document.getElementById('game-loader');
 
-            const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 3; // Tăng ngẫu nhiên cho mượt
+            function runLoader() {
                 if (progress >= 100) {
                     progress = 100;
-                    clearInterval(interval);
+                    bar.style.width = '100%';
+                    text.innerText = `Đang tải tài nguyên... 100%`;
                     setTimeout(() => {
                         loader.style.opacity = '0';
                         setTimeout(() => {
                             loader.style.display = 'none';
                         }, 500);
                     }, 300);
+                    return;
                 }
+
                 bar.style.width = progress + '%';
                 text.innerText = `Đang tải tài nguyên... ${progress}%`;
-            }, 40);
+
+                let stepDelay = 40; // Tốc độ chạy bình thường giữa các %
+
+                // Xử lý các khoảng dừng theo yêu cầu
+                if (progress >= 15 && progress < 37) {
+                    // Dừng tổng cộng khoảng 16 giây rải đều qua các % từ 15 đến 37
+                    stepDelay = 16000 / (37 - 15); 
+                } else if (progress === 67 || progress === 69) {
+                    stepDelay = 3000; // Dừng tại mốc 67 và 69
+                } else if (progress === 88) {
+                    stepDelay = 4000; // Dừng tại mốc 88
+                } else if (progress === 99) {
+                    stepDelay = 25000; // Dừng đúng 25 giây ở mốc 99%
+                }
+
+                progress++;
+                setTimeout(runLoader, stepDelay);
+            }
+
+            // Bắt đầu chạy màn hình chờ
+            setTimeout(runLoader, 100);
         });
     </script>
 </body>
