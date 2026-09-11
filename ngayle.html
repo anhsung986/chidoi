@@ -16,7 +16,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--app-font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -140,6 +140,43 @@
             display: inline-block;
         }
 
+        .nav-bar-custom {
+            background-color: #1a252f;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .nav-logo {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: white;
+            color: #1a252f;
+        }
+
         footer {
             margin-top: auto;
             background: var(--primary-color);
@@ -152,34 +189,22 @@
     </style>
 </head>
 <body>
+    <script>
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
 
-<nav style="
-    background-color: #1a252f;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    width: 100%;
-">
-    <div style="color: white; font-size: 1.2rem; font-weight: bold;">📅 FestivalCalendar</div>
+<nav class="nav-bar-custom">
+    <div class="nav-logo">📅 FestivalCalendar</div>
     
-    <a href="home.html" style="
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-    " onmouseover="this.style.backgroundColor='white'; this.style.color='#1a252f'" onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.1)'; this.style.color='white'">
+    <a href="home_2.html" class="nav-btn">
         🏠 Quay về Trang chủ
     </a>
 </nav>
