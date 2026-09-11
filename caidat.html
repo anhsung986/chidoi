@@ -17,7 +17,7 @@
         min-height: 100vh;
         display: flex; justify-content: center; align-items: center;
         overflow-y: auto;
-        padding: 40px 0;
+        padding: 40px 15px; /* Thêm padding ngang để tránh tràn màn hình di động nhỏ */
     }
 
     /* --- MENU BTN --- */
@@ -74,7 +74,7 @@
     /* --- MAIN CONTAINER --- */
     .container {
         position: relative;
-        width: 90%; max-width: 460px;
+        width: 100%; max-width: 460px;
         background: #111827;
         border-radius: 28px; padding: 35px 25px;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
@@ -141,15 +141,26 @@
         color: white;
     }
 
-    /* Nút chọn màu nhanh */
+    /* Sửa lại phần chọn màu nhanh để hiển thị đều, không bị tràn viền trên di động */
     .color-presets {
-        display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr); /* Chia đều thành 6 cột cân đối */
+        gap: 8px;
+        margin-top: 10px;
+        width: 100%;
     }
     .color-btn {
-        width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; cursor: pointer;
-        transition: transform 0.2s;
+        width: 100%;
+        aspect-ratio: 1; /* Đảm bảo nút luôn là hình vuông hoàn hảo */
+        border-radius: 50%; 
+        border: 2px solid white; 
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .color-btn:hover { transform: scale(1.1); }
+    .color-btn:hover { 
+        transform: scale(1.1); 
+        box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
 
     /* NÚT LƯU CÀI ĐẶT NEON */
     .save-btn {
@@ -229,7 +240,7 @@
                 <label for="themeColorInput">Màu chủ đạo toàn app (Mã Hex) 🎨</label>
                 <input type="text" id="themeColorInput" placeholder="Ví dụ: #FF0000, #00FF00,...">
                 
-                <!-- Các màu có sẵn: FF0000, 00FF00, 00FFFF, 0000FF, FF00FF, C0C0C0 -->
+                <!-- Các màu có sẵn được bố trí bằng CSS Grid để tự căn chỉnh vừa khung màn hình điện thoại -->
                 <div class="color-presets">
                     <div class="color-btn" style="background: #FF0000;" onclick="selectPresetColor('#FF0000')" title="Đỏ"></div>
                     <div class="color-btn" style="background: #00FF00;" onclick="selectPresetColor('#00FF00')" title="Xanh lá"></div>
