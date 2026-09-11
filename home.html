@@ -9,7 +9,7 @@
 <style>
     * {
         margin: 0; padding: 0; box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
+        font-family: var(--app-font-family, 'Poppins', sans-serif);
     }
 
     /* NỀN TỐI ĐỂ LÀM NỔI BẬT ĐÈN LED CẦU VỒNG */
@@ -17,7 +17,8 @@
         background-color: #ffb3b3;
         min-height: 100vh;
         display: flex; justify-content: center; align-items: center;
-        overflow: hidden;
+        overflow-x: hidden;
+        padding: 20px 15px; /* Thêm padding tránh tràn màn hình di động */
     }
 
     /* --- MENU BTN --- */
@@ -82,7 +83,7 @@
     /* --- MAIN CONTAINER --- */
     .container {
         position: relative;
-        width: 90%; max-width: 380px;
+        width: 100%; max-width: 380px;
         background: #111827;
         border-radius: 28px; padding: 35px 25px;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
@@ -117,7 +118,7 @@
         -webkit-text-fill-color: transparent;
     }
     .welcome-text { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
-    .welcome-text span { color: #00ffd5; font-weight: 600; }
+    .welcome-text span { color: var(--app-primary-color, #00ffd5); font-weight: 600; }
     
     .card {
         background: rgba(255, 255, 255, 0.03);
@@ -130,7 +131,7 @@
     .card:hover {
         background: rgba(255, 255, 255, 0.08);
         transform: translateY(-4px) scale(1.02);
-        border-color: #00ffd5;
+        border-color: var(--app-primary-color, #00ffd5);
         box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
     }
 
@@ -202,7 +203,7 @@
         background: rgba(255,255,255,0.2);
     }
     .toast-btn.ok {
-        background: #00ffd5;
+        background: var(--app-primary-color, #00ffd5);
         color: #111827;
     }
 </style>
@@ -210,12 +211,21 @@
 <body>
 
     <script>
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+
         const loggedInUser = localStorage.getItem("loggedInUser");
         if (!loggedInUser) {
-            // Thay alert bằng cơ chế hiển thị mượt mà bên dưới
             window.addEventListener("DOMContentLoaded", () => {
                 showCustomToast("Bạn cần phải đăng nhập trước!", "alert", () => {
-                    window.location.href = "đăng nhập.html";
+                    window.location.href = "login.html";
                 });
             });
         }
@@ -230,7 +240,7 @@
 
     <!-- Thanh Sidebar ngắn gọn -->
     <div class="sidebar" id="mySidebar">
-        <a href="#">🏠 Trang Chủ</a>
+        <a href="home.html">🏠 Trang Chủ</a>
         <a href="canhan.html">👤 Thông tin cá nhân</a>
         <a href="caidat.html">⚙️ Cài đặt</a>
         <a href="thongbao.html">🔔 Thông báo</a>
@@ -328,7 +338,7 @@
             if (e) e.preventDefault();
             showCustomToast("Bạn có chắc chắn muốn thoát hệ thống không?", "confirm", () => {
                 localStorage.removeItem("loggedInUser");
-                window.location.href = "auth.html"; 
+                window.location.href = "auth_2.html"; 
             });
         }
     </script>
