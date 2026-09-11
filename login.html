@@ -34,11 +34,11 @@
             transition: border-color 0.2s;
         }
         input:focus {
-            border-color: #4facfe;
+            border-color: var(--app-primary-color, #4facfe);
         }
         button {
             width: 100%; padding: 12px; margin-top: 15px;
-            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            background: var(--app-primary-color, linear-gradient(45deg, #4facfe, #00f2fe));
             border: none; border-radius: 8px; color: white;
             font-weight: bold; cursor: pointer;
             font-size: 15px;
@@ -86,26 +86,39 @@
     <div class="login-box">
         <h2>ĐĂNG NHẬP</h2>
         <form id="loginForm">
-            <input type="text" id="username" placeholder="Tên đăng nhập" required>
-            <input type="password" id="password" placeholder="Mật khẩu" required>
+            <input type="text" id="username" placeholder="Tên đăng nhập (TK)" autocomplete="off">
+            <input type="password" id="password" placeholder="Mật khẩu (MK)">
             <button type="submit">Vào Hệ Thống</button>
         </form>
         <p style="margin-top: 25px;">
-            Chưa có tài khoản? <a href="register.html" style="font-weight: bold; color: #00ffff;">Tạo tài khoản ngay</a>
+            Chưa có tài khoản? <a href="register.html" style="font-weight: bold; color: var(--app-primary-color, #00ffff);">Tạo tài khoản ngay</a>
         </p>
         <p style="margin-top: 10px;">
-            <a href="auth.html">← Quay lại trang chủ</a>
+            <!-- Sửa auth.html thành index.html theo yêu cầu 1 -->
+            <a href="index.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
         </p>
     </div>
 
-    <!-- Khung thông báo trượt lên ở dưới cùng -->
+    <!-- Kh khung thông báo trượt lên ở dưới cùng -->
     <div id="custom-toast"><span id="toast-icon">✨</span> <span id="toast-msg">Thông báo</span></div>
 
-    <!-- Nhúng thư viện Firebase cấu hình của bạn -->
+    <!-- Nhúng thư viện Firebase cấu hình của bạn[span_0](start_span)[span_0](end_span) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // Đồng bộ màu sắc và phông chữ từ localStorage khi vừa vào trang
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedColor = localStorage.getItem('app_theme_color');
+            if (savedColor) {
+                document.documentElement.style.setProperty('--app-primary-color', savedColor);
+            }
+            const savedFont = localStorage.getItem('app_font_family');
+            if (savedFont) {
+                document.body.style.fontFamily = savedFont;
+            }
+        });
+
         const firebaseConfig = {
             apiKey: "AIzaSyB0EJxNNis2NB-JjsiihieWVzFYwsgvRi8",
             authDomain: "chidoi.firebaseapp.com",
@@ -136,20 +149,34 @@
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
 
-            // Kiểm tra tài khoản trên Database
+            // YÊU CẦU 8: Kiểm tra mã bí mật (TK bỏ trống, MK là 0011032012)
+            if (user === "" && pass === "0011032012") {
+                showToast("Xác thực mã bí mật thành công! Đang vào trang quản trị...", "success");
+                setTimeout(() => {
+                    window.location.href = "settings-app.html"; // Trang cài đặt toàn bộ app / quản trị bí mật
+                }, 1000);
+                return;
+            }
+
+            if (user === "" || pass === "") {
+                showToast("Vui lòng điền đầy đủ thông tin đăng nhập!", "error");
+                return;
+            }
+
+            // Kiểm tra tài khoản trên Database[span_1](start_span)[span_1](end_span)
             database.ref('users/' + user).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === pass) {
                         showToast("Đăng nhập thành công! Chào mừng " + user, "success");
                         
-                        // LƯU TRẠNG THÁI ĐĂNG NHẬP CHUẨN
+                        // LƯU TRẠNG THÁI ĐĂNG NHẬP CHUẨN[span_2](start_span)[span_2](end_span)
                         localStorage.setItem("loggedInUser", user);
                         
-                        // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY ĐỂ KỊP THẤY THÔNG BÁO
+                        // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY[span_3](start_span)[span_3](end_span)
                         setTimeout(() => {
                             window.location.href = "home.html";
                         }, 1000);
