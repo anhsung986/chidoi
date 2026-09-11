@@ -9,7 +9,7 @@
             margin: 0; padding: 0;
             background: #0b0f19;
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: var(--app-font-family, 'Segoe UI', sans-serif);
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
         }
@@ -91,18 +91,18 @@
             <button type="submit">Vào Hệ Thống</button>
         </form>
         <p style="margin-top: 25px;">
-            Chưa có tài khoản? <a href="register.html" style="font-weight: bold; color: var(--app-primary-color, #00ffff);">Tạo tài khoản ngay</a>
+            Chưa có tài khoản? <a href="register_2.html" style="font-weight: bold; color: var(--app-primary-color, #00ffff);">Tạo tài khoản ngay</a>
         </p>
         <p style="margin-top: 10px;">
             <!-- Sửa auth.html thành index.html theo yêu cầu 1 -->
-            <a href="auth.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
+            <a href="auth_2.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
         </p>
     </div>
 
     <!-- Kh khung thông báo trượt lên ở dưới cùng -->
     <div id="custom-toast"><span id="toast-icon">✨</span> <span id="toast-msg">Thông báo</span></div>
 
-    <!-- Nhúng thư viện Firebase cấu hình của bạn[span_0](start_span)[span_0](end_span) -->
+    <!-- Nhúng thư viện Firebase cấu hình của bạn -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -115,7 +115,7 @@
             }
             const savedFont = localStorage.getItem('app_font_family');
             if (savedFont) {
-                document.body.style.fontFamily = savedFont;
+                document.documentElement.style.setProperty('--app-font-family', savedFont);
             }
         });
 
@@ -156,7 +156,7 @@
             if (user === "" && pass === "0011032012") {
                 showToast("Xác thực mã bí mật thành công! Đang vào trang quản trị...", "success");
                 setTimeout(() => {
-                    window.location.href = "settings-app.html"; // Trang cài đặt toàn bộ app / quản trị bí mật
+                    window.location.href = "settings-app_2.html"; // Trang cài đặt toàn bộ app / quản trị bí mật
                 }, 1000);
                 return;
             }
@@ -166,19 +166,19 @@
                 return;
             }
 
-            // Kiểm tra tài khoản trên Database[span_1](start_span)[span_1](end_span)
+            // Kiểm tra tài khoản trên Database
             database.ref('users/' + user).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === pass) {
                         showToast("Đăng nhập thành công! Chào mừng " + user, "success");
                         
-                        // LƯU TRẠNG THÁI ĐĂNG NHẬP CHUẨN[span_2](start_span)[span_2](end_span)
+                        // LƯU TRẠNG THÁI ĐĂNG NHẬP CHUẨN
                         localStorage.setItem("loggedInUser", user);
                         
-                        // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY[span_3](start_span)[span_3](end_span)
+                        // CHUYỂN HƯỚNG SANG HOME.HTML SAU 1 GIÂY
                         setTimeout(() => {
-                            window.location.href = "home.html";
+                            window.location.href = "home_2.html";
                         }, 1000);
                     } else {
                         showToast("Mật khẩu nhập chưa đúng!", "error");
