@@ -1,13 +1,33 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" style="background-color: #0b0f19;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chào mừng đến với CHI ĐỘI</title>
+    <meta name="theme-color" content="#0b0f19">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CHI ĐỘI</title>
+
+    <!-- Thẻ chứa CSS Font được khôi phục từ localStorage -->
+    <style id="app-cached-font"></style>
+
+    <script>
+        // BƯỚC 1: Nếu đã có font lưu từ trước (từ lần 2 trở đi), ép dùng ngay từ 0.001s
+        (function() {
+            const savedFont = localStorage.getItem('cached_poppins_css');
+            if (savedFont) {
+                document.getElementById('app-cached-font').innerHTML = savedFont;
+            }
+        })();
+    </script>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body {
-            background-color: #0b0f19;
+        /* Mặc định ưu tiên Poppins, nếu chưa có sẽ dùng font máy để hiện giao diện ngay lập tức */
+        html, body {
+            background-color: #0b0f19 !important;
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -16,6 +36,7 @@
             color: white;
             overflow: hidden;
         }
+
         .logo {
             font-size: 42px;
             font-weight: bold;
@@ -25,6 +46,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .progress-bar-container {
             width: 280px;
             height: 8px;
@@ -33,13 +55,15 @@
             overflow: hidden;
             margin-bottom: 15px;
         }
+
         .progress-bar {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #00ffd5, #7a00ff);
             border-radius: 4px;
-            transition: width 0.15s ease-out;
+            transition: width 0.05s linear;
         }
+
         .status-text {
             font-size: 14px;
             color: #9ca3af;
@@ -55,23 +79,26 @@
         <div class="progress-bar" id="progressBar"></div>
     </div>
     
-    <div class="status-text" id="statusText">Đang tải tài nguyên... 0%</div>
+    <div class="status-text" id="statusText">Đang tải... 0%</div>
 
     <script>
-        // Đồng bộ màu sắc từ localStorage nếu có
-        const savedColor = localStorage.getItem('app_theme_color');
-        if (savedColor) {
-            document.documentElement.style.setProperty('--app-primary-color', savedColor);
-        }
-
         const progressBar = document.getElementById('progressBar');
         const statusText = document.getElementById('statusText');
-        
         let progress = 0;
 
+        // BƯỚC 2: Hàm chỉ thực hiện tải Font từ Google sau khi app đã khởi chạy xong
+        function loadGoogleFontInBackground() {
+            fetch('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap')
+                .then(res => res.text())
+                .then(cssText => {
+                    // Lưu font vào localStorage để phục vụ cho các lần mở app sau
+                    localStorage.setItem('cached_poppins_css', cssText);
+                })
+                .catch(() => {});
+        }
+
         const timer = setInterval(() => {
-            // Tăng ngẫu nhiên từng bước từ 1 đến 8 mỗi nhịp để tạo cảm giác tự nhiên
-            progress += Math.floor(Math.random() * 8) + 1;
+            progress += Math.floor(Math.random() * 15) + 10;
 
             if (progress >= 100) {
                 progress = 100;
@@ -79,18 +106,19 @@
                 progressBar.style.width = '100%';
                 statusText.innerText = `Đã tải hoàn tất! 100%`;
                 
-                // Chuyển hướng sang trang auth.html sau khi đạt 100%
+                // BƯỚC 3: KHI ĐÃ TẢI XONG 100% VÀ CHUẨN BỊ VÀO APP MỚI BẮT ĐẦU TẢI FONT GOOGLE
+                loadGoogleFontInBackground();
+
                 setTimeout(() => {
                     window.location.href = "auth.html";
-                }, 400);
+                }, 100);
                 return;
             }
 
             progressBar.style.width = progress + '%';
-            statusText.innerText = `Đang tải tài nguyên... ${progress}%`;
+            statusText.innerText = `Đang tải... ${progress}%`;
 
-        }, 100);
+        }, 20);
     </script>
 </body>
 </html>
-
