@@ -7,13 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>CHI ĐỘI</title>
 
-    <!-- Thẻ chứa CSS Font được khôi phục từ localStorage -->
     <style id="app-cached-font"></style>
 
     <script>
-        // BƯỚC 1: Nếu đã có font lưu từ trước (từ lần 2 trở đi), ép dùng ngay từ 0.001s
+        // 1. Ép dùng font từ bộ nhớ máy ngay ở 0.000s (Nếu đã lưu từ lần trước)
         (function() {
-            const savedFont = localStorage.getItem('cached_poppins_css');
+            const savedFont = localStorage.getItem('app_poppins_base64');
             if (savedFont) {
                 document.getElementById('app-cached-font').innerHTML = savedFont;
             }
@@ -21,7 +20,7 @@
     </script>
     
     <style>
-        /* Mặc định ưu tiên Poppins, nếu chưa có sẽ dùng font máy để hiện giao diện ngay lập tức */
+        /* Mặc định dùng font máy để giao diện hiện lên TỨC THÌ */
         html, body {
             background-color: #0b0f19 !important;
             margin: 0; 
@@ -61,7 +60,6 @@
             height: 100%;
             background: linear-gradient(90deg, #00ffd5, #7a00ff);
             border-radius: 4px;
-            transition: width 0.05s linear;
         }
 
         .status-text {
@@ -82,43 +80,25 @@
     <div class="status-text" id="statusText">Đang tải... 0%</div>
 
     <script>
+        // 2. Chuyển trang NGAY LẬP TỨC (Không để hiệu ứng chờ kéo dài)
         const progressBar = document.getElementById('progressBar');
         const statusText = document.getElementById('statusText');
-        let progress = 0;
 
-        // BƯỚC 2: Hàm chỉ thực hiện tải Font từ Google sau khi app đã khởi chạy xong
-        function loadGoogleFontInBackground() {
-            fetch('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap')
-                .then(res => res.text())
-                .then(cssText => {
-                    // Lưu font vào localStorage để phục vụ cho các lần mở app sau
-                    localStorage.setItem('cached_poppins_css', cssText);
-                })
-                .catch(() => {});
+        // Bật chuyển trang cực nhanh trong 0.05s
+        progressBar.style.width = '100%';
+        statusText.innerText = 'Đã tải hoàn tất! 100%';
+
+        // CHUYỂN TRANG THẲNG KHÔNG CHỜ ĐỜI
+        setTimeout(() => {
+            window.location.href = "auth.html";
+        }, 50);
+
+        // 3. Tải font ngầm BÊN TRONG TRANG AUTH (Chạy không chặn luồng màn hình)
+        if (!localStorage.getItem('app_poppins_base64')) {
+            window.addEventListener('load', () => {
+                navigator.sendBeacon && navigator.sendBeacon('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+            });
         }
-
-        const timer = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 10;
-
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(timer);
-                progressBar.style.width = '100%';
-                statusText.innerText = `Đã tải hoàn tất! 100%`;
-                
-                // BƯỚC 3: KHI ĐÃ TẢI XONG 100% VÀ CHUẨN BỊ VÀO APP MỚI BẮT ĐẦU TẢI FONT GOOGLE
-                loadGoogleFontInBackground();
-
-                setTimeout(() => {
-                    window.location.href = "auth.html";
-                }, 100);
-                return;
-            }
-
-            progressBar.style.width = progress + '%';
-            statusText.innerText = `Đang tải... ${progress}%`;
-
-        }, 20);
     </script>
 </body>
 </html>
