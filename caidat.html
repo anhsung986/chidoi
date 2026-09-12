@@ -17,7 +17,7 @@
         min-height: 100vh;
         display: flex; justify-content: center; align-items: center;
         overflow-y: auto;
-        padding: 40px 15px; /* Thêm padding ngang để tránh tràn màn hình di động nhỏ */
+        padding: 40px 15px;
     }
 
     /* --- MENU BTN --- */
@@ -141,17 +141,16 @@
         color: white;
     }
 
-    /* Sửa lại phần chọn màu nhanh để hiển thị đều, không bị tràn viền trên di động */
     .color-presets {
         display: grid;
-        grid-template-columns: repeat(6, 1fr); /* Chia đều thành 6 cột cân đối */
+        grid-template-columns: repeat(6, 1fr);
         gap: 8px;
         margin-top: 10px;
         width: 100%;
     }
     .color-btn {
         width: 100%;
-        aspect-ratio: 1; /* Đảm bảo nút luôn là hình vuông hoàn hảo */
+        aspect-ratio: 1;
         border-radius: 50%; 
         border: 2px solid white; 
         cursor: pointer;
@@ -182,18 +181,36 @@
         border: 1px dashed rgba(255,255,255,0.2); transition: 0.3s;
     }
     .link-colors-btn:hover { background: rgba(255,255,255,0.1); }
+
+    /* --- STYLES CHO EMBED MODAL THAY THẾ ALERT/CONFIRM --- */
+    .custom-embed-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s ease;
+    }
+    .custom-embed-overlay.active { opacity: 1; visibility: visible; }
+    .custom-embed-card {
+        background: #1f2937; border: 1px solid rgba(0, 255, 213, 0.3);
+        border-radius: 16px; width: 90%; max-width: 380px; padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 255, 213, 0.2);
+        text-align: center; color: white; transform: scale(0.8); transition: 0.3s ease;
+    }
+    .custom-embed-overlay.active .custom-embed-card { transform: scale(1); }
+    .custom-embed-title { font-size: 16px; font-weight: 600; color: #00ffd5; margin-bottom: 10px; }
+    .custom-embed-msg { font-size: 13.5px; color: #ddd; margin-bottom: 20px; white-space: pre-wrap; word-break: break-word; }
+    .custom-embed-actions { display: flex; justify-content: center; gap: 10px; }
+    
+    .embed-btn {
+        padding: 8px 18px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
+    }
+    .embed-btn-ok { background: linear-gradient(45deg, #00ffd5, #7a00ff); color: white; }
+    .embed-btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
 </style>
 </head>
 <body>
 
     <script>
-        // Bảo mật kiểm tra trạng thái đăng nhập
-        const loggedInUser = localStorage.getItem("loggedInUser");
-        if (!loggedInUser) {
-            alert("Bạn cần phải đăng nhập trước!");
-            window.location.href = "login.html"; 
-        }
-        
         // Khôi phục màu sắc và phông chữ ngay khi tải trang để tránh chớp màn hình
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
@@ -219,7 +236,7 @@
         <a href="caidat.html">⚙️ Cài đặt</a>
         <a href="thongbao.html">🔔 Thông báo</a>
         <a href="ngayle.html">🥳 Các ngày lễ</a>
-        <a href="auth.html" onclick="logout()" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
+        <a href="#" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Thoát hệ thống</a>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -235,12 +252,11 @@
                 <input type="text" id="usernameInput" required>
             </div>
 
-            <!-- YÊU CẦU 3, 4, 5: ĐỔI MÀU TOÀN APP -->
+            <!-- ĐỔI MÀU TOÀN APP -->
             <div class="setting-group">
                 <label for="themeColorInput">Màu chủ đạo toàn app (Mã Hex) 🎨</label>
                 <input type="text" id="themeColorInput" placeholder="Ví dụ: #FF0000, #00FF00,...">
                 
-                <!-- Các màu có sẵn được bố trí bằng CSS Grid để tự căn chỉnh vừa khung màn hình điện thoại -->
                 <div class="color-presets">
                     <div class="color-btn" style="background: #FF0000;" onclick="selectPresetColor('#FF0000')" title="Đỏ"></div>
                     <div class="color-btn" style="background: #00FF00;" onclick="selectPresetColor('#00FF00')" title="Xanh lá"></div>
@@ -250,21 +266,10 @@
                     <div class="color-btn" style="background: #C0C0C0;" onclick="selectPresetColor('#C0C0C0')" title="Bạc"></div>
                 </div>
 
-                <!-- Nút chuyển đến trang COLERS -->
                 <a href="colors.html" class="link-colors-btn">👉 Đến trang [COLERS] tìm màu yêu thích</a>
             </div>
 
-                <!-- KHUNG OVERLAY VÀ MODAL EMBED DÙNG THAY THẾ ALERT/CONFIRM/PROMPT -->
-            <div class="custom-embed-overlay" id="customEmbedOverlay">              
-               <div class="custom-embed-card">
-                  <div class="custom-embed-actions">
-                <button class="btn btn-cancel" id="customEmbedCancelBtn" style="display: none;">Hủy</button>
-                <button class="btn btn-post" id="customEmbedOkBtn">OK</button>
-            </div>
-        </div>
-    </div>
-
-            <!-- YÊU CẦU 9: CHỈNH SỬA PHÔNG CHỮ TOÀN APP -->
+            <!-- CHỈNH SỬA PHÔNG CHỮ TOÀN APP -->
             <div class="setting-group">
                 <label for="fontSelect">Phông chữ toàn app ✍️</label>
                 <select id="fontSelect">
@@ -290,7 +295,70 @@
         </form>
     </div>
 
+    <!-- KHUNG EMBED MODAL THAY THẾ ALERT VÀ CONFIRM -->
+    <div class="custom-embed-overlay" id="customEmbedOverlay">              
+        <div class="custom-embed-card">
+            <div class="custom-embed-title" id="customEmbedTitle">THÔNG BÁO</div>
+            <div class="custom-embed-msg" id="customEmbedMsg">Nội dung thông báo</div>
+            <div class="custom-embed-actions">
+                <button class="embed-btn embed-btn-cancel" id="customEmbedCancelBtn" style="display: none;">Hủy</button>
+                <button class="embed-btn embed-btn-ok" id="customEmbedOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // HÀM HIỂN THỊ EMBED MODAL TÙY CHỈNH
+        const overlay = document.getElementById('customEmbedOverlay');
+        const titleEl = document.getElementById('customEmbedTitle');
+        const msgEl = document.getElementById('customEmbedMsg');
+        const okBtn = document.getElementById('customEmbedOkBtn');
+        const cancelBtn = document.getElementById('customEmbedCancelBtn');
+
+        function showEmbedAlert(message, title = "THÔNG BÁO") {
+            return new Promise((resolve) => {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                cancelBtn.style.display = "none";
+                overlay.classList.add('active');
+
+                const handleOk = () => {
+                    overlay.classList.remove('active');
+                    okBtn.removeEventListener('click', handleOk);
+                    resolve(true);
+                };
+                okBtn.onclick = handleOk;
+            });
+        }
+
+        function showEmbedConfirm(message, title = "XÁC NHẬN") {
+            return new Promise((resolve) => {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                cancelBtn.style.display = "inline-block";
+                overlay.classList.add('active');
+
+                const handleOk = () => {
+                    overlay.classList.remove('active');
+                    resolve(true);
+                };
+                const handleCancel = () => {
+                    overlay.classList.remove('active');
+                    resolve(false);
+                };
+                okBtn.onclick = handleOk;
+                cancelBtn.onclick = handleCancel;
+            });
+        }
+
+        // Kiểm tra đăng nhập khi mở trang
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            showEmbedAlert("Bạn cần phải đăng nhập trước!").then(() => {
+                window.location.href = "login.html"; 
+            });
+        }
+
         // Tải các giá trị đã lưu vào form khi khởi tạo
         if (loggedInUser) {
             document.getElementById("usernameInput").value = loggedInUser;
@@ -311,16 +379,16 @@
         // Hàm xử lý đóng mở thanh Menu trái
         function toggleMenu() {
             const sidebar = document.getElementById("mySidebar");
-            const overlay = document.getElementById("overlay");
+            const overlayNav = document.getElementById("overlay");
             const menuBtn = document.getElementById("menuBtn");
             
             sidebar.classList.toggle("active");
-            overlay.classList.toggle("active");
+            overlayNav.classList.toggle("active");
             menuBtn.classList.toggle("active");
         }
 
-        // YÊU CẦU 10: Lưu lại cài đặt, đồng bộ và giữ nguyên khi thoát ra vào lại
-        function saveSettings(e) {
+        // Lưu lại cài đặt
+        async function saveSettings(e) {
             e.preventDefault();
             const newName = document.getElementById("usernameInput").value.trim();
             const customColor = document.getElementById("themeColorInput").value.trim();
@@ -338,12 +406,14 @@
                 document.documentElement.style.setProperty('--app-font-family', selectedFont);
             }
 
-            alert("Đã lưu các tùy chỉnh cài đặt thành công và đồng bộ cho toàn app! ✨");
+            await showEmbedAlert("Đã lưu các tùy chỉnh cài đặt thành công và đồng bộ cho toàn app! ✨");
             window.location.href = "home.html"; 
         }
 
-        function logout() {
-            if (confirm("Bạn có chắc chắn muốn thoát hệ thống không?")) {
+        async function logout(e) {
+            if (e) e.preventDefault();
+            const confirmed = await showEmbedConfirm("Bạn có chắc chắn muốn thoát hệ thống không?");
+            if (confirmed) {
                 localStorage.removeItem("loggedInUser");
                 window.location.href = "auth.html"; 
             }
