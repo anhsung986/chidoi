@@ -101,6 +101,30 @@
         .admin-trigger {
             font-size: 11px; color: rgba(255,255,255,0.2); cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block;
         }
+
+        /* KHUNG THÔNG BÁO EMBED (CUSTOM MODAL) */
+        .custom-embed-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s ease;
+        }
+        .custom-embed-overlay.active { opacity: 1; visibility: visible; }
+        .custom-embed-card {
+            background: #1f2937; border: 1px solid rgba(0, 255, 213, 0.3);
+            border-radius: 16px; width: 90%; max-width: 380px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 255, 213, 0.2);
+            text-align: center; color: white; transform: scale(0.8); transition: 0.3s ease;
+        }
+        .custom-embed-overlay.active .custom-embed-card { transform: scale(1); }
+        .custom-embed-title { font-size: 16px; font-weight: 600; color: #00ffd5; margin-bottom: 10px; }
+        .custom-embed-msg { font-size: 13.5px; color: #ddd; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
+        .custom-embed-input {
+            width: 100%; background: #111827; border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px; padding: 10px; color: white; font-size: 13px; outline: none; margin-bottom: 15px; display: none;
+        }
+        .custom-embed-input:focus { border-color: #00ffd5; }
+        .custom-embed-actions { display: flex; justify-content: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -142,12 +166,25 @@
         <span class="admin-trigger" id="adminTrigger">Chế độ Admin</span>
     </div>
 
+    <!-- KHUNG OVERLAY VÀ MODAL EMBED DÙNG THAY THẾ ALERT/CONFIRM/PROMPT -->
+    <div class="custom-embed-overlay" id="customEmbedOverlay">
+        <div class="custom-embed-card">
+            <div class="custom-embed-title" id="customEmbedTitle">THÔNG BÁO</div>
+            <div class="custom-embed-msg" id="customEmbedMsg">Nội dung thông báo</div>
+            <input type="password" class="custom-embed-input" id="customEmbedInput" placeholder="Nhập tại đây...">
+            <div class="custom-embed-actions">
+                <button class="btn btn-cancel" id="customEmbedCancelBtn" style="display: none;">Hủy</button>
+                <button class="btn btn-post" id="customEmbedOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TÍCH HỢP FIREBASE REALTIME DATABASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Cấu hình Firebase thongbao-e6205 từ thông tin của bạn[span_0](start_span)[span_0](end_span)
+        // Cấu hình Firebase thongbao-e6205
         const firebaseConfig = {
             apiKey: "AIzaSyDWz9LghmamJdHkkUnz26VldvUieFePcqQ",
             authDomain: "thongbao-e6205.firebaseapp.com",
@@ -166,7 +203,77 @@
         const ADMIN_KEY = "sungtuananh";
         let isAdminMode = false;
 
-        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE[span_1](start_span)[span_1](end_span)
+        /* --- BỘ HÀM HIỂN THỊ EMBED MODAL THAY THẾ DIALOG TRÌNH DUYỆT --- */
+        const overlay = document.getElementById('customEmbedOverlay');
+        const titleEl = document.getElementById('customEmbedTitle');
+        const msgEl = document.getElementById('customEmbedMsg');
+        const inputEl = document.getElementById('customEmbedInput');
+        const okBtn = document.getElementById('customEmbedOkBtn');
+        const cancelBtn = document.getElementById('customEmbedCancelBtn');
+
+        function showEmbedAlert(message, title = "THÔNG BÁO") {
+            return new Promise((resolve) => {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                inputEl.style.display = "none";
+                cancelBtn.style.display = "none";
+                overlay.classList.add('active');
+
+                const handleOk = () => {
+                    overlay.classList.remove('active');
+                    okBtn.removeEventListener('click', handleOk);
+                    resolve(true);
+                };
+                okBtn.onclick = handleOk;
+            });
+        }
+
+        function showEmbedConfirm(message, title = "XÁC NHẬN") {
+            return new Promise((resolve) => {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                inputEl.style.display = "none";
+                cancelBtn.style.display = "inline-block";
+                overlay.classList.add('active');
+
+                const handleOk = () => {
+                    overlay.classList.remove('active');
+                    resolve(true);
+                };
+                const handleCancel = () => {
+                    overlay.classList.remove('active');
+                    resolve(false);
+                };
+                okBtn.onclick = handleOk;
+                cancelBtn.onclick = handleCancel;
+            });
+        }
+
+        function showEmbedPrompt(message, title = "QUYỀN QUẢN TRỊ") {
+            return new Promise((resolve) => {
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                inputEl.value = "";
+                inputEl.style.display = "block";
+                cancelBtn.style.display = "inline-block";
+                overlay.classList.add('active');
+                inputEl.focus();
+
+                const handleOk = () => {
+                    const val = inputEl.value;
+                    overlay.classList.remove('active');
+                    resolve(val);
+                };
+                const handleCancel = () => {
+                    overlay.classList.remove('active');
+                    resolve(null);
+                };
+                okBtn.onclick = handleOk;
+                cancelBtn.onclick = handleCancel;
+            });
+        }
+
+        // 1. LẮNG NGHE VÀ TẢI THÔNG BÁO REALTIME TỪ FIREBASE[span_0](start_span)[span_0](end_span)
         onValue(notifyRef, (snapshot) => {
             const list = document.getElementById('notifyList');
             const data = snapshot.val();
@@ -180,7 +287,7 @@
                 return;
             }
 
-            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu[span_2](start_span)[span_2](end_span)
+            // Chuyển Object dữ liệu Firebase thành Mảng và đảo ngược để bài mới nhất nằm lên đầu
             const items = Object.keys(data).map(key => ({
                 id: key,
                 ...data[key]
@@ -194,7 +301,7 @@
                 </div>
             `).join('');
 
-            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin[span_3](start_span)[span_3](end_span)
+            // Gán sự kiện xóa bài cho nút xóa trong giao diện Admin
             document.querySelectorAll('.btn-delete-item').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = e.target.getAttribute('data-id');
@@ -203,10 +310,10 @@
             });
         });
 
-        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE[span_4](start_span)[span_4](end_span)
+        // 2. ĐĂNG BÀI MỚI LÊN FIREBASE
         document.getElementById('btnPost').addEventListener('click', async () => {
             const text = document.getElementById('notifyInput').value.trim();
-            if (!text) return alert("Vui lòng nhập nội dung!");
+            if (!text) return showEmbedAlert("Vui lòng nhập nội dung!");
 
             const now = new Date();
             const timeString = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} lúc ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -218,38 +325,39 @@
                     createdAt: Date.now()
                 });
                 document.getElementById('notifyInput').value = "";
-                alert("🎉 Đã đăng thông báo lên Firebase thành công!");
+                await showEmbedAlert("🎉 Đã đăng thông báo lên Firebase thành công!");
             } catch (error) {
-                alert("❌ Lỗi: " + error.message);
+                await showEmbedAlert("❌ Lỗi: " + error.message);
             }
         });
 
-        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE[span_5](start_span)[span_5](end_span)
+        // 3. XÓA BÀI ĐĂNG TỪ FIREBASE
         async function deleteNotification(id) {
-            if(confirm("Bạn có chắc chắn muốn xóa thông báo này không?")) {
+            const confirmed = await showEmbedConfirm("Bạn có chắc chắn muốn xóa thông báo này không?");
+            if (confirmed) {
                 try {
                     await remove(ref(db, 'notifications/' + id));
                 } catch (error) {
-                    alert("❌ Lỗi khi xóa: " + error.message);
+                    await showEmbedAlert("❌ Lỗi khi xóa: " + error.message);
                 }
             }
         }
 
-        // 4. KÍCH HOẠT QUYỀN ADMIN[span_6](start_span)[span_6](end_span)
-        document.getElementById('adminTrigger').addEventListener('click', () => {
-            let pass = prompt("QUYỀN QUẢN TRỊ\nNhập mật mã để kích hoạt tính năng đăng bài:");
+        // 4. KÍCH HOẠT QUYỀN ADMIN
+        document.getElementById('adminTrigger').addEventListener('click', async () => {
+            let pass = await showEmbedPrompt("Nhập mật mã để kích hoạt tính năng đăng bài:");
             if (pass === ADMIN_KEY) {
                 isAdminMode = true;
                 document.getElementById('adminPanel').style.display = "block";
-                // Hiện nút xóa bài[span_7](start_span)[span_7](end_span)
+                // Hiện nút xóa bài
                 document.querySelectorAll('.btn-delete-item').forEach(btn => btn.style.display = 'block');
-                alert("Xác thực Admin thành công! Bạn có thể ĐĂNG hoặc XÓA thông báo.");
+                await showEmbedAlert("Xác thực Admin thành công! Bạn có thể ĐĂNG hoặc XÓA thông báo.");
             } else if (pass !== null) {
-                alert("Mật mã không chính xác!");
+                await showEmbedAlert("Mật mã không chính xác!");
             }
         });
 
-        // Đóng khung Admin[span_8](start_span)[span_8](end_span)
+        // Đóng khung Admin
         document.getElementById('btnCancel').addEventListener('click', () => {
             document.getElementById('adminPanel').style.display = "none";
         });
