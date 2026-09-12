@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" style="background-color: #ffb3b3;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffb3b3">
     <title>Dự Đoán Tình Yêu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-        /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT ĐỒNG BỘ HỆ THỐNG */
-        body {
-            background-color: #ffb3b3;
+        html, body {
+            background-color: #ffb3b3 !important;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -19,7 +21,6 @@
             color: white;
         }
 
-        /* NÚT HOME PHONG CÁCH NEON ĐỎ */
         .btn-back {
             align-self: flex-start;
             text-decoration: none;
@@ -41,7 +42,6 @@
             transform: translateX(-3px);
         }
 
-        /* KHUNG CHÍNH NỀN TỐI + VIỀN CẦU VỒNG LED CHẠY */
         .main-card {
             position: relative;
             background: #111827;
@@ -54,7 +54,6 @@
             margin-bottom: 25px;
         }
 
-        /* HIỆU ỨNG LED RGB CHẠY QUANH KHUNG CHÍNH */
         .main-card::before, .history-box::before {
             content: '';
             position: absolute;
@@ -65,6 +64,8 @@
             filter: blur(8px);
             border-radius: 27px;
             animation: steam 20s linear infinite;
+            will-change: transform, background-position;
+            transform: translateZ(0);
         }
 
         @keyframes steam {
@@ -73,7 +74,6 @@
             100% { background-position: 0 0; }
         }
 
-        /* TIÊU ĐỀ ĐỔI MÀU GRADIENT CẦU VỒNG */
         .card-title {
             margin: 0; 
             font-size: 22px; 
@@ -84,7 +84,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* KHUNG NHẬP LIỆU TỐI NEON XINH HƠN */
         .input-pair {
             display: flex;
             justify-content: center;
@@ -101,8 +100,8 @@
             box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
         }
 
-        input[type="number"] {
-            width: 60px;
+        input[type="number"], input[type="password"] {
+            width: 100%;
             border: none;
             outline: none;
             text-align: center;
@@ -114,7 +113,6 @@
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* NÚT KIỂM TRA PHÁT SÁNG CẦU VỒNG */
         button.btn-main {
             background: linear-gradient(45deg, #ff0055, #7a00ff);
             color: white;
@@ -135,7 +133,6 @@
             box-shadow: 0 6px 20px rgba(0, 255, 213, 0.6);
         }
 
-        /* KHUNG LỊCH SỬ CÓ VIỀN LED */
         .history-box {
             position: relative;
             width: 100%;
@@ -200,13 +197,62 @@
         }
         .item-info strong { color: #fffb00; }
 
-        /* SỐ PHẦN TRĂM KẾT QUẢ PHÁT SÁNG NEON */
         #result { 
             font-size: 38px; 
             margin: 15px 0; 
             font-weight: 700; 
             color: #00ffd5; 
             text-shadow: 0 0 15px rgba(0, 255, 213, 0.6); 
+        }
+
+        /* KHUNG THÔNG BÁO TỰ ĐỘNG THAY THẾ ALERT & PROMPT */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-card {
+            background: #1f2937;
+            border: 1px solid #00ffd5;
+            padding: 20px;
+            border-radius: 18px;
+            width: 85%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 213, 0.3);
+        }
+
+        .modal-card p {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #eee;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-modal.btn-secondary {
+            background: #4b5563;
         }
     </style>
 </head>
@@ -236,9 +282,22 @@
     <div class="history-box">
         <div class="history-header">
             <span>DANH SÁCH LỊCH SỬ</span>
-            <span class="btn-delete-selected" onclick="deleteSelected()">Xóa lịch sử</span>
+            <span class="btn-delete-selected" onclick="openDeleteModal()">Xóa lịch sử</span>
         </div>
         <ul class="history-list" id="historyList"></ul>
+    </div>
+
+    <!-- CỬA SỔ THÔNG BÁO TỰ TẠO (KHÔNG DÙNG ALERT/PROMPT) -->
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-card">
+            <p id="modalText">Thông báo</p>
+            <div id="passwordContainer" class="input-pair" style="display: none; margin-bottom: 15px;">
+                <input type="password" id="adminPassInput" placeholder="Nhập mật mã Admin">
+            </div>
+            <div class="modal-buttons" id="modalButtons">
+                <button class="btn-modal" onclick="closeModal()">Đóng</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -246,20 +305,29 @@
 
         window.onload = loadHistory;
 
+        function showCustomAlert(msg) {
+            document.getElementById('modalText').innerText = msg;
+            document.getElementById('passwordContainer').style.display = 'none';
+            document.getElementById('modalButtons').innerHTML = `<button class="btn-modal" onclick="closeModal()">Đóng</button>`;
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
         function calculate() {
             const d1 = document.getElementById('d1').value;
             const m1 = document.getElementById('m1').value;
             const d2 = document.getElementById('d2').value;
             const m2 = document.getElementById('m2').value;
 
-            if (!d1 || !m1 || !d2 || !m2) return alert("Vui lòng điền đầy đủ thông tin ngày tháng!");
+            if (!d1 || !m1 || !d2 || !m2) return showCustomAlert("Vui lòng điền đầy đủ thông tin ngày tháng!");
             
             if (d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31 || m1 < 1 || m1 > 12 || m2 < 1 || m2 > 12) {
-                return alert("Ngày hoặc tháng nhập vào không hợp lệ!");
+                return showCustomAlert("Ngày hoặc tháng nhập vào không hợp lệ!");
             }
 
-            // THUẬT TOÁN MỚI ĐÃ TỐI ƯU: Sử dụng trọng số toán học đối xứng (hoán đổi vị trí 2 người vẫn giữ nguyên kết quả) 
-            // và phân bổ kết quả dao động mượt mà từ 50% đến 100%.
             const val1 = parseInt(d1) * 31 + parseInt(m1);
             const val2 = parseInt(d2) * 31 + parseInt(m2);
             
@@ -273,7 +341,7 @@
             document.getElementById('result').innerText = score + "%";
 
             let history = JSON.parse(localStorage.getItem('love_v4')) || [];
-            let infoKey = `${d1}/${m1} & ${d2}/${m2}`;
+            let infoKey = `${d1}/${m1} - ${d2}/${m2}`;
 
             let existingIndex = history.findIndex(item => item.info === infoKey);
             if (existingIndex !== -1) { history.splice(existingIndex, 1); }
@@ -286,6 +354,15 @@
         function loadHistory() {
             const list = document.getElementById('historyList');
             let history = JSON.parse(localStorage.getItem('love_v4')) || [];
+            
+            history = history.map(item => {
+                if (item.info.includes('&')) {
+                    item.info = item.info.replace('&', '-');
+                }
+                return item;
+            });
+            localStorage.setItem('love_v4', JSON.stringify(history));
+
             list.innerHTML = history.map(item => `
                 <li class="history-item">
                     <input type="checkbox" class="del-check" data-id="${item.id}">
@@ -297,20 +374,33 @@
             `).join('');
         }
 
-        function deleteSelected() {
+        function openDeleteModal() {
             const checkboxes = document.querySelectorAll('.del-check:checked');
-            if (checkboxes.length === 0) return alert("Vui lòng tích chọn mục cần xóa trong danh sách!");
+            if (checkboxes.length === 0) return showCustomAlert("Vui lòng tích chọn mục cần xóa trong danh sách!");
 
-            let pass = prompt("HỆ THỐNG BẢO MẬT\nNhập mật mã Admin để xác nhận xóa:");
+            document.getElementById('modalText').innerText = "XÁC NHẬN ADMIN\nNhập mật mã Quản trị viên để xóa:";
+            document.getElementById('adminPassInput').value = "";
+            document.getElementById('passwordContainer').style.display = 'flex';
+            document.getElementById('modalButtons').innerHTML = `
+                <button class="btn-modal btn-secondary" onclick="closeModal()">Hủy</button>
+                <button class="btn-modal" onclick="confirmDelete()">Xác nhận</button>
+            `;
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        function confirmDelete() {
+            const pass = document.getElementById('adminPassInput').value;
             if (pass === ADMIN_KEY) {
+                const checkboxes = document.querySelectorAll('.del-check:checked');
                 let history = JSON.parse(localStorage.getItem('love_v4')) || [];
                 const idsToDelete = Array.from(checkboxes).map(cb => parseInt(cb.getAttribute('data-id')));
                 let newHistory = history.filter(item => !idsToDelete.includes(item.id));
                 localStorage.setItem('love_v4', JSON.stringify(newHistory));
                 loadHistory();
-                alert("Hệ thống đã xóa dữ liệu thành công.");
-            } else if (pass !== null) {
-                alert("Mật mã quản trị không chính xác!");
+                closeModal();
+                showCustomAlert("Hệ thống đã xóa dữ liệu thành công.");
+            } else {
+                showCustomAlert("Mật mã quản trị không chính xác!");
             }
         }
     </script>
