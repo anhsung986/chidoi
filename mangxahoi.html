@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mạng Xã Hội</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+        font-family: var(--app-font-family, 'Poppins', sans-serif);
+    }
+
+    body {
+        background-color: #ffb3b3;
+        min-height: 100vh;
+        display: flex; justify-content: center; align-items: flex-start;
+        overflow-x: hidden;
+        padding: 20px 15px;
+    }
+
+    /* --- MENU BTN --- */
+    .menu-btn {
+        position: fixed; top: 25px; left: 25px;
+        width: 45px; height: 45px;
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px; cursor: pointer;
+        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+        z-index: 100; transition: 0.3s;
+        backdrop-filter: blur(5px);
+    }
+    .menu-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .menu-btn span {
+        display: block; width: 22px; height: 3px;
+        background: white; border-radius: 2px; transition: 0.3s;
+    }
+    .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-btn.active span:nth-child(2) { opacity: 0; }
+    .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* --- SIDEBAR CHUẨN MẠNG XÃ HỘI --- */
+    .sidebar {
+        position: fixed;
+        top: 20px;
+        left: -300px;
+        width: 250px;
+        height: auto !important;
+        background: #111827;
+        border-radius: 12px;
+        padding: 15px;
+        padding-top: 80px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 99;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar.active { left: 20px; }
+
+    .sidebar a {
+        display: block; padding: 12px 20px;
+        color: #eee; text-decoration: none;
+        font-weight: 500; font-size: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
+        border-radius: 6px;
+    }
+    .sidebar a:hover {
+        background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
+        color: white; padding-left: 25px;
+    }
+
+    .overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+        display: none; z-index: 98;
+    }
+    .overlay.active { display: block; }
+
+    /* --- MAIN CONTAINER --- */
+    .container {
+        position: relative;
+        width: 100%; max-width: 480px;
+        background: #111827;
+        border-radius: 28px; padding: 25px 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        color: white;
+        margin-top: 10px;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: -3px; left: -3px; right: -3px; bottom: -3px;
+        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+        background-size: 400%;
+        z-index: -1;
+        filter: blur(8px);
+        border-radius: 31px;
+        animation: steam 20s linear infinite;
+    }
+
+    @keyframes steam {
+        0% { background-position: 0 0; }
+        50% { background-position: 400% 0; }
+        100% { background-position: 0 0; }
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .title { 
+        font-size: 24px; 
+        font-weight: 600; 
+        letter-spacing: 2px;
+        background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .welcome-text { font-size: 13px; color: rgba(255, 255, 255, 0.7); }
+    .welcome-text span { color: var(--app-primary-color, #00ffd5); font-weight: 600; }
+
+    /* --- NƠI ĐĂNG BÀI VIẾT --- */
+    .create-post {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .create-post textarea {
+        width: 100%;
+        height: 80px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 12px;
+        color: white;
+        resize: none;
+        outline: none;
+        font-size: 14px;
+    }
+    .create-post textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .post-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    .post-btn {
+        background: var(--app-primary-color, #00ffd5);
+        color: #111827;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .post-btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+    /* --- NGUỒN BÀI VIẾT (FEED) --- */
+    .post-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: 0.3s;
+    }
+    .post-card:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff0055, #00ffd5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .user-info { display: flex; flex-direction: column; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .time { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+    .post-content {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #e5e7eb;
+        margin-bottom: 12px;
+        white-space: pre-line;
+    }
+    .post-footer {
+        display: flex;
+        justify-content: space-around;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 10px;
+    }
+    .action-item {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+    .action-item:hover, .action-item.liked {
+        color: var(--app-primary-color, #00ffd5);
+    }
+
+    .logout-btn {
+        width: 100%; padding: 12px;
+        border: 2px solid #ff3b30; border-radius: 14px;
+        background: transparent; color: #ff3b30;
+        font-size: 14px; font-weight: 600;
+        cursor: pointer; transition: 0.3s;
+        margin-top: 10px;
+    }
+    .logout-btn:hover {
+        background: #ff3b30; color: white;
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
+    }
+
+    /* --- TOAST & CUSTOM MODAL --- */
+    #custom-toast {
+        position: fixed;
+        bottom: -120px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 20, 30, 0.95);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        padding: 16px 24px;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 9999;
+        width: 90%;
+        max-width: 380px;
+        text-align: center;
+    }
+    #custom-toast.show { bottom: 30px; }
+    .toast-actions { display: flex; gap: 10px; justify-content: center; }
+    .toast-btn {
+        padding: 8px 20px; border-radius: 8px; border: none;
+        font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s;
+    }
+    .toast-btn.confirm { background: #ff3b30; color: white; }
+    .toast-btn.confirm:hover { background: #e02e25; }
+    .toast-btn.cancel { background: rgba(255,255,255,0.1); color: white; }
+    .toast-btn.cancel:hover { background: rgba(255,255,255,0.2); }
+    .toast-btn.ok { background: var(--app-primary-color, #00ffd5); color: #111827; }
+</style>
+</head>
+<body>
+
+    <script>
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.addEventListener("DOMContentLoaded", () => {
+                showCustomToast("Bạn cần phải đăng nhập trước!", "alert", () => {
+                    window.location.href = "login.html";
+                });
+            });
+        }
+    </script>
+
+    <!-- Nút Menu -->
+    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Thanh Sidebar thuần MXH -->
+    <div class="sidebar" id="mySidebar">
+        <a href="home.html">🏠 Trang chủ</a>
+        <a href="canhan.html">👤 Trang cá nhân</a>
+        <a href="thongbao.html">🔔 Thông báo</a>
+        <a href="caidat.html">⚙️ Cài đặt</a>
+        <a href="auth.html" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Đăng xuất</a>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="title">BẢNG TIN</div>
+            <div class="welcome-text">Xin chào, <span id="userDisplay">...</span> ✨</div>
+        </div>
+
+        <!-- Khung đăng bài -->
+        <div class="create-post">
+            <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
+            <div class="post-actions">
+                <button class="post-btn" onclick="addPost()">Đăng bài</button>
+            </div>
+        </div>
+
+        <!-- Danh sách bài viết -->
+        <div id="newsFeed">
+            <!-- Bài viết mẫu -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar">H</div>
+                    <div class="user-info">
+                        <span class="name">Hệ Thống</span>
+                        <span class="time">Vừa xong</span>
+                    </div>
+                </div>
+                <div class="post-content">Chào mừng bạn đến với Mạng Xã Hội! Hãy chia sẻ suy nghĩ của bạn ngay tại đây nhé. 🎉</div>
+                <div class="post-footer">
+                    <button class="action-item" onclick="toggleLike(this)">❤️ <span>0</span> Lượt thích</button>
+                    <button class="action-item" onclick="showCustomToast('Tính năng bình luận đang phát triển!', 'alert')">💬 Bình luận</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout(event)">Đăng xuất</button>
+    </div>
+
+    <!-- Hộp thông báo tùy chỉnh -->
+    <div id="custom-toast">
+        <div id="toast-message">Thông báo hệ thống</div>
+        <div class="toast-actions" id="toast-actions"></div>
+    </div>
+
+    <script>
+        if (loggedInUser) {
+            document.getElementById("userDisplay").innerText = loggedInUser;
+        }
+
+        function toggleMenu() {
+            const sidebar = document.getElementById("mySidebar");
+            const overlay = document.getElementById("overlay");
+            const menuBtn = document.getElementById("menuBtn");
+            
+            sidebar.classList.toggle("active");
+            overlay.classList.toggle("active");
+            menuBtn.classList.toggle("active");
+        }
+
+        function showCustomToast(message, type, onConfirm) {
+            const toast = document.getElementById("custom-toast");
+            const msgEl = document.getElementById("toast-message");
+            const actionsEl = document.getElementById("toast-actions");
+
+            msgEl.innerText = message;
+            actionsEl.innerHTML = "";
+
+            if (type === "confirm") {
+                const btnCancel = document.createElement("button");
+                btnCancel.className = "toast-btn cancel";
+                btnCancel.innerText = "Hủy";
+                btnCancel.onclick = () => { toast.classList.remove("show"); };
+
+                const btnOk = document.createElement("button");
+                btnOk.className = "toast-btn confirm";
+                btnOk.innerText = "Xác nhận";
+                btnOk.onclick = () => {
+                    toast.classList.remove("show");
+                    if (onConfirm) onConfirm();
+                };
+
+                actionsEl.appendChild(btnCancel);
+                actionsEl.appendChild(btnOk);
+            } else {
+                const btnOk = document.createElement("button");
+                btnOk.className = "toast-btn ok";
+                btnOk.innerText = "OK";
+                btnOk.onclick = () => {
+                    toast.classList.remove("show");
+                    if (onConfirm) onConfirm();
+                };
+                actionsEl.appendChild(btnOk);
+            }
+
+            toast.classList.add("show");
+        }
+
+        function logout(e) {
+            if (e) e.preventDefault();
+            showCustomToast("Bạn có chắc chắn muốn thoát không?", "confirm", () => {
+                localStorage.removeItem("loggedInUser");
+                window.location.href = "auth.html"; 
+            });
+        }
+
+        function addPost() {
+            const input = document.getElementById("postInput");
+            const content = input.value.trim();
+
+            if (!content) {
+                showCustomToast("Vui lòng nhập nội dung bài viết!", "alert");
+                return;
+            }
+
+            const username = loggedInUser || "Người dùng";
+            const firstLetter = username.charAt(0).toUpperCase();
+
+            const feed = document.getElementById("newsFeed");
+            const postHTML = `
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="avatar">${firstLetter}</div>
+                        <div class="user-info">
+                            <span class="name">${username}</span>
+                            <span class="time">Vừa xong</span>
+                        </div>
+                    </div>
+                    <div class="post-content">${escapeHTML(content)}</div>
+                    <div class="post-footer">
+                        <button class="action-item" onclick="toggleLike(this)">❤️ <span>0</span> Lượt thích</button>
+                        <button class="action-item" onclick="showCustomToast('Tính năng bình luận đang phát triển!', 'alert')">💬 Bình luận</button>
+                    </div>
+                </div>
+            `;
+
+            feed.insertAdjacentHTML("afterbegin", postHTML);
+            input.value = "";
+            showCustomToast("Đã đăng bài viết thành công!", "alert");
+        }
+
+        function toggleLike(btn) {
+            const countSpan = btn.querySelector("span");
+            let count = parseInt(countSpan.innerText);
+            
+            if (btn.classList.contains("liked")) {
+                btn.classList.remove("liked");
+                countSpan.innerText = count - 1;
+            } else {
+                btn.classList.add("liked");
+                countSpan.innerText = count + 1;
+            }
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
