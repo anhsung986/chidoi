@@ -166,7 +166,7 @@ jobs:
           path: output/ChiDoi.apk
 
   # ==========================================
-  # JOB 3: PUBLISH TO BEAUTIFIED SINGLE RELEASE
+  # JOB 3: PUBLISH BOTH FILES TO 1 RELEASE
   # ==========================================
   publish-release:
     name: Create Combined Release
