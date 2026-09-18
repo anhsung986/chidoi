@@ -49,32 +49,60 @@
     }
     .submit-btn:hover { background: #00e0bc; }
 
-    /* Danh Sách Link */
+    /* Embed Card Style */
     .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #e5e7eb; }
-    .social-item {
-        background: rgba(255, 255, 255, 0.05); border-radius: 14px;
-        padding: 12px 15px; margin-bottom: 10px; display: flex;
-        align-items: center; justify-content: space-between;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+    .embed-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px; padding: 14px; margin-bottom: 12px; position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, border-color 0.2s;
     }
-    .social-info { display: flex; align-items: center; gap: 12px; width: 80%; }
-    .platform-icon { font-size: 24px; }
-    .details { overflow: hidden; }
-    .user-name { font-size: 13px; font-weight: 600; color: #00ffd5; }
-    .platform-name { font-size: 11px; color: #888; }
-    .social-link {
-        display: block; font-size: 12px; color: #38bdf8; text-decoration: none;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;
-    }
-    .social-link:hover { text-decoration: underline; }
+    .embed-card:hover { transform: translateY(-2px); border-color: rgba(0, 255, 213, 0.4); }
+    
+    .embed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .embed-owner { font-size: 13px; font-weight: 600; color: #00ffd5; display: flex; align-items: center; gap: 6px; }
+    .embed-platform { font-size: 11px; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 20px; color: #ccc; }
 
-    .delete-btn {
+    .embed-body {
+        background: rgba(0, 0, 0, 0.25); border-radius: 10px; padding: 10px 12px;
+        display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .embed-icon { font-size: 26px; }
+    .embed-details { flex: 1; overflow: hidden; }
+    .embed-title { font-size: 13px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .embed-url { font-size: 11px; color: #38bdf8; text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    .embed-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .open-link-btn {
+        background: #00ffd5; color: #111827; text-decoration: none; font-size: 12px;
+        font-weight: 600; padding: 6px 14px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .delete-embed-btn {
         background: rgba(255, 59, 48, 0.15); color: #ff3b30; border: none;
-        width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
-        font-size: 14px; display: flex; align-items: center; justify-content: center;
+        padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500;
         transition: 0.2s;
     }
-    .delete-btn:hover { background: #ff3b30; color: white; }
+    .delete-embed-btn:hover { background: #ff3b30; color: white; }
+
+    /* Modal Xóa Embed Tùy Chỉnh */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.7); display: none; justify-content: center;
+        align-items: center; z-index: 1000; backdrop-filter: blur(6px);
+    }
+    .modal-box {
+        background: #1f2937; border-radius: 20px; padding: 22px; width: 85%;
+        max-width: 360px; text-align: center; border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; color: #fff; }
+    .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 12px; line-height: 1.4; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+    .modal-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .btn-cancel { background: #374151; color: white; }
+    .btn-cancel:hover { background: #4b5563; }
+    .btn-confirm { background: #ff3b30; color: white; }
+    .btn-confirm:hover { background: #e02d22; }
 </style>
 </head>
 <body>
@@ -105,12 +133,29 @@
                 <label>Đường Dẫn (URL)</label>
                 <input type="url" id="linkInput" class="custom-input" placeholder="https://facebook.com/ten-tai-khoan">
             </div>
+            <div class="input-group">
+                <label>Mật Khẩu Bảo Vệ (Tùy chọn)</label>
+                <input type="password" id="linkPassword" class="custom-input" placeholder="🔑 Mật khẩu dùng để xóa sau này">
+            </div>
             <button class="submit-btn" id="addLinkBtn">Chia Sẻ Link</button>
         </div>
 
-        <!-- Danh Sách MXH -->
-        <div class="section-title">👥 Danh Sách Liên Kết Mọi Người</div>
+        <!-- Danh Sách MXH (Embed Format) -->
+        <div class="section-title">👥 Embed Liên Kết Mọi Người</div>
         <div id="socialList">Đang tải danh sách...</div>
+    </div>
+
+    <!-- Modal Embed Xác Nhận Xóa -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <div class="modal-title">🗑️ Xác nhận xóa Embed</div>
+            <div id="deleteModalDesc" class="modal-desc">Bạn có chắc chắn muốn xóa liên kết này không?</div>
+            <input type="password" id="verifyPasswordInput" class="custom-input" placeholder="🔒 Nhập mật khẩu bài viết..." style="display: none; margin-bottom: 10px;">
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" id="cancelDeleteBtn">Hủy</button>
+                <button class="modal-btn btn-confirm" id="confirmDeleteBtn">Xóa Ngay</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -148,10 +193,11 @@
             "Khác": "🔗"
         };
 
-        // Thêm Link Mới
+        // Thêm Link Embed
         document.getElementById("addLinkBtn").onclick = async () => {
             const platform = document.getElementById("platformSelect").value;
             const url = document.getElementById("linkInput").value.trim();
+            const password = document.getElementById("linkPassword").value.trim();
 
             if (!url) return alert("Vui lòng nhập đường dẫn!");
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -163,59 +209,104 @@
                     owner: currentUsername,
                     platform: platform,
                     url: url,
+                    password: password || null,
                     createdAt: Date.now()
                 });
                 document.getElementById("linkInput").value = "";
+                document.getElementById("linkPassword").value = "";
             } catch (err) {
                 alert("Lỗi khi thêm link: " + err.message);
             }
         };
 
-        // Đồng Bộ Danh Sách Realtime
+        // Realtime Embed Sync
+        let allSocialLinks = {};
         onValue(socialRef, (snapshot) => {
             const listContainer = document.getElementById("socialList");
             listContainer.innerHTML = "";
 
             if (!snapshot.exists()) {
                 listContainer.innerHTML = "<p style='text-align:center; color:#888; font-size:13px;'>Chưa có link mạng xã hội nào được chia sẻ.</p>";
+                allSocialLinks = {};
                 return;
             }
 
-            const data = snapshot.val();
+            allSocialLinks = snapshot.val();
             const items = [];
-            for (let id in data) items.push({ id, ...data[id] });
+            for (let id in allSocialLinks) items.push({ id, ...allSocialLinks[id] });
             items.sort((a, b) => b.createdAt - a.createdAt);
 
             items.forEach((item) => {
                 const icon = platformIcons[item.platform] || "🔗";
-                const isOwner = item.owner === currentUsername;
-                const deleteBtnHTML = isOwner ? `<button class="delete-btn" onclick="deleteLink('${item.id}')">✕</button>` : "";
+                const lockBadge = item.password ? `<span title="Có mật khẩu xóa">🔒</span>` : "";
 
-                const cardHTML = `
-                    <div class="social-item">
-                        <div class="social-info">
-                            <span class="platform-icon">${icon}</span>
-                            <div class="details">
-                                <span class="user-name">${escapeHTML(item.owner)}</span>
-                                <span class="platform-name">• ${escapeHTML(item.platform)}</span>
-                                <a href="${escapeHTML(item.url)}" target="_blank" class="social-link">${escapeHTML(item.url)}</a>
+                const embedHTML = `
+                    <div class="embed-card">
+                        <div class="embed-header">
+                            <div class="embed-owner">👤 ${escapeHTML(item.owner)} ${lockBadge}</div>
+                            <div class="embed-platform">${icon} ${escapeHTML(item.platform)}</div>
+                        </div>
+                        <div class="embed-body">
+                            <span class="embed-icon">${icon}</span>
+                            <div class="embed-details">
+                                <div class="embed-title">Trang cá nhân ${escapeHTML(item.platform)}</div>
+                                <a href="${escapeHTML(item.url)}" target="_blank" class="embed-url">${escapeHTML(item.url)}</a>
                             </div>
                         </div>
-                        ${deleteBtnHTML}
+                        <div class="embed-actions">
+                            <a href="${escapeHTML(item.url)}" target="_blank" class="open-link-btn">🚀 Truy cập</a>
+                            <button class="delete-embed-btn" onclick="openDeleteModal('${item.id}')">🗑️ Xóa</button>
+                        </div>
                     </div>
                 `;
-                listContainer.insertAdjacentHTML("beforeend", cardHTML);
+                listContainer.insertAdjacentHTML("beforeend", embedHTML);
             });
         });
 
-        // Xóa Link (chỉ dành cho chủ sở hữu)
-        window.deleteLink = async (id) => {
-            if (confirm("Bạn có muốn xóa liên kết này không?")) {
-                try {
-                    await remove(ref(db, "social_links/" + id));
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
+        // Quản lý Modal Xóa Embed Tùy Chỉnh
+        let deleteTargetId = null;
+
+        window.openDeleteModal = (id) => {
+            deleteTargetId = id;
+            const target = allSocialLinks[id];
+            const passInput = document.getElementById("verifyPasswordInput");
+            const desc = document.getElementById("deleteModalDesc");
+
+            passInput.value = "";
+            if (target && target.password) {
+                desc.innerText = "Liên kết này có mật khẩu bảo vệ. Vui lòng nhập đúng mật khẩu để xóa:";
+                passInput.style.display = "block";
+            } else {
+                desc.innerText = "Bạn có chắc chắn muốn xóa thẻ liên kết này khỏi danh sách không?";
+                passInput.style.display = "none";
+            }
+
+            document.getElementById("deleteModal").style.display = "flex";
+        };
+
+        document.getElementById("cancelDeleteBtn").onclick = () => {
+            deleteTargetId = null;
+            document.getElementById("deleteModal").style.display = "none";
+        };
+
+        document.getElementById("confirmDeleteBtn").onclick = async () => {
+            if (!deleteTargetId) return;
+
+            const target = allSocialLinks[deleteTargetId];
+            if (target && target.password) {
+                const inputPass = document.getElementById("verifyPasswordInput").value.trim();
+                if (inputPass !== target.password) {
+                    alert("Mật khẩu không đúng!");
+                    return;
                 }
+            }
+
+            try {
+                await remove(ref(db, "social_links/" + deleteTargetId));
+                deleteTargetId = null;
+                document.getElementById("deleteModal").style.display = "none";
+            } catch (err) {
+                alert("Lỗi khi xóa: " + err.message);
             }
         };
 
