@@ -19,7 +19,6 @@
     .header { text-align: center; margin-bottom: 20px; }
     .title { font-size: 24px; font-weight: 600; color: #00ffd5; }
 
-    /* Khung nhập tên & nội dung */
     .create-post { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 15px; margin-bottom: 20px; }
     .create-post input {
         width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3);
@@ -36,7 +35,6 @@
         border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 10px; float: right;
     }
 
-    /* Bài viết */
     .post-card {
         background: rgba(255, 255, 255, 0.05); border-radius: 16px;
         padding: 15px; margin-bottom: 15px; position: relative; clear: both;
@@ -55,76 +53,83 @@
             <div class="title">BẢNG TIN FIREBASE</div>
         </div>
 
-        <!-- Khung Đăng Bài (Không cần Đăng Nhập) -->
         <div class="create-post">
-            <input type="text" id="userInput" placeholder="Tên của bạn (Mặc định: Bắt danh)...">
+            <input type="text" id="userInput" placeholder="Nhập tên của bạn...">
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
             <button class="post-btn" id="postBtn">Đăng bài</button>
             <div style="clear:both;"></div>
         </div>
 
-        <!-- Danh sách bài viết -->
-        <div id="newsFeed">Đang tải dữ liệu từ Firebase...</div>
+        <div id="newsFeed">Đang tải dữ liệu...</div>
     </div>
 
-    <!-- FIREBASE NO-AUTH MODULE -->
+    <!-- FIREBASE REALTIME DATABASE MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+            getDatabase, ref, push, onValue, remove 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC2qJM8rMWEwCY5aAUJ-EgWc-GFleckSUI",
             authDomain: "mangxahoi-3620c.firebaseapp.com",
+            databaseURL: "https://mangxahoi-3620c-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "mangxahoi-3620c",
             storageBucket: "mangxahoi-3620c.firebasestorage.app",
             messagingSenderId: "794417692508",
-            appId: "1:794417692508:web:f439e61c151c33415c4b99"
+            appId: "1:794417692508:web:00a3b6c0a788fe095c4b99",
+            measurementId: "G-GXWXX2NQZR"
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const postsRef = collection(db, "posts");
+        const db = getDatabase(app);
+        const postsRef = ref(db, "posts");
 
-        // ĐĂNG BÀI VIẾT LÊN FIREBASE
+        // ĐĂNG BÀI VIẾT
         document.getElementById("postBtn").onclick = async () => {
             const username = document.getElementById("userInput").value.trim() || "Ẩn danh";
             const content = document.getElementById("postInput").value.trim();
 
-            if (!content) return alert("Vui lòng nhập nội dung bài viết!");
+            if (!content) return alert("Vui lòng nhập nội dung!");
 
             try {
-                await addDoc(postsRef, {
+                await push(postsRef, {
                     author: username,
                     content: content,
                     createdAt: Date.now()
                 });
                 document.getElementById("postInput").value = "";
             } catch (err) {
-                alert("Lỗi không lưu được bài viết: " + err.message);
+                alert("Lỗi lưu bài viết: " + err.message);
             }
         };
 
-        // HIỂN THỊ BÀI VIẾT REAL-TIME
-        const q = query(postsRef, orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
+        // HIỂN THỊ DỮ LIỆU REALTIME
+        onValue(postsRef, (snapshot) => {
             const feed = document.getElementById("newsFeed");
             feed.innerHTML = "";
 
-            if (snapshot.empty) {
+            if (!snapshot.exists()) {
                 feed.innerHTML = "<p style='text-align:center;'>Chưa có bài viết nào.</p>";
                 return;
             }
 
-            snapshot.forEach((docSnap) => {
-                const post = docSnap.data();
-                const id = docSnap.id;
+            const postsData = snapshot.val();
+            const postsList = [];
+
+            for (let id in postsData) {
+                postsList.push({ id, ...postsData[id] });
+            }
+
+            // Sắp xếp bài viết mới nhất lên đầu
+            postsList.sort((a, b) => b.createdAt - a.createdAt);
+
+            postsList.forEach((post) => {
                 const timeStr = new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                 const postHTML = `
                     <div class="post-card">
-                        <button class="delete-btn" onclick="deletePost('${id}')">✕</button>
+                        <button class="delete-btn" onclick="deletePost('${post.id}')">✕</button>
                         <div class="user-info">
                             <span class="name">${escapeHTML(post.author)}</span>
                             <span class="time">${timeStr}</span>
@@ -141,7 +146,7 @@
         // XÓA BÀI VIẾT
         window.deletePost = async (id) => {
             if (confirm("Xóa bài viết này?")) {
-                await deleteDoc(doc(db, "posts", id));
+                await remove(ref(db, "posts/" + id));
             }
         };
 
