@@ -23,7 +23,7 @@
     }
     .title { font-size: 22px; font-weight: 600; color: #00ffd5; }
 
-    /* POPUP MENU GIỐNG HỆT ẢNH */
+    /* POPUP MENU */
     .menu-backdrop {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
@@ -63,11 +63,16 @@
     .create-post textarea {
         width: 100%; height: 80px; background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
-        padding: 12px; color: white; resize: none; outline: none; font-size: 14px;
+        padding: 12px; color: white; resize: none; outline: none; font-size: 14px; margin-bottom: 10px;
+    }
+    .pass-input {
+        width: 100%; padding: 8px 12px; background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+        color: white; font-size: 13px; outline: none; margin-bottom: 10px;
     }
     .post-btn {
         background: #00ffd5; color: #111827; border: none; padding: 9px 20px;
-        border-radius: 10px; font-weight: 600; cursor: pointer; float: right; margin-top: 10px;
+        border-radius: 10px; font-weight: 600; cursor: pointer; float: right;
     }
 
     /* Bài viết */
@@ -80,6 +85,7 @@
     .user-info .time { font-size: 11px; color: #888; margin-left: 8px; }
     .post-content { font-size: 14px; margin: 10px 0; white-space: pre-wrap; word-break: break-word; }
     .delete-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; }
+    .lock-badge { font-size: 12px; margin-left: 5px; opacity: 0.8; }
 
     /* Modal Xóa Bài */
     .modal-overlay {
@@ -100,14 +106,14 @@
 <body>
 
     <div class="container">
-        <!-- Header có Nút Menu -->
+        <!-- Header -->
         <div class="header-bar">
             <button class="menu-toggle-btn" id="openMenuBtn">☰</button>
             <div class="title">MẠNG XÃ HỘI</div>
             <div style="width: 30px;"></div>
         </div>
 
-        <!-- LỚP LÀM MỜ VÀ POPUP MENU GIỐNG HÌNH -->
+        <!-- POPUP MENU -->
         <div class="menu-backdrop" id="menuBackdrop"></div>
         <div class="popover-menu" id="popoverMenu">
             <button class="close-btn" id="closeMenuBtn">✕</button>
@@ -122,10 +128,11 @@
             </div>
         </div>
 
-        <!-- Khung Đăng Bài (Tên tự nhận diện) -->
+        <!-- Khung Đăng Bài (Tích hợp tạo Mật khẩu) -->
         <div class="create-post">
             <div id="userDisplay" style="font-size: 13px; color: #00ffd5; margin-bottom: 8px; font-weight: 500;"></div>
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
+            <input type="password" id="postPassword" class="pass-input" placeholder="🔑 Mật khẩu bảo vệ bài viết (không bắt buộc)">
             <button class="post-btn" id="postBtn">Đăng bài</button>
             <div style="clear:both;"></div>
         </div>
@@ -134,11 +141,12 @@
         <div id="newsFeed">Đang tải dữ liệu...</div>
     </div>
 
-    <!-- Modal Xác Nhận Xóa -->
+    <!-- Modal Xác Nhận Xóa & Nhập Mật Khẩu -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
             <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">Xác nhận xóa</div>
-            <div style="font-size: 13px; color: #aaa;">Bạn có chắc chắn muốn xóa bài viết này không?</div>
+            <div id="deleteModalDesc" style="font-size: 13px; color: #aaa; margin-bottom: 10px;">Bạn có chắc chắn muốn xóa bài viết này không?</div>
+            <input type="password" id="verifyPasswordInput" class="pass-input" placeholder="🔒 Nhập mật khẩu bài viết để xóa..." style="display: none;">
             <div class="modal-actions">
                 <button class="modal-btn btn-cancel" id="cancelDeleteBtn">Hủy</button>
                 <button class="modal-btn btn-confirm" id="confirmDeleteBtn">Xóa</button>
@@ -166,7 +174,6 @@
         const db = getDatabase(app);
         const postsRef = ref(db, "posts");
 
-        // TỰ ĐỘNG TÌM VÀ LẤY TÊN TỪ TRANG HOME.HTML (LOCALSTORAGE)
         let currentUsername = localStorage.getItem("loggedInUser") || 
                               localStorage.getItem("username") || 
                               localStorage.getItem("user") || 
@@ -175,7 +182,7 @@
 
         document.getElementById("userDisplay").innerText = "Đăng bài với tên: " + currentUsername;
 
-        // Xử lý Popup Menu
+        // Menu Toggle
         const openMenuBtn = document.getElementById("openMenuBtn");
         const closeMenuBtn = document.getElementById("closeMenuBtn");
         const popoverMenu = document.getElementById("popoverMenu");
@@ -190,7 +197,6 @@
         closeMenuBtn.onclick = () => toggleMenu(false);
         menuBackdrop.onclick = () => toggleMenu(false);
 
-        // Thoát hệ thống -> Quay lại trang home.html
         document.getElementById("menuLogoutBtn").onclick = () => {
             localStorage.removeItem("loggedInUser");
             localStorage.removeItem("username");
@@ -198,45 +204,53 @@
             window.location.href = "home.html";
         };
 
-        // Đăng bài viết lên Firebase Realtime Database
+        // Đăng bài có lưu mật khẩu
         document.getElementById("postBtn").onclick = async () => {
             const content = document.getElementById("postInput").value.trim();
+            const password = document.getElementById("postPassword").value.trim();
+
             if (!content) return alert("Vui lòng nhập nội dung!");
 
             try {
                 await push(postsRef, {
                     author: currentUsername,
                     content: content,
+                    password: password || null,
                     createdAt: Date.now()
                 });
                 document.getElementById("postInput").value = "";
+                document.getElementById("postPassword").value = "";
             } catch (err) {
                 alert("Lỗi đăng bài: " + err.message);
             }
         };
 
-        // Lấy dữ liệu bài viết Realtime
+        // Đồng bộ dữ liệu Realtime
+        let allPosts = {};
         onValue(postsRef, (snapshot) => {
             const feed = document.getElementById("newsFeed");
             feed.innerHTML = "";
 
             if (!snapshot.exists()) {
                 feed.innerHTML = "<p style='text-align:center; color:#888;'>Chưa có bài viết nào.</p>";
+                allPosts = {};
                 return;
             }
 
-            const postsData = snapshot.val();
+            allPosts = snapshot.val();
             const postsList = [];
-            for (let id in postsData) postsList.push({ id, ...postsData[id] });
+            for (let id in allPosts) postsList.push({ id, ...allPosts[id] });
             postsList.sort((a, b) => b.createdAt - a.createdAt);
 
             postsList.forEach((post) => {
                 const timeStr = new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const lockIcon = post.password ? `<span class="lock-badge" title="Bài viết có mật khẩu">🔒</span>` : "";
+                
                 const postHTML = `
                     <div class="post-card">
                         <button class="delete-btn" onclick="openDeleteModal('${post.id}')">✕</button>
                         <div class="user-info">
-                            <span class="name">${escapeHTML(post.author)}</span>
+                            <span class="name">${escapeHTML(post.author)}</span>${lockIcon}
                             <span class="time">${timeStr}</span>
                         </div>
                         <div class="post-content">${escapeHTML(post.content)}</div>
@@ -246,10 +260,24 @@
             });
         });
 
-        // Embed Modal Xóa
+        // Quản lý Modal Xóa & Xác minh mật khẩu
         let deleteTargetId = null;
+
         window.openDeleteModal = (id) => {
             deleteTargetId = id;
+            const targetPost = allPosts[id];
+            const passInput = document.getElementById("verifyPasswordInput");
+            const desc = document.getElementById("deleteModalDesc");
+
+            passInput.value = "";
+            if (targetPost && targetPost.password) {
+                desc.innerText = "Bài viết này được bảo vệ bởi mật khẩu. Vui lòng nhập đúng mật khẩu để xóa:";
+                passInput.style.display = "block";
+            } else {
+                desc.innerText = "Bạn có chắc chắn muốn xóa bài viết này không?";
+                passInput.style.display = "none";
+            }
+
             document.getElementById("deleteModal").style.display = "flex";
         };
 
@@ -259,10 +287,23 @@
         };
 
         document.getElementById("confirmDeleteBtn").onclick = async () => {
-            if (deleteTargetId) {
+            if (!deleteTargetId) return;
+
+            const targetPost = allPosts[deleteTargetId];
+            if (targetPost && targetPost.password) {
+                const inputPass = document.getElementById("verifyPasswordInput").value.trim();
+                if (inputPass !== targetPost.password) {
+                    alert("Mật khẩu không đúng! Không thể xóa bài viết.");
+                    return;
+                }
+            }
+
+            try {
                 await remove(ref(db, "posts/" + deleteTargetId));
                 deleteTargetId = null;
                 document.getElementById("deleteModal").style.display = "none";
+            } catch (err) {
+                alert("Lỗi khi xóa bài: " + err.message);
             }
         };
 
