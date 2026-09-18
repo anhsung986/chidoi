@@ -70,6 +70,27 @@
         border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
         color: white; font-size: 13px; outline: none; margin-bottom: 10px;
     }
+    
+    /* Upload Ảnh UI */
+    .image-upload-wrapper { margin-bottom: 10px; }
+    .upload-label {
+        display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+        background: rgba(255, 255, 255, 0.08); border-radius: 10px; font-size: 13px;
+        cursor: pointer; border: 1px dashed rgba(255, 255, 255, 0.2); transition: 0.2s;
+    }
+    .upload-label:hover { background: rgba(255, 255, 255, 0.15); }
+    .image-preview-container {
+        position: relative; margin-top: 8px; display: none; width: fit-content;
+    }
+    .image-preview-container img {
+        max-width: 100%; max-height: 180px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .remove-img-btn {
+        position: absolute; top: -8px; right: -8px; background: #ff3b30; color: white;
+        border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+
     .post-btn {
         background: #00ffd5; color: #111827; border: none; padding: 9px 20px;
         border-radius: 10px; font-weight: 600; cursor: pointer; float: right;
@@ -84,6 +105,7 @@
     .user-info .name { font-weight: 600; font-size: 14px; color: #00ffd5; }
     .user-info .time { font-size: 11px; color: #888; margin-left: 8px; }
     .post-content { font-size: 14px; margin: 10px 0; white-space: pre-wrap; word-break: break-word; }
+    .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 12px; margin-top: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
     .delete-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; }
     .lock-badge { font-size: 12px; margin-left: 5px; opacity: 0.8; }
 
@@ -128,10 +150,23 @@
             </div>
         </div>
 
-        <!-- Khung Đăng Bài (Tích hợp tạo Mật khẩu) -->
+        <!-- Khung Đăng Bài (Tích hợp Chọn Ảnh & Mật khẩu) -->
         <div class="create-post">
             <div id="userDisplay" style="font-size: 13px; color: #00ffd5; margin-bottom: 8px; font-weight: 500;"></div>
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
+            
+            <!-- Phần chọn ảnh -->
+            <div class="image-upload-wrapper">
+                <label for="imageInput" class="upload-label">
+                    <span>🖼️</span> Thêm ảnh vào bài đăng
+                </label>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <div class="image-preview-container" id="previewContainer">
+                    <img id="imagePreview" src="" alt="Preview">
+                    <button class="remove-img-btn" id="removeImgBtn">✕</button>
+                </div>
+            </div>
+
             <input type="password" id="postPassword" class="pass-input" placeholder="🔑 Mật khẩu bảo vệ bài viết (không bắt buộc)">
             <button class="post-btn" id="postBtn">Đăng bài</button>
             <div style="clear:both;"></div>
@@ -204,22 +239,73 @@
             window.location.href = "home.html";
         };
 
-        // Đăng bài có lưu mật khẩu
+        // Quản lý xem trước ảnh & nén ảnh
+        let base64ImageData = null;
+        const imageInput = document.getElementById("imageInput");
+        const imagePreview = document.getElementById("imagePreview");
+        const previewContainer = document.getElementById("previewContainer");
+        const removeImgBtn = document.getElementById("removeImgBtn");
+
+        imageInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    // Nén ảnh nhỏ gọn (Max 800px)
+                    const canvas = document.createElement("canvas");
+                    const maxDim = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > maxDim) {
+                        height *= maxDim / width;
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width *= maxDim / height;
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    base64ImageData = canvas.toDataURL("image/jpeg", 0.7);
+                    imagePreview.src = base64ImageData;
+                    previewContainer.style.display = "block";
+                };
+            };
+            reader.readAsDataURL(file);
+        };
+
+        removeImgBtn.onclick = () => {
+            base64ImageData = null;
+            imageInput.value = "";
+            previewContainer.style.display = "none";
+        };
+
+        // Đăng bài viết
         document.getElementById("postBtn").onclick = async () => {
             const content = document.getElementById("postInput").value.trim();
             const password = document.getElementById("postPassword").value.trim();
 
-            if (!content) return alert("Vui lòng nhập nội dung!");
+            if (!content && !base64ImageData) return alert("Vui lòng nhập nội dung hoặc thêm ảnh!");
 
             try {
                 await push(postsRef, {
                     author: currentUsername,
                     content: content,
+                    imageUrl: base64ImageData || null,
                     password: password || null,
                     createdAt: Date.now()
                 });
                 document.getElementById("postInput").value = "";
                 document.getElementById("postPassword").value = "";
+                removeImgBtn.click();
             } catch (err) {
                 alert("Lỗi đăng bài: " + err.message);
             }
@@ -245,7 +331,8 @@
             postsList.forEach((post) => {
                 const timeStr = new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const lockIcon = post.password ? `<span class="lock-badge" title="Bài viết có mật khẩu">🔒</span>` : "";
-                
+                const imgHTML = post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" alt="Post Image">` : "";
+
                 const postHTML = `
                     <div class="post-card">
                         <button class="delete-btn" onclick="openDeleteModal('${post.id}')">✕</button>
@@ -253,7 +340,8 @@
                             <span class="name">${escapeHTML(post.author)}</span>${lockIcon}
                             <span class="time">${timeStr}</span>
                         </div>
-                        <div class="post-content">${escapeHTML(post.content)}</div>
+                        ${post.content ? `<div class="post-content">${escapeHTML(post.content)}</div>` : ''}
+                        ${imgHTML}
                     </div>
                 `;
                 feed.insertAdjacentHTML("beforeend", postHTML);
