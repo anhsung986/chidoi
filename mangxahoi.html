@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mạng Xã Hội - Firebase</title>
+<title>Bảng Tin Mạng Xã Hội</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -14,26 +14,27 @@
         width: 100%; max-width: 480px; background: #111827;
         border-radius: 28px; padding: 25px 20px; color: white;
         box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        position: relative;
     }
 
     .header { text-align: center; margin-bottom: 20px; }
     .title { font-size: 24px; font-weight: 600; color: #00ffd5; }
-    .welcome { font-size: 13px; color: #aaa; }
 
-    /* Khung nhập nội dung */
+    /* Khung nhập tên & nội dung */
     .create-post { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 15px; margin-bottom: 20px; }
+    .create-post input {
+        width: 100%; padding: 10px; background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
+        color: white; margin-bottom: 10px; font-size: 14px; outline: none;
+    }
     .create-post textarea {
         width: 100%; height: 80px; background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
         padding: 12px; color: white; resize: none; outline: none; font-size: 14px;
     }
     .post-btn {
-        background: #00ffd5; color: #111827; border: none; padding: 8px 20px;
+        background: #00ffd5; color: #111827; border: none; padding: 10px 20px;
         border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 10px; float: right;
-        transition: 0.2s;
     }
-    .post-btn:hover { opacity: 0.9; }
 
     /* Bài viết */
     .post-card {
@@ -45,14 +46,6 @@
     .user-info .time { font-size: 11px; color: #888; margin-left: 8px; }
     .post-content { font-size: 14px; margin: 10px 0; white-space: pre-wrap; word-break: break-word; }
     .delete-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; }
-
-    /* Form đăng nhập/đăng ký đơn giản */
-    .auth-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .auth-box input { padding: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; }
-    .auth-btns { display: flex; gap: 10px; }
-    .auth-btns button { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
-    .btn-login { background: #00ffd5; color: #111; }
-    .btn-logout { background: #ff3b30; color: #fff; width: 100%; padding: 10px; border: none; border-radius: 10px; margin-top: 10px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -60,118 +53,60 @@
     <div class="container">
         <div class="header">
             <div class="title">BẢNG TIN FIREBASE</div>
-            <div class="welcome" id="userDisplay">Chưa đăng nhập</div>
         </div>
 
-        <!-- Khung Đăng nhập / Đăng ký (Hiện khi chưa đăng nhập) -->
-        <div class="auth-box" id="authBox">
-            <input type="email" id="authEmail" placeholder="Email...">
-            <input type="password" id="authPassword" placeholder="Mật khẩu...">
-            <div class="auth-btns">
-                <button class="btn-login" id="btnLogin">Đăng nhập</button>
-                <button style="background: #444; color: white;" id="btnRegister">Đăng ký</button>
-            </div>
-        </div>
-
-        <!-- Khung Đăng Bài (An hiện theo trạng thái đăng nhập) -->
-        <div class="create-post" id="postBox" style="display: none;">
+        <!-- Khung Đăng Bài (Không cần Đăng Nhập) -->
+        <div class="create-post">
+            <input type="text" id="userInput" placeholder="Tên của bạn (Mặc định: Bắt danh)...">
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
             <button class="post-btn" id="postBtn">Đăng bài</button>
             <div style="clear:both;"></div>
         </div>
 
-        <!-- Danh sách bài viết từ Firebase -->
-        <div id="newsFeed">Đang kết nối cơ sở dữ liệu...</div>
-
-        <button class="btn-logout" id="btnLogout" style="display: none;">Đăng xuất</button>
+        <!-- Danh sách bài viết -->
+        <div id="newsFeed">Đang tải dữ liệu từ Firebase...</div>
     </div>
 
-    <!-- KHỞI TẠO FIREBASE MODULE -->
+    <!-- FIREBASE NO-AUTH MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
             getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Cấu hình Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC2qJM8rMWEwCY5aAUJ-EgWc-GFleckSUI",
             authDomain: "mangxahoi-3620c.firebaseapp.com",
             projectId: "mangxahoi-3620c",
             storageBucket: "mangxahoi-3620c.firebasestorage.app",
             messagingSenderId: "794417692508",
-            appId: "1:794417692508:web:f439e61c151c33415c4b99",
-            measurementId: "G-CCQXJ175CL"
+            appId: "1:794417692508:web:f439e61c151c33415c4b99"
         };
 
-        // Khởi tạo các dịch vụ
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
         const postsRef = collection(db, "posts");
 
-        let currentUser = null;
-
-        // 1. Quản lý Trạng Thái Tài Khoản
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById("userDisplay").innerText = "Xin chào: " + user.email;
-                document.getElementById("authBox").style.display = "none";
-                document.getElementById("postBox").style.display = "block";
-                document.getElementById("btnLogout").style.display = "block";
-            } else {
-                document.getElementById("userDisplay").innerText = "Bạn chưa đăng nhập";
-                document.getElementById("authBox").style.display = "flex";
-                document.getElementById("postBox").style.display = "none";
-                document.getElementById("btnLogout").style.display = "none";
-            }
-        });
-
-        // 2. Đăng ký & Đăng nhập
-        document.getElementById("btnRegister").onclick = async () => {
-            const email = document.getElementById("authEmail").value;
-            const pass = document.getElementById("authPassword").value;
-            try {
-                await createUserWithEmailAndPassword(auth, email, pass);
-                alert("Tạo tài khoản thành công!");
-            } catch (err) { alert("Lỗi tạo tài khoản: " + err.message); }
-        };
-
-        document.getElementById("btnLogin").onclick = async () => {
-            const email = document.getElementById("authEmail").value;
-            const pass = document.getElementById("authPassword").value;
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch (err) { alert("Đăng nhập thất bại: " + err.message); }
-        };
-
-        document.getElementById("btnLogout").onclick = () => signOut(auth);
-
-        // 3. Đăng và Lưu Bài Viết Lên Firestore
+        // ĐĂNG BÀI VIẾT LÊN FIREBASE
         document.getElementById("postBtn").onclick = async () => {
-            const input = document.getElementById("postInput");
-            const content = input.value.trim();
+            const username = document.getElementById("userInput").value.trim() || "Ẩn danh";
+            const content = document.getElementById("postInput").value.trim();
 
-            if (!content) return alert("Nội dung không được để trống!");
+            if (!content) return alert("Vui lòng nhập nội dung bài viết!");
 
             try {
                 await addDoc(postsRef, {
-                    author: currentUser.email,
-                    uid: currentUser.uid,
+                    author: username,
                     content: content,
                     createdAt: Date.now()
                 });
-                input.value = "";
+                document.getElementById("postInput").value = "";
             } catch (err) {
-                alert("Lỗi lưu bài viết: " + err.message);
+                alert("Lỗi không lưu được bài viết: " + err.message);
             }
         };
 
-        // 4. Đồng bộ và Hiển Thị Bài Viết Thời Gian Thực (Real-time)
+        // HIỂN THỊ BÀI VIẾT REAL-TIME
         const q = query(postsRef, orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             const feed = document.getElementById("newsFeed");
@@ -185,13 +120,11 @@
             snapshot.forEach((docSnap) => {
                 const post = docSnap.data();
                 const id = docSnap.id;
-                const isMyPost = currentUser && currentUser.uid === post.uid;
-
                 const timeStr = new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                 const postHTML = `
                     <div class="post-card">
-                        ${isMyPost ? `<button class="delete-btn" onclick="deletePost('${id}')">✕</button>` : ''}
+                        <button class="delete-btn" onclick="deletePost('${id}')">✕</button>
                         <div class="user-info">
                             <span class="name">${escapeHTML(post.author)}</span>
                             <span class="time">${timeStr}</span>
@@ -201,11 +134,13 @@
                 `;
                 feed.insertAdjacentHTML("beforeend", postHTML);
             });
+        }, (err) => {
+            document.getElementById("newsFeed").innerText = "Lỗi tải bài viết: " + err.message;
         });
 
-        // 5. Xóa Bài Viết
+        // XÓA BÀI VIẾT
         window.deletePost = async (id) => {
-            if (confirm("Bạn chắc chắn muốn xóa bài viết này?")) {
+            if (confirm("Xóa bài viết này?")) {
                 await deleteDoc(doc(db, "posts", id));
             }
         };
