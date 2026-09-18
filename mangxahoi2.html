@@ -84,7 +84,7 @@
     }
     .delete-embed-btn:hover { background: #ff3b30; color: white; }
 
-    /* Modal Xóa Embed Tùy Chỉnh */
+    /* Modal Embed Xác Nhận Xóa */
     .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.7); display: none; justify-content: center;
@@ -193,6 +193,37 @@
             "Khác": "🔗"
         };
 
+        const platformPlaceholders = {
+            "Facebook": "https://facebook.com/ten-tai-khoan",
+            "TikTok": "https://www.tiktok.com/@username",
+            "Zalo": "https://zalo.me/0901234567",
+            "Instagram": "https://instagram.com/ten-tai-khoan",
+            "YouTube": "https://youtube.com/@ten-kenh",
+            "Khác": "https://example.com"
+        };
+
+        // Đổi placeholder linh hoạt theo nền tảng được chọn
+        document.getElementById("platformSelect").onchange = (e) => {
+            const platform = e.target.value;
+            document.getElementById("linkInput").placeholder = platformPlaceholders[platform] || "https://...";
+        };
+
+        // Hàm kiểm tra URL hợp lệ theo từng nền tảng
+        function validatePlatformUrl(platform, url) {
+            const rules = {
+                "Facebook": /^https?:\/\/(www\.|m\.|web\.)?(facebook\.com|fb\.com)\/.*$/i,
+                "TikTok": /^https?:\/\/(www\.|vt\.|vm\.)?tiktok\.com\/.*$/i,
+                "Zalo": /^https?:\/\/(www\.)?zalo\.me\/.*$/i,
+                "Instagram": /^https?:\/\/(www\.)?(instagram\.com|instagr\.am)\/.*$/i,
+                "YouTube": /^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\/.*$/i
+            };
+
+            if (rules[platform]) {
+                return rules[platform].test(url);
+            }
+            return true; // Với "Khác"
+        }
+
         // Thêm Link Embed
         document.getElementById("addLinkBtn").onclick = async () => {
             const platform = document.getElementById("platformSelect").value;
@@ -202,6 +233,11 @@
             if (!url) return alert("Vui lòng nhập đường dẫn!");
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
                 return alert("Đường dẫn phải bắt đầu bằng http:// hoặc https://");
+            }
+
+            // Kiểm tra định dạng link theo từng nền tảng
+            if (!validatePlatformUrl(platform, url)) {
+                return alert(`Đường dẫn không khớp với nền tảng ${platform}!\nVí dụ đúng: ${platformPlaceholders[platform]}`);
             }
 
             try {
