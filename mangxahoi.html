@@ -17,11 +17,14 @@
     }
 
     .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .menu-toggle-btn {
+    .menu-toggle-btn, .nav-btn {
         background: rgba(255, 255, 255, 0.1); border: none; color: white;
-        padding: 8px 12px; border-radius: 12px; cursor: pointer; font-size: 18px;
+        padding: 8px 12px; border-radius: 12px; cursor: pointer; font-size: 14px;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+        transition: 0.2s;
     }
-    .title { font-size: 22px; font-weight: 600; color: #00ffd5; }
+    .nav-btn:hover { background: rgba(0, 255, 213, 0.2); color: #00ffd5; }
+    .title { font-size: 20px; font-weight: 600; color: #00ffd5; }
 
     /* POPUP MENU */
     .menu-backdrop {
@@ -128,11 +131,11 @@
 <body>
 
     <div class="container">
-        <!-- Header -->
+        <!-- Header với Nút Chuyển sang mangxahoi2 -->
         <div class="header-bar">
             <button class="menu-toggle-btn" id="openMenuBtn">☰</button>
             <div class="title">MẠNG XÃ HỘI</div>
-            <div style="width: 30px;"></div>
+            <a href="mangxahoi2.html" class="nav-btn" title="Quản lý link mạng xã hội">🔗 Quản lý MXH</a>
         </div>
 
         <!-- POPUP MENU -->
@@ -141,7 +144,7 @@
             <button class="close-btn" id="closeMenuBtn">✕</button>
             <div class="menu-list">
                 <a class="menu-item" href="home.html"><span>🏠</span> Trang Chủ</a>
-                <a class="menu-item"><span>📻</span> Mạng xã hội</a>
+                <a class="menu-item" href="mangxahoi2.html"><span>🔗</span> Quản lý MXH</a>
                 <a class="menu-item"><span>👤</span> Thông tin cá nhân</a>
                 <a class="menu-item"><span>⚙️</span> Cài đặt</a>
                 <a class="menu-item"><span>🔔</span> Thông báo</a>
@@ -150,12 +153,11 @@
             </div>
         </div>
 
-        <!-- Khung Đăng Bài (Tích hợp Chọn Ảnh & Mật khẩu) -->
+        <!-- Khung Đăng Bài -->
         <div class="create-post">
             <div id="userDisplay" style="font-size: 13px; color: #00ffd5; margin-bottom: 8px; font-weight: 500;"></div>
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
             
-            <!-- Phần chọn ảnh -->
             <div class="image-upload-wrapper">
                 <label for="imageInput" class="upload-label">
                     <span>🖼️</span> Thêm ảnh vào bài đăng
@@ -239,7 +241,7 @@
             window.location.href = "home.html";
         };
 
-        // Quản lý xem trước ảnh & nén ảnh
+        // Xem trước ảnh & nén ảnh
         let base64ImageData = null;
         const imageInput = document.getElementById("imageInput");
         const imagePreview = document.getElementById("imagePreview");
@@ -255,7 +257,6 @@
                 const img = new Image();
                 img.src = event.target.result;
                 img.onload = () => {
-                    // Nén ảnh nhỏ gọn (Max 800px)
                     const canvas = document.createElement("canvas");
                     const maxDim = 800;
                     let width = img.width;
@@ -288,7 +289,7 @@
             previewContainer.style.display = "none";
         };
 
-        // Đăng bài viết
+        // Đăng bài
         document.getElementById("postBtn").onclick = async () => {
             const content = document.getElementById("postInput").value.trim();
             const password = document.getElementById("postPassword").value.trim();
@@ -311,7 +312,7 @@
             }
         };
 
-        // Đồng bộ dữ liệu Realtime
+        // Realtime Data
         let allPosts = {};
         onValue(postsRef, (snapshot) => {
             const feed = document.getElementById("newsFeed");
@@ -348,7 +349,7 @@
             });
         });
 
-        // Quản lý Modal Xóa & Xác minh mật khẩu
+        // Modal Xóa
         let deleteTargetId = null;
 
         window.openDeleteModal = (id) => {
