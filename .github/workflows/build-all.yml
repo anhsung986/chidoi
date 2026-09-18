@@ -33,7 +33,6 @@ jobs:
       - name: Build Windows Executable
         run: npx electron-builder --win
 
-      # Lưu file .exe vào Artifacts tạm thời
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -146,7 +145,6 @@ jobs:
           mkdir -p output
           cp android/app/build/outputs/apk/debug/app-debug.apk output/Chidoi.apk
 
-      # Lưu file .apk vào Artifacts tạm thời
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -154,7 +152,7 @@ jobs:
           path: output/Chidoi.apk
 
   # ==========================================
-  # JOB 3: PUBLISH TO SINGLE RELEASE
+  # JOB 3: PUBLISH TO BEAUTIFIED SINGLE RELEASE
   # ==========================================
   publish-release:
     name: Create Combined Release
@@ -182,12 +180,25 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           name: Chi Đội v1.0.${{ github.run_number }}
           body: |
-            # 🚀 Chi Đội App - Build #${{ github.run_number }}
+            ## 🚀 Chi Đội App - Build #${{ github.run_number }}
 
-            Bản phát hành tích hợp cho cả hai nền tảng:
+            > Bản phát hành tự động hỗ trợ cả hai hệ điều hành **Windows** và **Android**.
 
-            - 💻 **Windows (.exe):** Tải file `.exe` cài đặt cho máy tính.
-            - 📱 **Android (.apk):** Tải file `Chidoi.apk` cài đặt cho điện thoại.
+            ---
+
+            ### 📦 Tệp cài đặt
+
+            | Nền tảng | Tệp cài đặt | Hướng dẫn |
+            | :--- | :--- | :--- |
+            | 💻 **Windows** | `.exe` | Tải về và mở trực tiếp để cài đặt trên máy tính |
+            | 📱 **Android** | `Chidoi.apk` | Tải về, mở tệp và cho phép cài đặt ứng dụng |
+
+            ---
+
+            ### 🌐 Thông tin thêm
+            * **Trang web:** [anhsung986.github.io/chidoi](https://anhsung986.github.io/chidoi/)
+            * **Mã nguồn:** `github.com/anhsung986/chidoi`
+            * **Trạng thái:** ✅ Stable Release
           draft: false
           prerelease: false
           overwrite: true
