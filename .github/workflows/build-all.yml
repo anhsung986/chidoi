@@ -190,14 +190,13 @@ jobs:
 
             | Nền tảng | Tệp cài đặt | Hướng dẫn |
             | :--- | :--- | :--- |
-            | 💻 **Windows** | `.exe` | Tải về và mở trực tiếp để cài đặt trên máy tính |
+            | 💻 **Windows** | `chidoi.exe` | Tải về và mở trực tiếp để cài đặt trên máy tính |
             | 📱 **Android** | `Chidoi.apk` | Tải về, mở tệp và cho phép cài đặt ứng dụng |
 
             ---
 
             ### 🌐 Thông tin thêm
-            * **Trang web:** [anhsung986.github.io/chidoi](https://anhsung986.github.io/chidoi/)
-            * **Mã nguồn:** `github.com/anhsung986/chidoi`
+            * **Trang Website:** [cd.chidoi.gt.tc](https://cd.chidoi.gt.tc/)
             * **Trạng thái:** ✅ Stable Release
           draft: false
           prerelease: false
