@@ -33,11 +33,25 @@ jobs:
       - name: Build Windows Executable
         run: npx electron-builder --win
 
+      # Đổi tên file .exe thành chidoi.exe
+      - name: Rename Windows Executable
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output
+          $exeFile = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
+          if ($exeFile) {
+            Copy-Item -Path $exeFile.FullName -Destination output/chidoi.exe
+            Write-Host "✅ Đã đổi tên file Windows thành chidoi.exe"
+          } else {
+            Write-Error "❌ Không tìm thấy file .exe trong thư mục dist"
+            exit 1
+          }
+
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: dist/*.exe
+          path: output/chidoi.exe
 
   # ==========================================
   # JOB 2: BUILD ANDROID APK
@@ -110,19 +124,19 @@ jobs:
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
-          sed -i 's|android:label="@string/app_name"|android:label="Chidoi"|g' "$MANIFEST"
+          sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
-      - name: Set App Name Chidoi
+      - name: Set App Name Chi Đội
         run: |
           STRINGS="android/app/src/main/res/values/strings.xml"
           if [ -f "$STRINGS" ]; then
-            sed -i 's|<string name="app_name">.*</string>|<string name="app_name">Chidoi</string>|g' "$STRINGS"
+            sed -i 's|<string name="app_name">.*</string>|<string name="app_name">Chi Đội</string>|g' "$STRINGS"
           else
             mkdir -p android/app/src/main/res/values
             cat > "$STRINGS" <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <string name="app_name">Chidoi</string>
+              <string name="app_name">Chi Đội</string>
           </resources>
           EOF
           fi
@@ -143,13 +157,13 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p output
-          cp android/app/build/outputs/apk/debug/app-debug.apk output/Chidoi.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk output/ChiDoi.apk
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-app
-          path: output/Chidoi.apk
+          path: output/ChiDoi.apk
 
   # ==========================================
   # JOB 3: PUBLISH TO BEAUTIFIED SINGLE RELEASE
@@ -190,8 +204,8 @@ jobs:
 
             | Nền tảng | Tệp cài đặt | Hướng dẫn |
             | :--- | :--- | :--- |
-            | 💻 **Windows** | `chidoi.exe` | Tải về và mở trực tiếp để cài đặt trên máy tính |
-            | 📱 **Android** | `Chidoi.apk` | Tải về, mở tệp và cho phép cài đặt ứng dụng |
+            | 💻 **Windows** | `chidoi.exe` | Tải về và mở trực tiếp để chạy/cài đặt trên máy tính |
+            | 📱 **Android** | `ChiDoi.apk` | Tải về, mở tệp và cho phép cài đặt ứng dụng **Chi Đội** |
 
             ---
 
