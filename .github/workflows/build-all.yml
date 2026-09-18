@@ -1,4 +1,4 @@
-name: Build ChiDoi Apps (Windows EXE & Android APK)
+name: Build ChiDoi Apps (Single Release)
 
 on:
   push:
@@ -33,27 +33,12 @@ jobs:
       - name: Build Windows Executable
         run: npx electron-builder --win
 
+      # Lưu file .exe vào Artifacts tạm thời
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ChiDoi-Windows-Executable
+          name: windows-app
           path: dist/*.exe
-
-      - name: Create GitHub Release (Windows EXE)
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        with:
-          files: dist/*.exe
-          tag_name: v1.0.${{ github.run_number }}-win
-          name: Chi Đội Windows v1.0.${{ github.run_number }}
-          body: |
-            Bản cài đặt ứng dụng Chi Đội dành cho Windows (.exe) - Build #${{ github.run_number }}.
-            Tải về và chạy trực tiếp.
-          draft: false
-          prerelease: false
-          overwrite: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ==========================================
   # JOB 2: BUILD ANDROID APK
@@ -79,15 +64,10 @@ jobs:
 
       - name: Check Chidoi Icon
         run: |
-          echo "===== Kiểm tra icon ====="
           if [ ! -f "icon.png" ]; then
             echo "❌ KHÔNG TÌM THẤY icon.png"
-            echo "Hãy đặt icon.png ở thư mục gốc repository."
             exit 1
           fi
-          file icon.png
-          ls -lh icon.png
-          echo "✅ Đã tìm thấy icon.png"
 
       - name: Prepare Web Directory
         run: |
@@ -96,8 +76,6 @@ jobs:
           cp *.css www/ 2>/dev/null || true
           cp *.js www/ 2>/dev/null || true
           cp icon.png www/icon.png
-          echo "===== Nội dung www ====="
-          ls -lah www
 
       - name: Initialize Node Project
         run: |
@@ -120,8 +98,6 @@ jobs:
             }
           }
           EOF
-          echo "===== capacitor.config.json ====="
-          cat capacitor.config.json
 
       - name: Add Android Platform
         run: |
@@ -130,19 +106,12 @@ jobs:
 
       - name: Install Chidoi Android Icon
         run: |
-          echo "===== Cài icon Chidoi ====="
           mkdir -p android/app/src/main/res/drawable
           cp icon.png android/app/src/main/res/drawable/chidoi_icon.png
-
-          echo "===== Sửa AndroidManifest.xml ====="
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chidoi"|g' "$MANIFEST"
-
-          if ! grep -q 'android:icon=' "$MANIFEST"; then
-            sed -i 's|<application|<application android:icon="@drawable/chidoi_icon"|' "$MANIFEST"
-          fi
 
       - name: Set App Name Chidoi
         run: |
@@ -166,10 +135,6 @@ jobs:
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
 
-          if [ -f "variables.gradle" ]; then
-            sed -i 's/minSdkVersion = .*/minSdkVersion = 22/' variables.gradle
-          fi
-
       - name: Build Chidoi APK
         run: |
           cd android
@@ -181,26 +146,48 @@ jobs:
           mkdir -p output
           cp android/app/build/outputs/apk/debug/app-debug.apk output/Chidoi.apk
 
-      - name: Create GitHub Release (Android APK)
+      # Lưu file .apk vào Artifacts tạm thời
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app
+          path: output/Chidoi.apk
+
+  # ==========================================
+  # JOB 3: PUBLISH TO SINGLE RELEASE
+  # ==========================================
+  publish-release:
+    name: Create Combined Release
+    needs: [build-windows, build-android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-app
+          path: release-files
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-app
+          path: release-files
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          files: output/Chidoi.apk
-          tag_name: v1.0.${{ github.run_number }}-apk
-          name: Chidoi APK v1.0.${{ github.run_number }}
+          files: release-files/*
+          tag_name: v1.0.${{ github.run_number }}
+          name: Chi Đội v1.0.${{ github.run_number }}
           body: |
-            # 📱 Chidoi APK - Build #${{ github.run_number }}
+            # 🚀 Chi Đội App - Build #${{ github.run_number }}
 
-            APK được build tự động bằng GitHub Actions.
+            Bản phát hành tích hợp cho cả hai nền tảng:
 
-            ## Thông tin
-            - 📱 App: Chidoi
-            - 🎨 Icon: icon.png
-            - 📦 Android APK
-            - 🌐 Website: https://cd.chidoi.gt.tc/
-
-            ## Cài đặt
-            Tải `Chidoi.apk` và cài đặt trên thiết bị Android.
+            - 💻 **Windows (.exe):** Tải file `.exe` cài đặt cho máy tính.
+            - 📱 **Android (.apk):** Tải file `Chidoi.apk` cài đặt cho điện thoại.
           draft: false
           prerelease: false
           overwrite: true
