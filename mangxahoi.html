@@ -7,225 +7,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-    * {
-        margin: 0; padding: 0; box-sizing: border-box;
-        font-family: var(--app-font-family, 'Poppins', sans-serif);
-    }
-
-    body {
-        background-color: #ffb3b3;
-        min-height: 100vh;
-        display: flex; justify-content: center; align-items: flex-start;
-        overflow-x: hidden;
-        padding: 20px 15px;
-    }
-
-    .menu-btn {
-        position: fixed; top: 25px; left: 25px;
-        width: 45px; height: 45px;
-        background: rgba(17, 24, 39, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px; cursor: pointer;
-        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
-        z-index: 100; transition: 0.3s;
-        backdrop-filter: blur(5px);
-    }
-    .menu-btn:hover { background: rgba(255, 255, 255, 0.2); }
-    .menu-btn span {
-        display: block; width: 22px; height: 3px;
-        background: white; border-radius: 2px; transition: 0.3s;
-    }
-    .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-    .menu-btn.active span:nth-child(2) { opacity: 0; }
-    .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-    .sidebar {
-        position: fixed; top: 20px; left: -300px;
-        width: 250px; height: auto !important;
-        background: #111827; border-radius: 12px;
-        padding: 15px; padding-top: 80px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99; border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .sidebar.active { left: 20px; }
-    .sidebar a {
-        display: block; padding: 12px 20px;
-        color: #eee; text-decoration: none;
-        font-weight: 500; font-size: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
-        border-radius: 6px;
-    }
-    .sidebar a:hover {
-        background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
-        color: white; padding-left: 25px;
-    }
-
-    .overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-        display: none; z-index: 98;
-    }
-    .overlay.active { display: block; }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background-color: #ffb3b3; min-height: 100vh; display: flex; justify-content: center; padding: 20px 15px; }
+    
     .container {
-        position: relative; width: 100%; max-width: 480px;
-        background: #111827; border-radius: 28px; padding: 25px 20px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.6); color: white; margin-top: 10px;
+        width: 100%; max-width: 480px; background: #111827;
+        border-radius: 28px; padding: 25px 20px; color: white;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     }
-    .container::before {
-        content: ''; position: absolute;
-        top: -3px; left: -3px; right: -3px; bottom: -3px;
-        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-        background-size: 400%; z-index: -1; filter: blur(8px);
-        border-radius: 31px; animation: steam 20s linear infinite;
-    }
-    @keyframes steam {
-        0% { background-position: 0 0; }
-        50% { background-position: 400% 0; }
-        100% { background-position: 0 0; }
-    }
-
     .header { text-align: center; margin-bottom: 20px; }
-    .title { 
-        font-size: 24px; font-weight: 600; letter-spacing: 2px;
-        background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .welcome-text { font-size: 13px; color: rgba(255, 255, 255, 0.7); }
-    .welcome-text span { color: var(--app-primary-color, #00ffd5); font-weight: 600; }
+    .title { font-size: 24px; font-weight: 600; color: #00ffd5; }
 
-    .create-post {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 15px; margin-bottom: 20px;
-    }
+    .create-post { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 15px; margin-bottom: 20px; }
     .create-post textarea {
-        width: 100%; height: 80px; background: rgba(0, 0, 0, 0.2);
+        width: 100%; height: 80px; background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
-        padding: 12px; color: white; resize: none; outline: none; font-size: 14px;
+        padding: 12px; color: white; resize: none; outline: none;
     }
-    .create-post textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
-    .post-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
     .post-btn {
-        background: var(--app-primary-color, #00ffd5); color: #111827;
-        border: none; padding: 8px 20px; border-radius: 10px;
-        font-weight: 600; cursor: pointer; transition: 0.3s;
+        background: #00ffd5; color: #111827; border: none; padding: 8px 20px;
+        border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 10px; float: right;
     }
-    .post-btn:hover { opacity: 0.9; transform: scale(1.02); }
 
     .post-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 15px; margin-bottom: 15px;
-        transition: 0.3s; position: relative;
+        background: rgba(255, 255, 255, 0.05); border-radius: 16px;
+        padding: 15px; margin-bottom: 15px; position: relative; clear: both;
     }
-    .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .avatar {
-        width: 40px; height: 40px; border-radius: 50%;
-        background: linear-gradient(45deg, #ff0055, #00ffd5);
-        display: flex; justify-content: center; align-items: center;
-        font-weight: bold; font-size: 16px;
-    }
-    .user-info { display: flex; flex-direction: column; }
-    .user-info .name { font-size: 14px; font-weight: 600; }
-    .user-info .time { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
-    
-    .delete-btn {
-        position: absolute; top: 15px; right: 15px;
-        background: none; border: none; color: rgba(255, 255, 255, 0.4);
-        cursor: pointer; font-size: 16px; transition: 0.2s;
-    }
-    .delete-btn:hover { color: #ff3b30; }
-
-    .post-content {
-        font-size: 14px; line-height: 1.5; color: #e5e7eb;
-        margin-bottom: 12px; white-space: pre-line;
-    }
-    .post-footer {
-        display: flex; justify-content: space-around;
-        border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 10px;
-    }
-    .action-item {
-        background: none; border: none; color: rgba(255, 255, 255, 0.7);
-        font-size: 13px; cursor: pointer; display: flex; align-items: center;
-        gap: 5px; transition: 0.2s;
-    }
-    .action-item:hover, .action-item.liked { color: var(--app-primary-color, #00ffd5); }
-
-    .logout-btn {
-        width: 100%; padding: 12px; border: 2px solid #ff3b30; border-radius: 14px;
-        background: transparent; color: #ff3b30; font-size: 14px; font-weight: 600;
-        cursor: pointer; transition: 0.3s; margin-top: 10px;
-    }
-    .logout-btn:hover { background: #ff3b30; color: white; box-shadow: 0 0 20px rgba(255, 59, 48, 0.6); }
-
-    #custom-toast {
-        position: fixed; bottom: -120px; left: 50%; transform: translateX(-50%);
-        background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(10px);
-        color: #fff; padding: 16px 24px; border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.2);
-        font-size: 14px; font-weight: 500; display: flex; flex-direction: column; gap: 12px;
-        transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 9999; width: 90%; max-width: 380px; text-align: center;
-    }
-    #custom-toast.show { bottom: 30px; }
-    .toast-actions { display: flex; gap: 10px; justify-content: center; }
-    .toast-btn {
-        padding: 8px 20px; border-radius: 8px; border: none;
-        font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s;
-    }
-    .toast-btn.confirm { background: #ff3b30; color: white; }
-    .toast-btn.cancel { background: rgba(255,255,255,0.1); color: white; }
-    .toast-btn.ok { background: var(--app-primary-color, #00ffd5); color: #111827; }
+    .user-info .name { font-weight: 600; font-size: 14px; color: #00ffd5; }
+    .post-content { font-size: 14px; margin: 10px 0; }
+    .delete-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ff3b30; cursor: pointer; }
 </style>
 </head>
 <body>
 
-    <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-    </div>
-
-    <div class="sidebar" id="mySidebar">
-        <a href="home.html">🏠 Bảng tin</a>
-        <a href="canhan.html">👤 Trang cá nhân</a>
-        <a href="thongbao.html">🔔 Thông báo</a>
-        <a href="caidat.html">⚙️ Cài đặt</a>
-        <a href="auth.html" onclick="logout(event)" style="color: #ff3b30; font-weight: 600;">🚪 Đăng xuất</a>
-    </div>
-
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
     <div class="container">
         <div class="header">
-            <div class="title">BẢNG TIN</div>
-            <div class="welcome-text">Xin chào, <span id="userDisplay">...</span> ✨</div>
+            <div class="title">BẢNG TIN FIREBASE</div>
         </div>
 
         <div class="create-post">
             <textarea id="postInput" placeholder="Bạn đang nghĩ gì thế?..."></textarea>
-            <div class="post-actions">
-                <button class="post-btn" id="postBtn">Đăng bài</button>
-            </div>
+            <button class="post-btn" id="postBtn">Đăng bài</button>
+            <div style="clear:both;"></div>
         </div>
 
-        <div id="newsFeed">
-            <p style="text-align: center; color: rgba(255,255,255,0.5);">Đang tải bài viết...</p>
-        </div>
-
-        <button class="logout-btn" onclick="logout(event)">Đăng xuất</button>
+        <div id="newsFeed">Đang tải dữ liệu...</div>
     </div>
 
-    <div id="custom-toast">
-        <div id="toast-message">Thông báo hệ thống</div>
-        <div class="toast-actions" id="toast-actions"></div>
-    </div>
-
-    <!-- SỬ DỤNG FIREBASE DẠNG MODULE TYPE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
-            getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp 
+            getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -234,176 +66,74 @@
             projectId: "mangxahoi-3620c",
             storageBucket: "mangxahoi-3620c.firebasestorage.app",
             messagingSenderId: "794417692508",
-            appId: "1:794417692508:web:f439e61c151c33415c4b99",
-            measurementId: "G-CCQXJ175CL"
+            appId: "1:794417692508:web:f439e61c151c33415c4b99"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        const loggedInUser = localStorage.getItem("loggedInUser") || "Người dùng";
-        document.getElementById("userDisplay").innerText = loggedInUser;
-
-        // Lắng nghe dữ liệu thời gian thực từ Firebase Firestore
         const postsRef = collection(db, "posts");
-        const q = query(postsRef, orderBy("createdAt", "desc"));
 
-        onSnapshot(q, (snapshot) => {
-            const feed = document.getElementById("newsFeed");
-            feed.innerHTML = "";
-
-            if (snapshot.empty) {
-                feed.innerHTML = `<p style="text-align:center; color:rgba(255,255,255,0.5);">Chưa có bài viết nào.</p>`;
-                return;
-            }
-
-            snapshot.forEach((docSnap) => {
-                const post = docSnap.data();
-                const postId = docSnap.id;
-                const firstLetter = (post.author || "A").charAt(0).toUpperCase();
-                const isMyPost = post.author === loggedInUser;
-
-                const likesArr = post.likes || [];
-                const isLiked = likesArr.includes(loggedInUser);
-
-                const postHTML = `
-                    <div class="post-card" id="post-${postId}">
-                        ${isMyPost ? `<button class="delete-btn" data-id="${postId}">✕</button>` : ''}
-                        <div class="post-header">
-                            <div class="avatar">${firstLetter}</div>
-                            <div class="user-info">
-                                <span class="name">${escapeHTML(post.author || '')}</span>
-                                <span class="time">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Vừa xong'}</span>
-                            </div>
-                        </div>
-                        <div class="post-content">${escapeHTML(post.content || '')}</div>
-                        <div class="post-footer">
-                            <button class="action-item ${isLiked ? 'liked' : ''}" data-like-id="${postId}">
-                                ❤️ <span>${likesArr.length}</span> Lượt thích
-                            </button>
-                            <button class="action-item comment-btn">💬 Bình luận</button>
-                        </div>
-                    </div>
-                `;
-                feed.insertAdjacentHTML("beforeend", postHTML);
-            });
-
-            // Gán sự kiện nút Xóa
-            document.querySelectorAll(".delete-btn").forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.target.getAttribute("data-id");
-                    showCustomToast("Bạn có chắc chắn muốn xóa bài viết này không?", "confirm", async () => {
-                        await deleteDoc(doc(db, "posts", id));
-                        showCustomToast("Đã xóa bài viết!", "alert");
-                    });
-                };
-            });
-
-            // Gán sự kiện Thích bài viết
-            document.querySelectorAll("[data-like-id]").forEach(btn => {
-                btn.onclick = async (e) => {
-                    const id = btn.getAttribute("data-like-id");
-                    const postSnap = snapshot.docs.find(d => d.id === id);
-                    if (postSnap) {
-                        let likes = postSnap.data().likes || [];
-                        if (likes.includes(loggedInUser)) {
-                            likes = likes.filter(u => u !== loggedInUser);
-                        } else {
-                            likes.push(loggedInUser);
-                        }
-                        await updateDoc(doc(db, "posts", id), { likes: likes });
-                    }
-                };
-            });
-
-            document.querySelectorAll(".comment-btn").forEach(btn => {
-                btn.onclick = () => showCustomToast("Tính năng bình luận đang phát triển!", "alert");
-            });
-        });
-
-        // Đăng bài viết lên Firebase
+        // ĐĂNG BÀI VIẾT
         document.getElementById("postBtn").onclick = async () => {
             const input = document.getElementById("postInput");
             const content = input.value.trim();
 
             if (!content) {
-                showCustomToast("Vui lòng nhập nội dung bài viết!", "alert");
+                alert("Vui lòng nhập nội dung!");
                 return;
             }
 
             try {
-                await addDoc(collection(db, "posts"), {
-                    author: loggedInUser,
+                await addDoc(postsRef, {
+                    author: localStorage.getItem("loggedInUser") || "Người dùng",
                     content: content,
-                    likes: [],
-                    createdAt: serverTimestamp()
+                    createdAt: Date.now()
                 });
                 input.value = "";
-                showCustomToast("Đã đăng và lưu bài viết lên Firebase!", "alert");
-            } catch (err) {
-                showCustomToast("Lỗi khi lưu bài viết: " + err.message, "alert");
+                alert("Đã lưu bài viết thành công!");
+            } catch (error) {
+                console.error("Lỗi Firebase:", error);
+                alert("Lỗi không lưu được: " + error.message);
             }
         };
 
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-    </script>
+        // LẤY VÀ HIỂN THỊ BÀI VIẾT TỰ ĐỘNG
+        const q = query(postsRef, orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const feed = document.getElementById("newsFeed");
+            feed.innerHTML = "";
 
-    <script>
-        function toggleMenu() {
-            document.getElementById("mySidebar").classList.toggle("active");
-            document.getElementById("overlay").classList.toggle("active");
-            document.getElementById("menuBtn").classList.toggle("active");
-        }
-
-        function showCustomToast(message, type, onConfirm) {
-            const toast = document.getElementById("custom-toast");
-            const msgEl = document.getElementById("toast-message");
-            const actionsEl = document.getElementById("toast-actions");
-
-            msgEl.innerText = message;
-            actionsEl.innerHTML = "";
-
-            if (type === "confirm") {
-                const btnCancel = document.createElement("button");
-                btnCancel.className = "toast-btn cancel";
-                btnCancel.innerText = "Hủy";
-                btnCancel.onclick = () => { toast.classList.remove("show"); };
-
-                const btnOk = document.createElement("button");
-                btnOk.className = "toast-btn confirm";
-                btnOk.innerText = "Xác nhận";
-                btnOk.onclick = () => {
-                    toast.classList.remove("show");
-                    if (onConfirm) onConfirm();
-                };
-
-                actionsEl.appendChild(btnCancel);
-                actionsEl.appendChild(btnOk);
-            } else {
-                const btnOk = document.createElement("button");
-                btnOk.className = "toast-btn ok";
-                btnOk.innerText = "OK";
-                btnOk.onclick = () => {
-                    toast.classList.remove("show");
-                    if (onConfirm) onConfirm();
-                };
-                actionsEl.appendChild(btnOk);
+            if (snapshot.empty) {
+                feed.innerHTML = "<p>Chưa có bài viết nào.</p>";
+                return;
             }
 
-            toast.classList.add("show");
-        }
+            snapshot.forEach((docSnap) => {
+                const post = docSnap.data();
+                const id = docSnap.id;
 
-        function logout(e) {
-            if (e) e.preventDefault();
-            showCustomToast("Bạn có chắc chắn muốn thoát không?", "confirm", () => {
-                localStorage.removeItem("loggedInUser");
-                window.location.href = "auth.html"; 
+                const postHTML = `
+                    <div class="post-card">
+                        <button class="delete-btn" onclick="deletePost('${id}')">✕</button>
+                        <div class="user-info">
+                            <span class="name">${post.author}</span>
+                        </div>
+                        <div class="post-content">${post.content}</div>
+                    </div>
+                `;
+                feed.insertAdjacentHTML("beforeend", postHTML);
             });
-        }
+        }, (error) => {
+            console.error("Lỗi đọc dữ liệu:", error);
+            document.getElementById("newsFeed").innerText = "Lỗi tải bài viết: " + error.message;
+        });
+
+        // XÓA BÀI VIẾT
+        window.deletePost = async (id) => {
+            if (confirm("Xóa bài viết này?")) {
+                await deleteDoc(doc(db, "posts", id));
+            }
+        };
     </script>
 </body>
 </html>
