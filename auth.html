@@ -117,7 +117,7 @@
     </script>
 </body>
 <!-- Nút bấm xin quyền thông báo trực tiếp -->
-<button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+<button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
   🔔 Bật thông báo Chi Đội
 </button>
 
@@ -131,12 +131,21 @@
     });
   });
 
-  // Hàm chạy khi người dùng bấm nút
+  // Hàm kích hoạt xin quyền an toàn khi bấm nút
   function requestPushPermission() {
-    OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.Notifications.requestPermission();
-    });
+    if (window.OneSignalDeferred) {
+      OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          await OneSignal.Notifications.requestPermission();
+        } catch (err) {
+          console.error("Lỗi xin quyền thông báo:", err);
+        }
+      });
+    } else {
+      alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
+    }
   }
 </script>
+
     
 </html>
