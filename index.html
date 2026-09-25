@@ -54,7 +54,25 @@
             height: 20px;
         }
     </style>
-</head>    
+</head> 
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+      notifyButton: {
+        enable: true, // Bắt buộc vẽ quả chuông ra màn hình
+      },
+    });
+
+    // Ép hiện bảng hỏi cấp quyền ngay lập tức
+    setTimeout(() => {
+      OneSignal.Notifications.requestPermission();
+    }, 1000);
+  });
+</script>
+    
 <body>
 
     <div class="logo">CHI ĐỘI</div>
