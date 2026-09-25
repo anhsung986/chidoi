@@ -99,9 +99,21 @@
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
       appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+      notifyButton: {
+        enable: true, // Bật biểu tượng quả chuông nhỏ ở góc màn hình
+        size: 'medium',
+        position: 'bottom-right'
+      },
+      allowLocalhostAsSecureOrigin: true
     });
+
+    // Ép trình duyệt hỏi quyền thông báo ngay khi người dùng mở web
+    if (OneSignal.Notifications) {
+      OneSignal.Notifications.requestPermission();
+    }
   });
 </script>
+
 
     
 <body>
