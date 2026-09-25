@@ -92,23 +92,6 @@
         }
     </style>
 </head>
-<!-- OneSignal Web Push SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
-      notifyButton: {
-        enable: true, // Hiện quả chuông
-        size: 'medium',
-        position: 'bottom-right'
-      },
-      allowLocalhostAsSecureOrigin: true
-    });
-  });
-</script>
-    
 <body>
 
     <div class="welcome-container">
@@ -133,4 +116,27 @@
         }
     </script>
 </body>
+<!-- Nút bấm xin quyền thông báo trực tiếp -->
+<button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  🔔 Bật thông báo Chi Đội
+</button>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+      allowLocalhostAsSecureOrigin: true
+    });
+  });
+
+  // Hàm chạy khi người dùng bấm nút
+  function requestPushPermission() {
+    OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.Notifications.requestPermission();
+    });
+  }
+</script>
+    
 </html>
