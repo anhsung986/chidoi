@@ -92,6 +92,21 @@
         }
     </style>
 </head>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+      safari_web_id: "pb.onesignal.website.id", // Nếu không dùng Safari thì bỏ qua
+      notifyButton: {
+        enable: true, // Hiển thị nút quả chuông nhỏ ở góc màn hình để đăng ký
+      },
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
+    
 <body>
 
     <div class="welcome-container">
