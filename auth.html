@@ -2,14 +2,14 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#007bff">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác Thực - Chidoi</title>
     <style>
         :root {
-            --app-primary-color: #00ffd5; /* Màu mặc định nếu chưa lưu */
+            --app-primary-color: #00ffd5;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -91,6 +91,21 @@
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
     </style>
+
+    <!-- OneSignal SDK trong Head -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+          allowLocalhostAsSecureOrigin: true,
+          notifyButton: {
+            enable: true, // Tự động bật thêm quả chuông nhỏ ở góc
+          }
+        });
+      });
+    </script>
 </head>
 <body>
 
@@ -108,44 +123,32 @@
         </div>
     </div>
 
+    <!-- Nút Bật thông báo nằm trong body -->
+    <button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
+      🔔 Bật thông báo Chi Đội
+    </button>
+
     <script>
         // Đồng bộ màu sắc từ localStorage nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
+
+        // Hàm kích hoạt xin quyền an toàn khi bấm nút
+        function requestPushPermission() {
+            if (window.OneSignalDeferred) {
+                OneSignalDeferred.push(async function(OneSignal) {
+                    try {
+                        await OneSignal.Notifications.requestPermission();
+                    } catch (err) {
+                        console.error("Lỗi xin quyền thông báo:", err);
+                    }
+                });
+            } else {
+                alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
+            }
+        }
     </script>
 </body>
-<!-- Nút bấm xin quyền thông báo trực tiếp -->
-<button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
-  🔔 Bật thông báo Chi Đội
-</button>
-
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
-      allowLocalhostAsSecureOrigin: true
-    });
-  });
-
-  // Hàm kích hoạt xin quyền an toàn khi bấm nút
-  function requestPushPermission() {
-    if (window.OneSignalDeferred) {
-      OneSignalDeferred.push(async function(OneSignal) {
-        try {
-          await OneSignal.Notifications.requestPermission();
-        } catch (err) {
-          console.error("Lỗi xin quyền thông báo:", err);
-        }
-      });
-    } else {
-      alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
-    }
-  }
-</script>
-
-    
 </html>
