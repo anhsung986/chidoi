@@ -96,7 +96,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 999;
+            z-index: 9999; /* Đẩy z-index lên cao để tránh bị che */
             padding: 12px 20px;
             color: white;
             border: none;
@@ -125,15 +125,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 99999;
+            z-index: 100000;
             opacity: 0;
             visibility: hidden;
+            pointer-events: none; /* Không chặn tương tác khi ẩn */
             transition: all 0.3s ease;
             padding: 20px;
         }
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto; /* Bật lại tương tác khi modal hiện lên */
         }
         .modal-card {
             background: #1f2937;
@@ -220,7 +222,7 @@
     </div>
 
     <!-- Nút Bật thông báo -->
-    <button id="notif-btn" onclick="handleNotificationClick()" class="btn-notification not-granted">
+    <button id="notif-btn" class="btn-notification not-granted">
       🔔 Bật thông báo Chi Đội
     </button>
 
@@ -230,7 +232,7 @@
             <div id="modal-icon" class="modal-icon">🔔</div>
             <div id="modal-title" class="modal-title">Thông Báo</div>
             <div id="modal-body" class="modal-body">Nội dung thông báo</div>
-            <button class="modal-btn" onclick="closeEmbedModal()">Đã Hiểu</button>
+            <button class="modal-btn" id="modal-close-btn">Đã Hiểu</button>
         </div>
     </div>
 
@@ -240,7 +242,7 @@
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
 
-        // HÀM HIỂN THỊ EMBED MODAL (THAY THẾ ALERT)
+        // HÀM HIỂN THỊ EMBED MODAL
         function showEmbedModal(title, text, icon = '🔔') {
             document.getElementById('modal-icon').innerText = icon;
             document.getElementById('modal-title').innerText = title;
@@ -253,7 +255,9 @@
             document.getElementById('embed-modal').classList.remove('active');
         }
 
-        // Cập nhật nút bấm
+        document.getElementById('modal-close-btn').addEventListener('click', closeEmbedModal);
+
+        // Cập nhật giao diện nút bấm
         function updateNotificationButtonUI(OneSignal) {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
@@ -269,8 +273,8 @@
             }
         }
 
-        // Xử lý khi nhấn nút
-        function handleNotificationClick() {
+        // Bắt sự kiện Click trực tiếp bằng Event Listener
+        document.getElementById('notif-btn').addEventListener('click', function() {
             if (!window.OneSignalDeferred) {
                 showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
                 return;
@@ -295,7 +299,6 @@
                         return;
                     }
 
-                    // Yêu cầu cấp quyền
                     await OneSignal.Notifications.requestPermission();
                     
                     setTimeout(() => {
@@ -311,7 +314,7 @@
                     );
                 }
             });
-        }
+        });
     </script>
 </body>
 </html>
