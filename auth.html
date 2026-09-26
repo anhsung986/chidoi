@@ -91,7 +91,7 @@
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
 
-        /* CSS Nút Thông báo */
+        /* Nút Thông báo */
         .btn-notification {
             position: fixed;
             bottom: 20px;
@@ -106,23 +106,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
-        /* Trạng thái chưa cho phép / bị chặn (Màu đỏ) */
+        /* Chưa bật/Chờ xin quyền -> ĐỎ */
         .btn-notification.not-granted {
-            background-color: #dc3545;
+            background-color: #dc3545 !important;
         }
-        .btn-notification.not-granted:hover {
-            background-color: #bd2130;
-            transform: scale(1.05);
-        }
-
-        /* Trạng thái đã cho phép (Màu xanh) */
+        /* Đã cho phép -> XANH */
         .btn-notification.granted {
-            background-color: #28a745;
-        }
-        .btn-notification.granted:hover {
-            background-color: #218838;
-            transform: scale(1.05);
+            background-color: #28a745 !important;
         }
     </style>
 
@@ -133,14 +123,17 @@
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+          // Đặt đường dẫn Service Worker tương đối để không bị lỗi 404 trên domain phụ
+          serviceWorkerPath: "OneSignalSDKWorker.js",
+          allowLocalhostAsSecureOrigin: true
         });
 
-        // Kiểm tra và đổi màu nút ngay sau khi OneSignal khởi tạo xong
-        updateNotificationButtonUI(OneSignal);
+        // Cập nhật trạng thái màu sắc ngay khi tải xong
+        checkNotificationStatus();
 
-        // Lắng nghe sự thay đổi quyền
+        // Lắng nghe sự thay đổi quyền từ trình duyệt
         OneSignal.Notifications.addEventListener("permissionChange", function() {
-            updateNotificationButtonUI(OneSignal);
+            checkNotificationStatus();
         });
       });
     </script>
@@ -162,69 +155,73 @@
     </div>
 
     <!-- Nút Bật thông báo -->
-    <button id="notif-btn" onclick="requestPushPermission()" class="btn-notification not-granted">
+    <button id="notif-btn" onclick="handleNotificationClick()" class="btn-notification not-granted">
       🔔 Bật thông báo Chi Đội
     </button>
 
     <script>
-        // Đồng bộ màu giao diện từ localStorage
+        // Lấy theme color nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
 
-        // Cập nhật giao diện & màu sắc nút theo trạng thái quyền
-        function updateNotificationButtonUI(OneSignal) {
+        // Hàm kiểm tra và cập nhật giao diện nút
+        function checkNotificationStatus() {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
 
-            const permission = OneSignal.Notifications.permission;
-
-            if (permission === "granted") {
-                btn.className = "btn-notification granted";
-                btn.innerText = "✅ Đã bật thông báo";
-            } else {
-                btn.className = "btn-notification not-granted";
-                btn.innerText = "🔔 Bật thông báo Chi Đội";
+            // Kiểm tra quyền Push mặc định của trình duyệt
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    btn.className = "btn-notification granted";
+                    btn.innerText = "✅ Đã bật thông báo";
+                } else {
+                    btn.className = "btn-notification not-granted";
+                    btn.innerText = "🔔 Bật thông báo Chi Đội";
+                }
             }
         }
 
-        // Kích hoạt xin quyền khi bấm nút
-        function requestPushPermission() {
-            if (!window.OneSignalDeferred) {
-                alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
+        // Hàm xử lý trực tiếp khi bấm nút
+        function handleNotificationClick() {
+            const btn = document.getElementById('notif-btn');
+
+            if (!('Notification' in window)) {
+                alert("Trình duyệt này không hỗ trợ nhận thông báo!");
                 return;
             }
 
-            OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                    if (!OneSignal.Notifications.isPushSupported()) {
-                        alert("Trình duyệt của bạn không hỗ trợ thông báo Push!");
-                        return;
+            // Nếu đã được cho phép từ trước
+            if (Notification.permission === 'granted') {
+                alert("Bạn đã bật thông báo thành công!");
+                checkNotificationStatus();
+                return;
+            }
+
+            // Nếu bị chặn
+            if (Notification.permission === 'denied') {
+                alert("Bạn đã CHẶN thông báo cho trang này.\n\nHãy bấm vào biểu tượng 🔒 (Ổ khóa) ở thanh địa chỉ web để MỞ LẠI quyền thông báo.");
+                return;
+            }
+
+            // Gọi xin quyền trực tiếp thông qua trình duyệt Native (Tránh bị chặn Pop-up)
+            Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                    // Đồng bộ lại với OneSignal
+                    if (window.OneSignalDeferred) {
+                        OneSignalDeferred.push(function(OneSignal) {
+                            OneSignal.Notifications.requestPermission();
+                        });
                     }
-
-                    const permission = OneSignal.Notifications.permission;
-
-                    if (permission === "granted") {
-                        alert("Bạn đã bật thông báo rồi!");
-                        return;
-                    }
-
-                    if (permission === "denied") {
-                        alert("Bạn đã TẮT/CHẶN thông báo.\n\nHãy bấm vào biểu tượng 'Ổ khóa' ở thanh địa chỉ URL của trình duyệt để chọn Cho phép (Allow) thông báo.");
-                        return;
-                    }
-
-                    // Gọi xin quyền
-                    await OneSignal.Notifications.requestPermission();
-                    updateNotificationButtonUI(OneSignal);
-
-                } catch (err) {
-                    console.error("Lỗi xin quyền thông báo:", err);
-                    alert("Có lỗi xảy ra khi bật thông báo!");
+                    alert("Cảm ơn bạn đã bật thông báo!");
                 }
+                checkNotificationStatus();
             });
         }
+
+        // Chạy kiểm tra 1 lần khi load trang
+        document.addEventListener("DOMContentLoaded", checkNotificationStatus);
     </script>
 </body>
 </html>
