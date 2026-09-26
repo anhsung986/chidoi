@@ -90,9 +90,29 @@
         .btn-guide:hover {
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
+        /* Style cho nút Bật thông báo */
+        .btn-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-notification:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
     </style>
 
-    <!-- OneSignal SDK trong Head -->
+    <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -101,7 +121,7 @@
           appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
           allowLocalhostAsSecureOrigin: true,
           notifyButton: {
-            enable: true, // Tự động bật thêm quả chuông nhỏ ở góc
+            enable: false // Tắt quả chuông nổi mặc định để dùng nút riêng bên dưới
           }
         });
       });
@@ -123,31 +143,66 @@
         </div>
     </div>
 
-    <!-- Nút Bật thông báo nằm trong body -->
-    <button onclick="requestPushPermission()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;">
+    <!-- Nút Bật thông báo -->
+    <button id="notif-btn" onclick="requestPushPermission()" class="btn-notification">
       🔔 Bật thông báo Chi Đội
     </button>
 
     <script>
-        // Đồng bộ màu sắc từ localStorage nếu có
+        // Đồng bộ màu sắc giao diện từ localStorage
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
 
-        // Hàm kích hoạt xin quyền an toàn khi bấm nút
+        // Hàm xử lý kích hoạt xin quyền thông báo
         function requestPushPermission() {
-            if (window.OneSignalDeferred) {
-                OneSignalDeferred.push(async function(OneSignal) {
-                    try {
-                        await OneSignal.Notifications.requestPermission();
-                    } catch (err) {
-                        console.error("Lỗi xin quyền thông báo:", err);
-                    }
-                });
-            } else {
+            const btn = document.getElementById('notif-btn');
+
+            if (!window.OneSignalDeferred) {
                 alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
+                return;
             }
+
+            OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    // 1. Kiểm tra trình duyệt có hỗ trợ Push Notification không
+                    if (!OneSignal.Notifications.isPushSupported()) {
+                        alert("Trình duyệt của bạn không hỗ trợ nhận thông báo!");
+                        return;
+                    }
+
+                    // 2. Kiểm tra trạng thái cấp quyền hiện tại
+                    const permission = OneSignal.Notifications.permission;
+
+                    if (permission === "granted") {
+                        alert("Bạn đã bật thông báo thành công từ trước rồi!");
+                        return;
+                    }
+
+                    if (permission === "denied") {
+                        alert("Bạn đã TẮT/CHẶN thông báo cho trang này.\n\nĐể bật lại: Bấm vào biểu tượng 'Ổ khóa' hoặc 'Cài đặt' bên cạnh thanh địa chỉ URL của trình duyệt và chọn Cho phép thông báo.");
+                        return;
+                    }
+
+                    // 3. Tiến hành gọi hộp thoại xin quyền
+                    btn.innerText = "⏳ Đang xử lý...";
+                    await OneSignal.Notifications.requestPermission();
+                    
+                    // Cập nhật lại giao diện nút sau khi người dùng tương tác
+                    if (OneSignal.Notifications.permission === "granted") {
+                        alert("Cảm ơn bạn! Đã bật thông báo thành công.");
+                        btn.innerText = "✅ Đã bật thông báo";
+                    } else {
+                        btn.innerText = "🔔 Bật thông báo Chi Đội";
+                    }
+
+                } catch (err) {
+                    console.error("Lỗi xin quyền thông báo:", err);
+                    alert("Có lỗi xảy ra khi bật thông báo. Chi tiết lỗi ở Console.");
+                    btn.innerText = "🔔 Bật thông báo Chi Đội";
+                }
+            });
         }
     </script>
 </body>
