@@ -90,13 +90,15 @@ jobs:
           cp *.js www/ 2>/dev/null || true
           cp icon.png www/icon.png
 
+      # ĐÃ THÊM PLUGIN PUSH NOTIFICATIONS TẠI ĐÂY
       - name: Initialize Node Project
         run: |
           npm init -y
           npm install \
             @capacitor/core@5.7.0 \
             @capacitor/cli@5.7.0 \
-            @capacitor/android@5.7.0
+            @capacitor/android@5.7.0 \
+            @capacitor/push-notifications@5.1.0
 
       - name: Create Capacitor Config
         run: |
@@ -126,14 +128,14 @@ jobs:
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
-      # BƯỚC BỔ SUNG: Cấp quyền thông báo cho Android Manifest (Fix lỗi Android 13+)
-      - name: Add Notification Permissions to Manifest
+      # ĐÃ THÊM BƯỚC KHAI BÁO QUYỀN VỚI HỆ THỐNG ANDROID
+      - name: Add Notification Permissions to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" \/>' "$MANIFEST"
 
-      # BƯỚC BỔ SUNG: Cho phép WebView chạy JavaScript và lưu Storage hỗ trợ Push
       - name: Enable WebView Features
         run: |
           MAIN_ACTIVITY="android/app/src/main/java/com/anhsung/chidoi/MainActivity.java"
