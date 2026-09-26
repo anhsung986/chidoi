@@ -96,7 +96,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 9999; /* Đẩy z-index lên cao để tránh bị che */
+            z-index: 9999;
             padding: 12px 20px;
             color: white;
             border: none;
@@ -128,14 +128,14 @@
             z-index: 100000;
             opacity: 0;
             visibility: hidden;
-            pointer-events: none; /* Không chặn tương tác khi ẩn */
+            pointer-events: none;
             transition: all 0.3s ease;
             padding: 20px;
         }
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
-            pointer-events: auto; /* Bật lại tương tác khi modal hiện lên */
+            pointer-events: auto;
         }
         .modal-card {
             background: #1f2937;
@@ -197,10 +197,10 @@
           allowLocalhostAsSecureOrigin: true
         });
 
-        updateNotificationButtonUI(OneSignal);
+        updateNotificationButtonUI();
 
         OneSignal.Notifications.addEventListener("permissionChange", function() {
-            updateNotificationButtonUI(OneSignal);
+            updateNotificationButtonUI();
         });
       });
     </script>
@@ -242,7 +242,6 @@
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
 
-        // HÀM HIỂN THỊ EMBED MODAL
         function showEmbedModal(title, text, icon = '🔔') {
             document.getElementById('modal-icon').innerText = icon;
             document.getElementById('modal-title').innerText = title;
@@ -250,19 +249,29 @@
             document.getElementById('embed-modal').classList.add('active');
         }
 
-        // HÀM ĐÓNG EMBED MODAL
         function closeEmbedModal() {
             document.getElementById('embed-modal').classList.remove('active');
         }
 
         document.getElementById('modal-close-btn').addEventListener('click', closeEmbedModal);
 
-        // Cập nhật giao diện nút bấm
-        function updateNotificationButtonUI(OneSignal) {
+        // Kiểm tra xem ứng dụng có đang chạy trên App APK (Capacitor Native) hay không
+        function isNativeApp() {
+            return window.Capacitor !== undefined && window.Capacitor.isNativePlatform();
+        }
+
+        // Cập nhật giao diện nút
+        function updateNotificationButtonUI() {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
 
-            const isGranted = OneSignal.Notifications.permission === true || OneSignal.Notifications.permission === "granted";
+            let isGranted = false;
+
+            if (window.Notification && Notification.permission === 'granted') {
+                isGranted = true;
+            } else if (window.OneSignal && OneSignal.Notifications && OneSignal.Notifications.permission === true) {
+                isGranted = true;
+            }
 
             if (isGranted) {
                 btn.className = "btn-notification granted";
@@ -273,8 +282,30 @@
             }
         }
 
-        // Bắt sự kiện Click trực tiếp bằng Event Listener
-        document.getElementById('notif-btn').addEventListener('click', function() {
+        // Bắt sự kiện bấm nút
+        document.getElementById('notif-btn').addEventListener('click', async function() {
+            // TRƯỜNG HỢP 1: CHẠY TRÊN APP APK
+            if (isNativeApp()) {
+                try {
+                    // Gọi xin quyền Native Android từ Capacitor
+                    if (window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                        const permResult = await window.Capacitor.Plugins.PushNotifications.requestPermissions();
+                        if (permResult.receive === 'granted') {
+                            showEmbedModal("Thành Công", "Đã bật thông báo thành công trên ứng dụng!", "✅");
+                            updateNotificationButtonUI();
+                        } else {
+                            showEmbedModal("Quyền Bị Chặn", "Vui lòng vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật Thông báo!", "🚫");
+                        }
+                    } else {
+                        showEmbedModal("Hướng Dẫn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền 'Thông báo' thủ công!", "⚙️");
+                    }
+                } catch (err) {
+                    showEmbedModal("Hướng Dẫn Cấp Quyền", "Hãy vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật Cho phép thông báo!", "⚙️");
+                }
+                return;
+            }
+
+            // TRƯỜNG HỢP 2: CHẠY TRÊN WEB TRÌNH DUYỆT (CHROME/SAFARI)
             if (!window.OneSignalDeferred) {
                 showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
                 return;
@@ -286,35 +317,29 @@
 
                     if (permission === true || permission === "granted") {
                         showEmbedModal("Thành Công", "Bạn đã bật thông báo thành công!", "✅");
-                        updateNotificationButtonUI(OneSignal);
+                        updateNotificationButtonUI();
                         return;
                     }
 
                     if (permission === "denied") {
-                        showEmbedModal(
-                            "Quyền Bị Chặn", 
-                            "Quyền thông báo đang bị CHẶN trên thiết bị.\n\nVui lòng vào: Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Thông báo ➔ Bật 'Cho phép thông báo'.", 
-                            "🚫"
-                        );
+                        showEmbedModal("Quyền Bị Chặn", "Quyền thông báo đang bị CHẶN.\n\nHãy nhấn vào biểu tượng 🔒 (Ổ khóa) ở thanh địa chỉ web để bật lại!", "🚫");
                         return;
                     }
 
                     await OneSignal.Notifications.requestPermission();
                     
                     setTimeout(() => {
-                        updateNotificationButtonUI(OneSignal);
+                        updateNotificationButtonUI();
                     }, 800);
 
                 } catch (err) {
-                    console.error("Lỗi cấp quyền:", err);
-                    showEmbedModal(
-                        "Hướng Dẫn Cấp Quyền", 
-                        "Vui lòng vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền Thông báo để nhận tin tức từ Chi Đội!", 
-                        "⚙️"
-                    );
+                    showEmbedModal("Thông Báo", "Không thể yêu cầu quyền thông báo từ trình duyệt này.", "⚠️");
                 }
             });
         });
+
+        // Kiểm tra trạng thái 1 lần khi trang vừa load xong
+        document.addEventListener('DOMContentLoaded', updateNotificationButtonUI);
     </script>
 </body>
 </html>
