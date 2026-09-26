@@ -96,7 +96,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 9999;
+            z-index: 999;
             padding: 12px 20px;
             color: white;
             border: none;
@@ -106,34 +106,99 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        /* Chưa bật/Chờ xin quyền -> ĐỎ */
         .btn-notification.not-granted {
             background-color: #dc3545 !important;
         }
-        /* Đã cho phép -> XANH */
         .btn-notification.granted {
             background-color: #28a745 !important;
         }
+
+        /* CSS EMBED MODAL POPUP */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-card {
+            background: #1f2937;
+            border: 1px solid color-mix(in srgb, var(--app-primary-color) 50%, transparent);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+        .modal-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .modal-body {
+            font-size: 14px;
+            color: #d1d5db;
+            line-height: 1.5;
+            white-space: pre-line;
+            margin-bottom: 20px;
+        }
+        .modal-btn {
+            background: linear-gradient(45deg, #ff416c, var(--app-primary-color));
+            color: #0b0f19;
+            font-weight: bold;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
     </style>
 
-    <!-- OneSignal SDK -->
+    <!-- OneSignal SDK v16 -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
-          // Đặt đường dẫn Service Worker tương đối để không bị lỗi 404 trên domain phụ
           serviceWorkerPath: "OneSignalSDKWorker.js",
           allowLocalhostAsSecureOrigin: true
         });
 
-        // Cập nhật trạng thái màu sắc ngay khi tải xong
-        checkNotificationStatus();
+        updateNotificationButtonUI(OneSignal);
 
-        // Lắng nghe sự thay đổi quyền từ trình duyệt
         OneSignal.Notifications.addEventListener("permissionChange", function() {
-            checkNotificationStatus();
+            updateNotificationButtonUI(OneSignal);
         });
       });
     </script>
@@ -159,69 +224,94 @@
       🔔 Bật thông báo Chi Đội
     </button>
 
+    <!-- EMBED POPUP MODAL -->
+    <div id="embed-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modal-icon" class="modal-icon">🔔</div>
+            <div id="modal-title" class="modal-title">Thông Báo</div>
+            <div id="modal-body" class="modal-body">Nội dung thông báo</div>
+            <button class="modal-btn" onclick="closeEmbedModal()">Đã Hiểu</button>
+        </div>
+    </div>
+
     <script>
-        // Lấy theme color nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
         }
 
-        // Hàm kiểm tra và cập nhật giao diện nút
-        function checkNotificationStatus() {
+        // HÀM HIỂN THỊ EMBED MODAL (THAY THẾ ALERT)
+        function showEmbedModal(title, text, icon = '🔔') {
+            document.getElementById('modal-icon').innerText = icon;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerText = text;
+            document.getElementById('embed-modal').classList.add('active');
+        }
+
+        // HÀM ĐÓNG EMBED MODAL
+        function closeEmbedModal() {
+            document.getElementById('embed-modal').classList.remove('active');
+        }
+
+        // Cập nhật nút bấm
+        function updateNotificationButtonUI(OneSignal) {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
 
-            // Kiểm tra quyền Push mặc định của trình duyệt
-            if ('Notification' in window) {
-                if (Notification.permission === 'granted') {
-                    btn.className = "btn-notification granted";
-                    btn.innerText = "✅ Đã bật thông báo";
-                } else {
-                    btn.className = "btn-notification not-granted";
-                    btn.innerText = "🔔 Bật thông báo Chi Đội";
-                }
+            const isGranted = OneSignal.Notifications.permission === true || OneSignal.Notifications.permission === "granted";
+
+            if (isGranted) {
+                btn.className = "btn-notification granted";
+                btn.innerText = "✅ Đã bật thông báo";
+            } else {
+                btn.className = "btn-notification not-granted";
+                btn.innerText = "🔔 Bật thông báo Chi Đội";
             }
         }
 
-        // Hàm xử lý trực tiếp khi bấm nút
+        // Xử lý khi nhấn nút
         function handleNotificationClick() {
-            const btn = document.getElementById('notif-btn');
-
-            if (!('Notification' in window)) {
-                alert("Trình duyệt này không hỗ trợ nhận thông báo!");
+            if (!window.OneSignalDeferred) {
+                showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
                 return;
             }
 
-            // Nếu đã được cho phép từ trước
-            if (Notification.permission === 'granted') {
-                alert("Bạn đã bật thông báo thành công!");
-                checkNotificationStatus();
-                return;
-            }
+            OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    const permission = OneSignal.Notifications.permission;
 
-            // Nếu bị chặn
-            if (Notification.permission === 'denied') {
-                alert("Bạn đã CHẶN thông báo cho trang này.\n\nHãy bấm vào biểu tượng 🔒 (Ổ khóa) ở thanh địa chỉ web để MỞ LẠI quyền thông báo.");
-                return;
-            }
-
-            // Gọi xin quyền trực tiếp thông qua trình duyệt Native (Tránh bị chặn Pop-up)
-            Notification.requestPermission().then(function(permission) {
-                if (permission === 'granted') {
-                    // Đồng bộ lại với OneSignal
-                    if (window.OneSignalDeferred) {
-                        OneSignalDeferred.push(function(OneSignal) {
-                            OneSignal.Notifications.requestPermission();
-                        });
+                    if (permission === true || permission === "granted") {
+                        showEmbedModal("Thành Công", "Bạn đã bật thông báo thành công!", "✅");
+                        updateNotificationButtonUI(OneSignal);
+                        return;
                     }
-                    alert("Cảm ơn bạn đã bật thông báo!");
+
+                    if (permission === "denied") {
+                        showEmbedModal(
+                            "Quyền Bị Chặn", 
+                            "Quyền thông báo đang bị CHẶN trên thiết bị.\n\nVui lòng vào: Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Thông báo ➔ Bật 'Cho phép thông báo'.", 
+                            "🚫"
+                        );
+                        return;
+                    }
+
+                    // Yêu cầu cấp quyền
+                    await OneSignal.Notifications.requestPermission();
+                    
+                    setTimeout(() => {
+                        updateNotificationButtonUI(OneSignal);
+                    }, 800);
+
+                } catch (err) {
+                    console.error("Lỗi cấp quyền:", err);
+                    showEmbedModal(
+                        "Hướng Dẫn Cấp Quyền", 
+                        "Vui lòng vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền Thông báo để nhận tin tức từ Chi Đội!", 
+                        "⚙️"
+                    );
                 }
-                checkNotificationStatus();
             });
         }
-
-        // Chạy kiểm tra 1 lần khi load trang
-        document.addEventListener("DOMContentLoaded", checkNotificationStatus);
     </script>
 </body>
 </html>
