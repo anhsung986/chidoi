@@ -208,7 +208,7 @@
 <body>
 
     <div class="welcome-container">
-        <h1 class="logo">CHI ĐỘI</h1>
+        <h1 class="logo">CHI ĐỘ</h1>
         <p class="welcome-text">
             Chào mừng bạn đến với hệ thống website Chi đội.<br>
             Vui lòng đăng nhập hoặc đăng ký để tiếp tục trải nghiệm.
@@ -243,126 +243,219 @@
         }
 
         function showEmbedModal(title, text, icon = '🔔') {
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-body').innerText = text;
-            document.getElementById('embed-modal').classList.add('active');
+            const iconEl = document.getElementById('modal-icon');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            const modalEl = document.getElementById('embed-modal');
+            
+            if (iconEl) iconEl.innerText = icon;
+            if (titleEl) titleEl.innerText = title;
+            if (bodyEl) bodyEl.innerText = text;
+            if (modalEl) modalEl.classList.add('active');
         }
 
         function closeEmbedModal() {
-            document.getElementById('embed-modal').classList.remove('active');
+            const modalEl = document.getElementById('embed-modal');
+            if (modalEl) modalEl.classList.remove('active');
         }
 
-        document.getElementById('modal-close-btn').addEventListener('click', closeEmbedModal);
+        const closeBtn = document.getElementById('modal-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeEmbedModal);
+        }
 
         function isNativeApp() {
-            return window.Capacitor !== undefined && window.Capacitor.isNativePlatform();
+            return typeof window.Capacitor !== 'undefined' && 
+                   window.Capacitor !== null && 
+                   typeof window.Capacitor.isNativePlatform === 'function' && 
+                   window.Capacitor.isNativePlatform();
         }
 
         async function initNativeNotificationChannel() {
-            if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
-                try {
+            try {
+                if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
                     const PushNotifications = window.Capacitor.Plugins.PushNotifications;
-                    await PushNotifications.createChannel({
-                        id: 'chidoi_default',
-                        name: 'Thông Báo Chi Đội',
-                        description: 'Kênh thông báo mặc định của ứng dụng Chi Đội',
-                        importance: 5,
-                        visibility: 1,
-                        vibration: true
-                    });
-                } catch (e) {
-                    console.log("Khởi tạo Channel Android thất bại:", e);
+                    if (typeof PushNotifications.createChannel === 'function') {
+                        await PushNotifications.createChannel({
+                            id: 'chidoi_default',
+                            name: 'Thông Báo Chi Đội',
+                            description: 'Kênh thông báo mặc định của ứng dụng Chi Đội',
+                            importance: 5,
+                            visibility: 1,
+                            vibration: true
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn("Bỏ qua lỗi khởi tạo Channel:", e);
+            }
+        }
+
+        // QUẢN LÝ THỜI GIAN ẨN NÚT SAU 5 PHÚT
+        const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+        function checkAndHideNotificationButton() {
+            const btn = document.getElementById('notif-btn');
+            if (!btn) return;
+
+            const grantedTime = localStorage.getItem('notif_granted_time');
+            if (grantedTime) {
+                const timePassed = Date.now() - parseInt(grantedTime, 10);
+                if (timePassed >= FIVE_MINUTES_MS) {
+                    btn.style.display = 'none'; // Xóa/Ẩn nút đi
+                    return true;
+                } else {
+                    // Đặt lịch tự ẩn khi đủ 5 phút
+                    const remainingTime = FIVE_MINUTES_MS - timePassed;
+                    setTimeout(() => {
+                        if (btn) btn.style.display = 'none';
+                    }, remainingTime);
                 }
             }
+            return false;
         }
 
         async function updateNotificationButtonUI() {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
 
+            // Nếu đã quá 5 phút kể từ lúc cấp quyền thì ẩn luôn nút
+            if (checkAndHideNotificationButton()) return;
+
             let isGranted = false;
 
-            if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
-                try {
-                    const perm = await window.Capacitor.Plugins.PushNotifications.checkPermissions();
-                    isGranted = (perm.receive === 'granted');
-                } catch (e) { isGranted = false; }
-            } else if (window.Notification && Notification.permission === 'granted') {
-                isGranted = true;
-            } else if (window.OneSignal && OneSignal.Notifications && OneSignal.Notifications.permission === true) {
-                isGranted = true;
+            try {
+                if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                    const PushNotifications = window.Capacitor.Plugins.PushNotifications;
+                    if (typeof PushNotifications.checkPermissions === 'function') {
+                        const perm = await PushNotifications.checkPermissions();
+                        isGranted = (perm && perm.receive === 'granted');
+                    }
+                } else if (window.Notification && Notification.permission === 'granted') {
+                    isGranted = true;
+                } else if (window.OneSignal && OneSignal.Notifications && OneSignal.Notifications.permission === true) {
+                    isGranted = true;
+                }
+            } catch (e) {
+                console.warn("Lỗi kiểm tra quyền thông báo:", e);
+                isGranted = false;
             }
 
             if (isGranted) {
+                // Lưu mốc thời gian nếu chưa từng lưu
+                if (!localStorage.getItem('notif_granted_time')) {
+                    localStorage.setItem('notif_granted_time', Date.now().toString());
+                }
+
                 btn.className = "btn-notification granted";
                 btn.innerText = "✅ Đã bật thông báo";
+
+                // Kiểm tra lại hẹn giờ ẩn nút
+                checkAndHideNotificationButton();
             } else {
+                // Nếu bị hủy quyền thì xóa mốc thời gian và hiện lại nút
+                localStorage.removeItem('notif_granted_time');
+                btn.style.display = 'block';
                 btn.className = "btn-notification not-granted";
                 btn.innerText = "🔔 Bật thông báo Chi Đội";
             }
         }
 
-        document.getElementById('notif-btn').addEventListener('click', async function() {
-            if (isNativeApp()) {
-                try {
-                    if (window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
-                        const PushNotifications = window.Capacitor.Plugins.PushNotifications;
-                        
-                        await initNativeNotificationChannel();
-                        const permResult = await PushNotifications.requestPermissions();
-                        
-                        if (permResult.receive === 'granted') {
-                            await PushNotifications.register();
-                            showEmbedModal("Thành Công", "Đã bật thông báo thành công trên ứng dụng!", "✅");
+        const notifBtn = document.getElementById('notif-btn');
+        if (notifBtn) {
+            notifBtn.addEventListener('click', async function() {
+                if (isNativeApp()) {
+                    try {
+                        if (window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                            const PushNotifications = window.Capacitor.Plugins.PushNotifications;
+
+                            let checkResult = { receive: 'prompt' };
+                            if (typeof PushNotifications.checkPermissions === 'function') {
+                                checkResult = await PushNotifications.checkPermissions();
+                            }
+
+                            if (checkResult.receive === 'granted') {
+                                showEmbedModal("Thành Công", "Bạn đã bật thông báo cho ứng dụng rồi!", "✅");
+                                updateNotificationButtonUI();
+                                return;
+                            }
+
+                            if (checkResult.receive === 'denied') {
+                                showEmbedModal(
+                                    "Quyền Bị Hạn Chế", 
+                                    "Thông báo đang bị tắt trong hệ thống Android.\n\nVui lòng mở: Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật 'Cho phép thông báo'!", 
+                                    "⚙️"
+                                );
+                                updateNotificationButtonUI();
+                                return;
+                            }
+
+                            await initNativeNotificationChannel();
+                            if (typeof PushNotifications.requestPermissions === 'function') {
+                                const permResult = await PushNotifications.requestPermissions();
+                                
+                                if (permResult && permResult.receive === 'granted') {
+                                    if (typeof PushNotifications.register === 'function') {
+                                        await PushNotifications.register();
+                                    }
+                                    // Ghi nhận mốc thời gian ngay khi vừa bấm cho phép thành công
+                                    localStorage.setItem('notif_granted_time', Date.now().toString());
+                                    showEmbedModal("Thành Công", "Đã bật thông báo thành công trên ứng dụng!", "✅");
+                                } else {
+                                    showEmbedModal("Thông Báo", "Bạn chưa cấp quyền thông báo cho ứng dụng.", "🚫");
+                                }
+                            }
                         } else {
-                            showEmbedModal("Quyền Bị Chặn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Cho phép Thông báo!", "🚫");
+                            showEmbedModal("Hướng Dẫn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền 'Thông báo' thủ công!", "⚙️");
                         }
-                        updateNotificationButtonUI();
-                    } else {
-                        showEmbedModal("Hướng Dẫn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền 'Thông báo' thủ công!", "⚙️");
+                    } catch (err) {
+                        console.error("Lỗi Push Notification:", err);
+                        showEmbedModal("Hướng Dẫn Cấp Quyền", "Hãy vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật Cho phép thông báo!", "⚙️");
+                    } finally {
+                        await updateNotificationButtonUI();
                     }
-                } catch (err) {
-                    showEmbedModal("Hướng Dẫn Cấp Quyền", "Hãy vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật Cho phép thông báo!", "⚙️");
+                    return;
                 }
-                return;
-            }
 
-            if (!window.OneSignalDeferred) {
-                showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
-                return;
-            }
-
-            OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                    const permission = OneSignal.Notifications.permission;
-
-                    if (permission === true || permission === "granted") {
-                        showEmbedModal("Thành Công", "Bạn đã bật thông báo thành công!", "✅");
-                        updateNotificationButtonUI();
-                        return;
-                    }
-
-                    if (permission === "denied") {
-                        showEmbedModal("Quyền Bị Chặn", "Quyền thông báo đang bị CHẶN.\n\nHãy nhấn vào biểu tượng 🔒 (Ổ khóa) ở thanh địa chỉ web để bật lại!", "🚫");
-                        return;
-                    }
-
-                    await OneSignal.Notifications.requestPermission();
-                    
-                    setTimeout(() => {
-                        updateNotificationButtonUI();
-                    }, 800);
-
-                } catch (err) {
-                    showEmbedModal("Thông Báo", "Không thể yêu cầu quyền thông báo từ trình duyệt này.", "⚠️");
+                if (!window.OneSignalDeferred) {
+                    showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
+                    return;
                 }
+
+                OneSignalDeferred.push(async function(OneSignal) {
+                    try {
+                        const permission = OneSignal.Notifications.permission;
+
+                        if (permission === true || permission === "granted") {
+                            localStorage.setItem('notif_granted_time', Date.now().toString());
+                            showEmbedModal("Thành Công", "Bạn đã bật thông báo thành công!", "✅");
+                            updateNotificationButtonUI();
+                            return;
+                        }
+
+                        if (permission === "denied") {
+                            showEmbedModal("Quyền Bị Chặn", "Quyền thông báo đang bị CHẶN.\n\nHãy nhấn vào biểu tượng 🔒 (Ổ khóa) ở thanh địa chỉ web để bật lại!", "🚫");
+                            return;
+                        }
+
+                        await OneSignal.Notifications.requestPermission();
+                        
+                        setTimeout(() => {
+                            updateNotificationButtonUI();
+                        }, 800);
+
+                    } catch (err) {
+                        showEmbedModal("Thông Báo", "Không thể yêu cầu quyền thông báo từ trình duyệt này.", "⚠️");
+                    }
+                });
             });
-        });
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            initNativeNotificationChannel();
-            updateNotificationButtonUI();
+            setTimeout(() => {
+                initNativeNotificationChannel();
+                updateNotificationButtonUI();
+            }, 500);
         });
     </script>
 </body>
