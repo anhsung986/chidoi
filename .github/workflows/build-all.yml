@@ -126,6 +126,21 @@ jobs:
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
+      # BƯỚC BỔ SUNG: Cấp quyền thông báo cho Android Manifest (Fix lỗi Android 13+)
+      - name: Add Notification Permissions to Manifest
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" \/>' "$MANIFEST"
+
+      # BƯỚC BỔ SUNG: Cho phép WebView chạy JavaScript và lưu Storage hỗ trợ Push
+      - name: Enable WebView Features
+        run: |
+          MAIN_ACTIVITY="android/app/src/main/java/com/anhsung/chidoi/MainActivity.java"
+          if [ -f "$MAIN_ACTIVITY" ]; then
+            sed -i '/super.onCreate(savedInstanceState);/a \        this.bridge.getWebView().getSettings().setJavaScriptEnabled(true);\n        this.bridge.getWebView().getSettings().setDomStorageEnabled(true);' "$MAIN_ACTIVITY"
+          fi
+
       - name: Set App Name Chi Đội
         run: |
           STRINGS="android/app/src/main/res/values/strings.xml"
