@@ -255,19 +255,40 @@
 
         document.getElementById('modal-close-btn').addEventListener('click', closeEmbedModal);
 
-        // Kiểm tra xem ứng dụng có đang chạy trên App APK (Capacitor Native) hay không
         function isNativeApp() {
             return window.Capacitor !== undefined && window.Capacitor.isNativePlatform();
         }
 
-        // Cập nhật giao diện nút
-        function updateNotificationButtonUI() {
+        async function initNativeNotificationChannel() {
+            if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                try {
+                    const PushNotifications = window.Capacitor.Plugins.PushNotifications;
+                    await PushNotifications.createChannel({
+                        id: 'chidoi_default',
+                        name: 'Thông Báo Chi Đội',
+                        description: 'Kênh thông báo mặc định của ứng dụng Chi Đội',
+                        importance: 5,
+                        visibility: 1,
+                        vibration: true
+                    });
+                } catch (e) {
+                    console.log("Khởi tạo Channel Android thất bại:", e);
+                }
+            }
+        }
+
+        async function updateNotificationButtonUI() {
             const btn = document.getElementById('notif-btn');
             if (!btn) return;
 
             let isGranted = false;
 
-            if (window.Notification && Notification.permission === 'granted') {
+            if (isNativeApp() && window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
+                try {
+                    const perm = await window.Capacitor.Plugins.PushNotifications.checkPermissions();
+                    isGranted = (perm.receive === 'granted');
+                } catch (e) { isGranted = false; }
+            } else if (window.Notification && Notification.permission === 'granted') {
                 isGranted = true;
             } else if (window.OneSignal && OneSignal.Notifications && OneSignal.Notifications.permission === true) {
                 isGranted = true;
@@ -282,20 +303,22 @@
             }
         }
 
-        // Bắt sự kiện bấm nút
         document.getElementById('notif-btn').addEventListener('click', async function() {
-            // TRƯỜNG HỢP 1: CHẠY TRÊN APP APK
             if (isNativeApp()) {
                 try {
-                    // Gọi xin quyền Native Android từ Capacitor
                     if (window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications) {
-                        const permResult = await window.Capacitor.Plugins.PushNotifications.requestPermissions();
+                        const PushNotifications = window.Capacitor.Plugins.PushNotifications;
+                        
+                        await initNativeNotificationChannel();
+                        const permResult = await PushNotifications.requestPermissions();
+                        
                         if (permResult.receive === 'granted') {
+                            await PushNotifications.register();
                             showEmbedModal("Thành Công", "Đã bật thông báo thành công trên ứng dụng!", "✅");
-                            updateNotificationButtonUI();
                         } else {
-                            showEmbedModal("Quyền Bị Chặn", "Vui lòng vào Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật Thông báo!", "🚫");
+                            showEmbedModal("Quyền Bị Chặn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Cho phép Thông báo!", "🚫");
                         }
+                        updateNotificationButtonUI();
                     } else {
                         showEmbedModal("Hướng Dẫn", "Vui lòng mở Cài đặt điện thoại ➔ Ứng dụng ➔ Chi Đội ➔ Bật quyền 'Thông báo' thủ công!", "⚙️");
                     }
@@ -305,7 +328,6 @@
                 return;
             }
 
-            // TRƯỜNG HỢP 2: CHẠY TRÊN WEB TRÌNH DUYỆT (CHROME/SAFARI)
             if (!window.OneSignalDeferred) {
                 showEmbedModal("Đang Khởi Tạo", "Hệ thống thông báo đang khởi tạo, vui lòng bấm lại sau 2 giây!", "⏳");
                 return;
@@ -338,8 +360,10 @@
             });
         });
 
-        // Kiểm tra trạng thái 1 lần khi trang vừa load xong
-        document.addEventListener('DOMContentLoaded', updateNotificationButtonUI);
+        document.addEventListener('DOMContentLoaded', () => {
+            initNativeNotificationChannel();
+            updateNotificationButtonUI();
+        });
     </script>
 </body>
 </html>
