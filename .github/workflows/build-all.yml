@@ -33,7 +33,6 @@ jobs:
       - name: Build Windows Executable
         run: npx electron-builder --win
 
-      # Đổi tên file .exe thành chidoi.exe
       - name: Rename Windows Executable
         shell: pwsh
         run: |
@@ -88,9 +87,9 @@ jobs:
           cp *.html www/ 2>/dev/null || true
           cp *.css www/ 2>/dev/null || true
           cp *.js www/ 2>/dev/null || true
+          cp *.json www/ 2>/dev/null || true
           cp icon.png www/icon.png
 
-      # ĐÃ THÊM PLUGIN PUSH NOTIFICATIONS TẠI ĐÂY
       - name: Initialize Node Project
         run: |
           npm init -y
@@ -100,16 +99,18 @@ jobs:
             @capacitor/android@5.7.0 \
             @capacitor/push-notifications@5.1.0
 
-      - name: Create Capacitor Config
+      - name: Create Capacitor Config (Local WebDir)
         run: |
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.anhsung.chidoi",
             "appName": "Chi Đội",
             "webDir": "www",
-            "server": {
-              "url": "https://anhsung986.github.io/chidoi/",
-              "cleartext": true
+            "bundledWebRuntime": false,
+            "plugins": {
+              "PushNotifications": {
+                "presentationOptions": ["badge", "sound", "alert"]
+              }
             }
           }
           EOF
@@ -128,13 +129,13 @@ jobs:
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
-      # ĐÃ THÊM BƯỚC KHAI BÁO QUYỀN VỚI HỆ THỐNG ANDROID
       - name: Add Notification Permissions to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.VIBRATE" \/>' "$MANIFEST"
 
       - name: Enable WebView Features
         run: |
@@ -212,23 +213,8 @@ jobs:
           name: Chi Đội v1.0.${{ github.run_number }}
           body: |
             ## 🚀 Chi Đội App - Build #${{ github.run_number }}
-
-            > Bản phát hành tự động hỗ trợ cả hai hệ điều hành **Windows** và **Android**.
-
-            ---
-
-            ### 📦 Tệp cài đặt
-
-            | Nền tảng | Tệp cài đặt | Hướng dẫn |
-            | :--- | :--- | :--- |
-            | 💻 **Windows** | `chidoi.exe` | Tải về và mở trực tiếp để chạy/cài đặt trên máy tính |
-            | 📱 **Android** | `ChiDoi.apk` | Tải về, mở tệp và cho phép cài đặt ứng dụng **Chi Đội** |
-
-            ---
-
-            ### 🌐 Thông tin thêm
-            * **Trang Website:** [cd.chidoi.gt.tc](https://cd.chidoi.gt.tc/)
-            * **Trạng thái:** ✅ Stable Release
+            
+            Bản cập nhật sửa lỗi cấp quyền Notification trên Android Xiaomi/HyperOS.
           draft: false
           prerelease: false
           overwrite: true
