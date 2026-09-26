@@ -91,7 +91,7 @@
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
 
-        /* CSS cho nút Thông báo */
+        /* CSS Nút Thông báo */
         .btn-notification {
             position: fixed;
             bottom: 20px;
@@ -106,7 +106,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         /* Trạng thái chưa cho phép / bị chặn (Màu đỏ) */
         .btn-notification.not-granted {
             background-color: #dc3545;
@@ -133,16 +133,12 @@
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
-          allowLocalhostAsSecureOrigin: true,
-          notifyButton: {
-            enable: false
-          }
         });
 
-        // Tự động kiểm tra trạng thái quyền và cập nhật màu nút ngay khi load xong OneSignal
+        // Kiểm tra và đổi màu nút ngay sau khi OneSignal khởi tạo xong
         updateNotificationButtonUI(OneSignal);
 
-        // Lắng nghe sự thay đổi quyền (nếu người dùng thay đổi trạng thái)
+        // Lắng nghe sự thay đổi quyền
         OneSignal.Notifications.addEventListener("permissionChange", function() {
             updateNotificationButtonUI(OneSignal);
         });
@@ -165,13 +161,13 @@
         </div>
     </div>
 
-    <!-- Nút Bật thông báo (Mặc định để màu đỏ khi chưa tải xong SDK) -->
+    <!-- Nút Bật thông báo -->
     <button id="notif-btn" onclick="requestPushPermission()" class="btn-notification not-granted">
       🔔 Bật thông báo Chi Đội
     </button>
 
     <script>
-        // Đồng bộ màu sắc giao diện từ localStorage
+        // Đồng bộ màu giao diện từ localStorage
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
@@ -193,10 +189,8 @@
             }
         }
 
-        // Hàm xử lý kích hoạt xin quyền thông báo khi bấm nút
+        // Kích hoạt xin quyền khi bấm nút
         function requestPushPermission() {
-            const btn = document.getElementById('notif-btn');
-
             if (!window.OneSignalDeferred) {
                 alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
                 return;
@@ -205,31 +199,29 @@
             OneSignalDeferred.push(async function(OneSignal) {
                 try {
                     if (!OneSignal.Notifications.isPushSupported()) {
-                        alert("Trình duyệt của bạn không hỗ trợ nhận thông báo!");
+                        alert("Trình duyệt của bạn không hỗ trợ thông báo Push!");
                         return;
                     }
 
                     const permission = OneSignal.Notifications.permission;
 
                     if (permission === "granted") {
-                        alert("Bạn đã bật thông báo thành công!");
+                        alert("Bạn đã bật thông báo rồi!");
                         return;
                     }
 
                     if (permission === "denied") {
-                        alert("Bạn đã TẮT/CHẶN thông báo cho trang này.\n\nĐể bật lại: Bấm vào biểu tượng 'Ổ khóa' hoặc 'Cài đặt' trên thanh địa chỉ URL của trình duyệt và chọn Cho phép thông báo.");
+                        alert("Bạn đã TẮT/CHẶN thông báo.\n\nHãy bấm vào biểu tượng 'Ổ khóa' ở thanh địa chỉ URL của trình duyệt để chọn Cho phép (Allow) thông báo.");
                         return;
                     }
 
-                    // Tiến hành gọi hộp thoại xin quyền
+                    // Gọi xin quyền
                     await OneSignal.Notifications.requestPermission();
-                    
-                    // Cập nhật lại màu sắc nút
                     updateNotificationButtonUI(OneSignal);
 
                 } catch (err) {
                     console.error("Lỗi xin quyền thông báo:", err);
-                    alert("Có lỗi xảy ra khi bật thông báo.");
+                    alert("Có lỗi xảy ra khi bật thông báo!");
                 }
             });
         }
