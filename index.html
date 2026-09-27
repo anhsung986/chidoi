@@ -29,13 +29,24 @@
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInLogo 1.2s ease-out forwards;
+            text-align: center;
         }
         .logo-container img {
-            width: 100px; /* Bạn có thể điều chỉnh kích thước logo tại đây */
-            height: 100px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            border-radius: 20px; /* Bo góc logo (nếu muốn ảnh vuông thì bỏ dòng này) */
+            border-radius: 20px;
             box-shadow: 0 8px 24px rgba(0, 255, 213, 0.2);
+        }
+        /* Style cho chữ dự phòng nếu ảnh lỗi */
+        .fallback-text {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: none; 
         }
 
         @keyframes fadeInLogo {
@@ -69,9 +80,11 @@
 </head>    
 <body>
 
-    <!-- Hiển thị hình ảnh logo thay vì chữ -->
+    <!-- Khu vực logo -->
     <div class="logo-container">
-        <img src="icon.png" alt="Logo Chi Đội">
+        <!-- Thử tải icon.png, nếu lỗi sẽ tự chuyển nguồn hoặc hiện chữ dự phòng[span_2](start_span)[span_2](end_span) -->
+        <img src="icon.png" alt="Logo Chi Đội" id="logoImg" onerror="tryAlternativePath()">
+        <div class="fallback-text" id="fallbackText">CHI ĐỘI</div>
     </div>
     
     <div class="progress-bar-container">
@@ -81,6 +94,18 @@
     <div class="status-text" id="statusText">Đang tải tài nguyên... 0%</div>
 
     <script>
+        // Hàm dự phòng xử lý nếu đường dẫn tương đối không tìm thấy ảnh
+        function tryAlternativePath() {
+            const img = document.getElementById('logoImg');
+            if (!img.dataset.retried) {
+                img.dataset.retried = "true";
+                img.src = "/chidoi/icon.png";
+            } else {
+                img.style.display = 'none';
+                document.getElementById('fallbackText').style.display = 'block';
+            }
+        }
+
         // Đồng bộ màu sắc từ localStorage nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
@@ -92,12 +117,12 @@
         
         let progress = 0;
 
-        // Tạo khoảng delay ngẫu nhiên từ 10 đến 15 giây (10000ms - 15000ms) ở mức 0%
-        const initialDelay = Math.floor(Math.random() * 5000) + 10000;
+        // Đặt thời gian delay cố định 5 giây (5000ms) ở mức 0%[span_3](start_span)[span_3](end_span)
+        const initialDelay = 5000;
 
         setTimeout(() => {
             const timer = setInterval(() => {
-                // Tăng ngẫu nhiên từng bước từ 1 đến 8 mỗi nhịp để tạo cảm giác tự nhiên
+                // Tăng ngẫu nhiên từng bước từ 1 đến 8 mỗi nhịp để tạo cảm giác tự nhiên[span_4](start_span)[span_4](end_span)
                 progress += Math.floor(Math.random() * 8) + 1;
 
                 if (progress >= 100) {
@@ -106,7 +131,7 @@
                     progressBar.style.width = '100%';
                     statusText.innerText = `Đã tải hoàn tất! 100%`;
                     
-                    // Chuyển hướng sang trang auth.html sau khi đạt 100%
+                    // Chuyển hướng sang trang auth.html sau khi đạt 100%[span_5](start_span)[span_5](end_span)
                     setTimeout(() => {
                         window.location.href = "auth.html";
                     }, 400);
