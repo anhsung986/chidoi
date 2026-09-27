@@ -32,15 +32,17 @@
             text-align: center;
         }
         .logo-container img {
-            width: 180px;  /* Đã phóng to kích thước chiều rộng logo */
-            height: 180px; /* Đã phóng to kích thước chiều cao logo */
+            width: 260px;  /* Kích thước logo cực lớn */
+            height: 260px; /* Kích thước logo cực lớn */
+            max-width: 80vw; /* Đảm bảo không bị tràn trên màn hình điện thoại nhỏ */
+            max-height: 80vw;
             object-fit: contain;
-            border-radius: 36px;
-            box-shadow: 0 15px 40px rgba(0, 255, 213, 0.3);
+            border-radius: 50px;
+            box-shadow: 0 20px 50px rgba(0, 255, 213, 0.4);
         }
         /* Style cho chữ dự phòng nếu ảnh lỗi */
         .fallback-text {
-            font-size: 64px;
+            font-size: 72px;
             font-weight: bold;
             letter-spacing: 4px;
             background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
@@ -80,7 +82,7 @@
 </head>    
 <body>
 
-    <!-- Khu vực logo lớn -->
+    <!-- Khu vực logo siêu lớn -->
     <div class="logo-container">
         <img src="icon.png" alt="Logo Chi Đội" id="logoImg" onerror="tryAlternativePath()">
         <div class="fallback-text" id="fallbackText">CHI ĐỘI</div>
