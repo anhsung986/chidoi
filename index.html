@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#007bff">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,7 +32,19 @@
             background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            /* Thêm hiệu ứng xuất hiện cho logo */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInLogo 1.2s ease-out forwards;
         }
+
+        @keyframes fadeInLogo {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .progress-bar-container {
             width: 280px;
             height: 8px;
@@ -77,27 +89,32 @@
         
         let progress = 0;
 
-        const timer = setInterval(() => {
-            // Tăng ngẫu nhiên từng bước từ 1 đến 8 mỗi nhịp để tạo cảm giác tự nhiên
-            progress += Math.floor(Math.random() * 8) + 1;
+        // Tạo khoảng delay ngẫu nhiên từ 10 đến 15 giây (10000ms - 15000ms) ở mức 0%
+        const initialDelay = Math.floor(Math.random() * 5000) + 10000;
 
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(timer);
-                progressBar.style.width = '100%';
-                statusText.innerText = `Đã tải hoàn tất! 100%`;
-                
-                // Chuyển hướng sang trang auth.html sau khi đạt 100%
-                setTimeout(() => {
-                    window.location.href = "auth.html";
-                }, 400);
-                return;
-            }
+        setTimeout(() => {
+            const timer = setInterval(() => {
+                // Tăng ngẫu nhiên từng bước từ 1 đến 8 mỗi nhịp để tạo cảm giác tự nhiên
+                progress += Math.floor(Math.random() * 8) + 1;
 
-            progressBar.style.width = progress + '%';
-            statusText.innerText = `Đang tải tài nguyên... ${progress}%`;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    progressBar.style.width = '100%';
+                    statusText.innerText = `Đã tải hoàn tất! 100%`;
+                    
+                    // Chuyển hướng sang trang auth.html sau khi đạt 100%
+                    setTimeout(() => {
+                        window.location.href = "auth.html";
+                    }, 400);
+                    return;
+                }
 
-        }, 100);
+                progressBar.style.width = progress + '%';
+                statusText.innerText = `Đang tải tài nguyên... ${progress}%`;
+
+            }, 100);
+        }, initialDelay);
     </script>
 </body>
 </html>
