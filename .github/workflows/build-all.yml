@@ -107,7 +107,7 @@ jobs:
             "appName": "Chi Đội",
             "webDir": "www",
             "server": {
-              "url": "https://duong-dan-web-cua-ban.com",
+              "url": "https://cd.chidoi.gt.tc",
               "cleartext": true
             },
             "bundledWebRuntime": false,
