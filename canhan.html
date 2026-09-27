@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#007bff">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,19 +59,33 @@
 
         /* TIÊU ĐỀ GRADIENT CẦU VỒNG */
         .header-title {
-            font-size: 22px; font-weight: 600; margin: 20px 0 25px 0;
+            font-size: 22px; font-weight: 600; margin: 15px 0 20px 0;
             background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 1px;
         }
 
+        /* KHU VỰC ẢNH ĐẠI DIỆN (AVATAR) */
+        .avatar-container {
+            position: relative;
+            width: 90px; height: 90px;
+            margin: 0 auto 20px auto;
+        }
+        .avatar-container img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--app-primary-color, #00ffd5);
+            box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
+        }
+
         /* CÁC DÒNG THÔNG TIN */
         .info-group {
-            margin-bottom: 18px; text-align: left;
+            margin-bottom: 15px; text-align: left;
         }
         .info-label {
-            font-weight: 600; font-size: 11px; margin-bottom: 6px;
+            font-weight: 600; font-size: 11px; margin-bottom: 5px;
             display: block; color: rgba(255, 255, 255, 0.4); letter-spacing: 1px;
         }
         
@@ -97,8 +111,8 @@
         /* NÚT LƯU THÔNG TIN PHÁT SÁNG CẦU VỒNG HOẶC THEO MÀU CHỦ ĐẠO */
         .save-btn {
             background: var(--app-primary-color, linear-gradient(45deg, #ff0055, #7a00ff));
-            color: white; border: none; padding: 13px; border-radius: 50px;
-            font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 15px;
+            color: white; border: none; padding: 12px; border-radius: 50px;
+            font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 10px;
             width: 100%; transition: 0.3s;
             box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
         }
@@ -111,7 +125,7 @@
 <body>
 
 <script>
-    // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang
+    // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang[span_0](start_span)[span_0](end_span)
     const savedColor = localStorage.getItem('app_theme_color');
     if (savedColor) {
         document.documentElement.style.setProperty('--app-primary-color', savedColor);
@@ -121,9 +135,7 @@
         document.documentElement.style.setProperty('--app-font-family', savedFont);
     }
 
-    // Tự động áp dụng cài đặt chung cho mọi trang khi được tải xong
     window.addEventListener("DOMContentLoaded", () => {
-        // 1. Đồng bộ Dark Mode
         const isDarkMode = localStorage.getItem("appDarkMode") === "true";
         if (isDarkMode) {
             document.body.style.backgroundColor = "#0b0f19";
@@ -132,20 +144,26 @@
             document.body.style.backgroundColor = "";
             document.body.style.color = "";
         }
-
-        // 2. Đồng bộ tên hiển thị (nếu trang đó có chỗ hiển thị tên như trang chủ)
-        const savedUser = localStorage.getItem("loggedInUser");
-        const userDisplayEl = document.getElementById("userDisplay");
-        if (savedUser && userDisplayEl) {
-            userDisplayEl.innerText = savedUser;
-        }
     });
 </script>
 
 <div class="container">
-    <a href="home.html" class="back-btn">⬅ BACK</a>
+    <a href="home.html" class="back-btn">⬅ BACK</a>[span_1](start_span)[span_1](end_span)
     
     <div class="header-title">THÔNG TIN CỦA BẠN</div>
+
+    <!-- KHU VỰC ẢNH ĐẠI DIỆN -->
+    <div class="avatar-container">
+        <img id="avatarPreview" src="icon.png" alt="Ảnh đại diện">
+    </div>
+
+    <div class="info-group">
+        <span class="info-label">ĐƯỜNG DẪN ẢNH ĐẠI DIỆN (AVATAR URL)</span>
+        <div class="info-row">
+            <span class="info-icon">🖼️</span>
+            <input type="text" id="avatarUrl" placeholder="Nhập link ảnh hoặc tên tệp (vd: icon.png)..." oninput="updateAvatarPreview()">
+        </div>
+    </div>
 
     <div class="info-group">
         <span class="info-label">HỌ VÀ TÊN</span>
@@ -187,7 +205,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // Cấu hình Firebase có databaseURL
   const firebaseConfig = {
     apiKey: "AIzaSyBAWnGJ0m3RYEFba6QLQ4ajsqJ3rwhd34Q",
     authDomain: "thongtin-21697.firebaseapp.com",
@@ -202,19 +219,29 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  let userId = localStorage.getItem("user_id");
-  if (!userId) {
-    userId = "user_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("user_id", userId);
+  // Xác định định danh người dùng riêng biệt dựa trên tài khoản đang đăng nhập hoặc tạo mới nếu chưa có
+  let currentAccount = localStorage.getItem("loggedInUser");
+  if (!currentAccount) {
+      currentAccount = localStorage.getItem("user_id");
+      if (!currentAccount) {
+          currentAccount = "user_" + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem("user_id", currentAccount);
+      }
   }
+  // Chuyển đổi tên tài khoản thành dạng an toàn để làm key trên Firebase (loại bỏ ký tự đặc biệt)
+  let userKey = currentAccount.replace(/[@\.]/g, "_");
 
-  // 1. Lấy dữ liệu về khi load trang
+  // 1. Lấy dữ liệu riêng của người dùng này về khi load trang[span_2](start_span)[span_2](end_span)
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const dbRef = ref(db);
-      const snapshot = await get(child(dbRef, `users/${userId}`));
+      const snapshot = await get(child(dbRef, `users/${userKey}`));
       if (snapshot.exists()) {
         const data = snapshot.val();
+        if (data.avatar) {
+          document.getElementById('avatarUrl').value = data.avatar;
+          document.getElementById('avatarPreview').src = data.avatar;
+        }
         if (data.username) document.getElementById('username').value = data.username;
         if (data.birthday) document.getElementById('birthday').value = data.birthday;
         if (data.nickname) document.getElementById('nickname').value = data.nickname;
@@ -225,15 +252,18 @@
     }
   });
 
-  // 2. Lưu thông tin vào Realtime Database
+  // 2. Lưu thông tin riêng của người dùng này lên Realtime Database[span_3](start_span)[span_3](end_span)
   document.getElementById("saveBtn").addEventListener("click", async () => {
+    const avatar = document.getElementById('avatarUrl').value.trim();
     const name = document.getElementById('username').value;
     const birth = document.getElementById('birthday').value;
     const nick = document.getElementById('nickname').value;
     const hobby = document.getElementById('hobby').value;
 
     try {
-      await set(ref(db, 'users/' + userId), {
+      await set(ref(db, 'users/' + userKey), {
+        accountName: currentAccount,
+        avatar: avatar || 'icon.png',
         username: name,
         birthday: birth,
         nickname: nick,
@@ -241,11 +271,24 @@
         updatedAt: new Date().toISOString()
       });
 
-      alert("🎉 Đã lưu thông tin lên Realtime Database thành công!");
+      alert("🎉 Đã lưu thông tin của bạn lên hệ thống thành công!");
     } catch (error) {
       alert("❌ Lỗi: " + error.message);
     }
   });
+</script>
+
+<script>
+    // Hàm cập nhật hình ảnh xem trước ngay khi người dùng gõ link ảnh mới
+    function updateAvatarPreview() {
+        const url = document.getElementById('avatarUrl').value.trim();
+        const preview = document.getElementById('avatarPreview');
+        if (url) {
+            preview.src = url;
+        } else {
+            preview.src = 'icon.png';
+        }
+    }
 </script>
 
 </body>
