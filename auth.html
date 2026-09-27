@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007bff">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Thực - Chidoi</title>
+    <style>
+        :root {
+            --app-primary-color: #00ffd5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: #0b0f19;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+        .welcome-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            background: #111827;
+            border-radius: 24px;
+            padding: 35px 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            border: 1px solid color-mix(in srgb, var(--app-primary-color) 40%, transparent);
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff416c, var(--app-primary-color), #7a00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .welcome-text {
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .btn-login {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+        }
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .btn-register {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-register:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .btn-guide {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--app-primary-color);
+            border: 1px dashed color-mix(in srgb, var(--app-primary-color) 50%, transparent);
+            font-size: 13px;
+        }
+        .btn-guide:hover {
+            background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
+        }
+
+        /* CSS Nút Thông báo */
+        .btn-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 20px;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Trạng thái chưa cho phép / bị chặn (Màu đỏ) */
+        .btn-notification.not-granted {
+            background-color: #dc3545;
+        }
+        .btn-notification.not-granted:hover {
+            background-color: #bd2130;
+            transform: scale(1.05);
+        }
+
+        /* Trạng thái đã cho phép (Màu xanh) */
+        .btn-notification.granted {
+            background-color: #28a745;
+        }
+        .btn-notification.granted:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+    </style>
+
+    <!-- OneSignal SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "43f7f97c-c122-4c0a-aa40-c4b74d80fcbe",
+        });
+
+        // Kiểm tra và đổi màu nút ngay sau khi OneSignal khởi tạo xong
+        updateNotificationButtonUI(OneSignal);
+
+        // Lắng nghe sự thay đổi quyền
+        OneSignal.Notifications.addEventListener("permissionChange", function() {
+            updateNotificationButtonUI(OneSignal);
+        });
+      });
+    </script>
+</head>
+<body>
+
+    <div class="welcome-container">
+        <h1 class="logo">CHI ĐỘI</h1>
+        <p class="welcome-text">
+            Chào mừng bạn đến với hệ thống website Chi đội.<br>
+            Vui lòng đăng nhập hoặc đăng ký để tiếp tục trải nghiệm.
+        </p>
+
+        <div class="btn-group">
+            <a href="login.html" class="btn btn-login">Đăng Nhập</a>
+            <a href="register.html" class="btn btn-register">Đăng Ký</a>
+            <a href="huongdan.html" class="btn btn-guide">👉 Bấm vào đây để xem chi tiết hướng dẫn</a>
+        </div>
+    </div>
+
+    <!-- Nút Bật thông báo -->
+    <button id="notif-btn" onclick="requestPushPermission()" class="btn-notification not-granted">
+      🔔 Bật thông báo Chi Đội
+    </button>
+
+    <script>
+        // Đồng bộ màu giao diện từ localStorage
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+
+        // Cập nhật giao diện & màu sắc nút theo trạng thái quyền
+        function updateNotificationButtonUI(OneSignal) {
+            const btn = document.getElementById('notif-btn');
+            if (!btn) return;
+
+            const permission = OneSignal.Notifications.permission;
+
+            if (permission === "granted") {
+                btn.className = "btn-notification granted";
+                btn.innerText = "✅ Đã bật thông báo";
+            } else {
+                btn.className = "btn-notification not-granted";
+                btn.innerText = "🔔 Bật thông báo Chi Đội";
+            }
+        }
+
+        // Kích hoạt xin quyền khi bấm nút
+        function requestPushPermission() {
+            if (!window.OneSignalDeferred) {
+                alert("Hệ thống thông báo đang tải, vui lòng thử lại sau vài giây!");
+                return;
+            }
+
+            OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    if (!OneSignal.Notifications.isPushSupported()) {
+                        alert("Trình duyệt của bạn không hỗ trợ thông báo Push!");
+                        return;
+                    }
+
+                    const permission = OneSignal.Notifications.permission;
+
+                    if (permission === "granted") {
+                        alert("Bạn đã bật thông báo rồi!");
+                        return;
+                    }
+
+                    if (permission === "denied") {
+                        alert("Bạn đã TẮT/CHẶN thông báo.\n\nHãy bấm vào biểu tượng 'Ổ khóa' ở thanh địa chỉ URL của trình duyệt để chọn Cho phép (Allow) thông báo.");
+                        return;
+                    }
+
+                    // Gọi xin quyền
+                    await OneSignal.Notifications.requestPermission();
+                    updateNotificationButtonUI(OneSignal);
+
+                } catch (err) {
+                    console.error("Lỗi xin quyền thông báo:", err);
+                    alert("Có lỗi xảy ra khi bật thông báo!");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
