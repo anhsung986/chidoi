@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#007bff">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,6 +91,14 @@
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
     </style>
+
+    <script>
+        // KIỂM TRA PHIÊN ĐĂNG NHẬP: Nếu đã đăng nhập rồi mà vào lại trang auth, tự động đẩy về home.html
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (loggedInUser) {
+            window.location.href = "home.html";
+        }
+    </script>
 </head>
 <body>
 
@@ -98,7 +106,7 @@
         <h1 class="logo">CHI ĐỘI</h1>
         <p class="welcome-text">
             Chào mừng bạn đến với hệ thống của Chi đội.<br>
-            Vui lòng đăng nhập hoặc đăng ký để tiếp tục trải nghiệm.
+            Vui lòng đăng nhập hoặc đăng ký để tiếp tục trải nghiệm[span_1](start_span)[span_1](end_span).
         </p>
 
         <div class="btn-group">
@@ -109,7 +117,7 @@
     </div>
 
     <script>
-        // Đồng bộ màu sắc từ localStorage nếu có
+        // Đồng bộ màu sắc từ localStorage nếu có[span_2](start_span)[span_2](end_span)
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
