@@ -9,6 +9,14 @@
 <title>Bảng Tin Mạng Xã Hội</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+<!-- BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html -->
+<script>
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+        window.location.href = "auth.html";
+    }
+</script>
+
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     body { background-color: #ffb3b3; min-height: 100vh; display: flex; justify-content: center; padding: 20px 15px; }
