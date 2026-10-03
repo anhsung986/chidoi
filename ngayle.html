@@ -9,6 +9,15 @@
     <title>Lịch Các Ngày Lễ & Thời Gian</title>
     <!-- Nhúng thư viện LunarCalendarJS để tính toán ngày Âm lịch chính xác -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-calendar-js@1.0.4/LunarCalendar.min.js"></script>
+
+    <!-- BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html -->
+    <script>
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "auth.html";
+        }
+    </script>
+
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -493,3 +502,4 @@
     </script>
 </body>
 </html>
+                                                
