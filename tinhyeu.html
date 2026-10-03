@@ -8,11 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffb3b3">
     <title>Dự Đoán Tình Yêu</title>
+
+    <!-- BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html -->
+    <script>
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "auth.html";
+        }
+    </script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins'), sans-serif; }
 
         html, body {
             background-color: #ffb3b3 !important;
@@ -260,6 +268,17 @@
     </style>
 </head>
 <body>
+    <script>
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
 
     <a href="home.html" class="btn-back">⬅ Home</a>
 
@@ -409,3 +428,4 @@
     </script>
 </body>
 </html>
+
