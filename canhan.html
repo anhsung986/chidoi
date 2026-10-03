@@ -121,20 +121,28 @@
             box-shadow: 0 6px 20px rgba(0, 255, 213, 0.6);
         }
     </style>
+
+    <script>
+        // BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "auth.html";
+        }
+
+        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
 </head>
 <body>
 
 <script>
-    // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang[span_0](start_span)[span_0](end_span)
-    const savedColor = localStorage.getItem('app_theme_color');
-    if (savedColor) {
-        document.documentElement.style.setProperty('--app-primary-color', savedColor);
-    }
-    const savedFont = localStorage.getItem('app_font_family');
-    if (savedFont) {
-        document.documentElement.style.setProperty('--app-font-family', savedFont);
-    }
-
     window.addEventListener("DOMContentLoaded", () => {
         const isDarkMode = localStorage.getItem("appDarkMode") === "true";
         if (isDarkMode) {
@@ -148,7 +156,7 @@
 </script>
 
 <div class="container">
-    <a href="home.html" class="back-btn">⬅ BACK</a>[span_1](start_span)[span_1](end_span)
+    <a href="home.html" class="back-btn">⬅ BACK</a>
     
     <div class="header-title">THÔNG TIN CỦA BẠN</div>
 
@@ -231,7 +239,7 @@
   // Chuyển đổi tên tài khoản thành dạng an toàn để làm key trên Firebase (loại bỏ ký tự đặc biệt)
   let userKey = currentAccount.replace(/[@\.]/g, "_");
 
-  // 1. Lấy dữ liệu riêng của người dùng này về khi load trang[span_2](start_span)[span_2](end_span)
+  // 1. Lấy dữ liệu riêng của người dùng này về khi load trang
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const dbRef = ref(db);
@@ -252,7 +260,7 @@
     }
   });
 
-  // 2. Lưu thông tin riêng của người dùng này lên Realtime Database[span_3](start_span)[span_3](end_span)
+  // 2. Lưu thông tin riêng của người dùng này lên Realtime Database
   document.getElementById("saveBtn").addEventListener("click", async () => {
     const avatar = document.getElementById('avatarUrl').value.trim();
     const name = document.getElementById('username').value;
