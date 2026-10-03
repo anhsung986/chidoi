@@ -2,8 +2,7 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
-    
+    <meta name="theme-color" content="#007bff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh Sách Thành Viên</title>
@@ -11,7 +10,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins', sans-serif); }
         
-        /* ĐỔI NỀN SANG MÀU ĐỎ NHẠT GIỐNG TRANG HOME */
         body {
             background-color: #ffb3b3;
             min-height: 100vh;
@@ -21,7 +19,6 @@
             align-items: center;
         }
 
-        /* KHUNG CHỨA ĐỔI SANG NỀN TỐI VÀ THÊM VIỀN LED CẦU VỒNG */
         .container {
             position: relative;
             width: 100%;
@@ -35,7 +32,6 @@
             height: 85vh;
         }
 
-        /* VIỀN LED CẦU VỒNG CHẠY XOAY QUANH KHUNG */
         .container::before {
             content: '';
             position: absolute;
@@ -54,21 +50,19 @@
             100% { background-position: 0 0; }
         }
 
-        /* ĐỔI MÀU KHU VỰC HEADER */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 20px;
+            padding: 15px 20px;
             background: #1f2937;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        /* NÚT BACK SANG PHONG CÁCH NEON ĐỎ */
         .back-btn {
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: transparent;
             border: 1px solid #ff3b30;
             border-radius: 8px;
@@ -86,41 +80,45 @@
             box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
         }
 
-        /* CHỮ TIÊU ĐỀ GRADIENT CẦU VỒNG */
         .page-title {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             letter-spacing: 1px;
             background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* THANH TÌM KIẾM THEO KIỂU TỐI NEON */
-        .search-box {
-            padding: 8px 14px;
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .search-box, .month-select {
+            padding: 7px 10px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            width: 140px;
-            font-size: 13px;
+            font-size: 12px;
             outline: none;
             background: #111827;
             color: white;
             transition: 0.3s;
         }
 
-        .search-box:focus { 
-            width: 180px; 
+        .search-box { flex: 1; }
+        .month-select { width: 110px; cursor: pointer; }
+
+        .search-box:focus, .month-select:focus { 
             border-color: var(--app-primary-color, #00ffd5); 
             box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
         }
 
-        .search-info {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 5px;
-            width: 100%;
-            text-align: center;
+        .month-select option {
+            background: #111827;
+            color: white;
         }
 
         .table-container {
@@ -129,13 +127,11 @@
             background: #111827;
         }
 
-        /* Tối ưu hóa thanh cuộn tối */
         .table-container::-webkit-scrollbar { width: 6px; }
         .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
         table { width: 100%; border-collapse: collapse; }
 
-        /* TIÊU ĐỀ BẢNG MÀU TỐI */
         thead th {
             position: sticky;
             top: 0;
@@ -143,31 +139,27 @@
             color: var(--app-primary-color, #00ffd5);
             font-weight: 600;
             text-align: left;
-            padding: 14px;
+            padding: 12px 14px;
             border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             font-size: 13px;
             z-index: 5;
         }
 
-        /* NỘI DUNG BẢNG CHỮ SÁNG */
         td {
-            padding: 12px 14px;
+            padding: 11px 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             font-size: 13px;
             color: #eee;
         }
 
-        /* HOVER DÒNG BẢNG PHÁT SÁNG NHẸ MÀU XANH NEON */
         tr:hover { background-color: rgba(0, 255, 213, 0.05); }
 
         .col-stt { width: 60px; text-align: center; font-weight: 600; color: #ff7300; }
         .col-namsinh { width: 120px; text-align: center; color: #fffb00; }
     </style>
-
 </head>
 <body>
     <script>
-        // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
@@ -182,8 +174,24 @@
         <div class="header">
             <a href="home.html" class="back-btn">⬅ BACK</a>
             <div class="page-title">DANH SÁCH</div>
-            <input type="text" id="searchInput" onkeyup="filterTable()" class="search-box" placeholder="Tìm tên hoặc ngày sinh...">
-            <div class="search-info">Tìm kiếm theo tên hoặc ngày sinh (dd/mm/yyyy)</div>
+            <div class="filter-group">
+                <select id="monthSelect" onchange="filterTable()" class="month-select">
+                    <option value="">Tất cả tháng</option>
+                    <option value="1">Tháng 1</option>
+                    <option value="2">Tháng 2</option>
+                    <option value="3">Tháng 3</option>
+                    <option value="4">Tháng 4</option>
+                    <option value="5">Tháng 5</option>
+                    <option value="6">Tháng 6</option>
+                    <option value="7">Tháng 7</option>
+                    <option value="8">Tháng 8</option>
+                    <option value="9">Tháng 9</option>
+                    <option value="10">Tháng 10</option>
+                    <option value="11">Tháng 11</option>
+                    <option value="12">Tháng 12</option>
+                </select>
+                <input type="text" id="searchInput" onkeyup="filterTable()" class="search-box" placeholder="Tìm tên hoặc ngày sinh...">
+            </div>
         </div>
 
         <div class="table-container">
@@ -264,26 +272,41 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <script>
         function filterTable() {
-            var input, filter, table, tr, td, i, txtValue, nameColumn, dateColumn;
+            var input, filter, monthSelect, selectedMonth, table, tr, i;
             input = document.getElementById("searchInput");
             filter = input.value.toUpperCase();
+            monthSelect = document.getElementById("monthSelect");
+            selectedMonth = monthSelect.value;
+            
             table = document.getElementById("myTable");
             tr = table.getElementsByTagName("tr");
 
             for (i = 1; i < tr.length; i++) {
-                nameColumn = tr[i].getElementsByTagName("td")[1];
-                dateColumn = tr[i].getElementsByTagName("td")[2];
+                var nameColumn = tr[i].getElementsByTagName("td")[1];
+                var dateColumn = tr[i].getElementsByTagName("td")[2];
 
-                if (nameColumn || dateColumn) {
-                    var nameValue = nameColumn ? (nameColumn.textContent || nameColumn.innerText) : "";
-                    var dateValue = dateColumn ? (dateColumn.textContent || dateColumn.innerText) : "";
+                if (nameColumn && dateColumn) {
+                    var nameValue = nameColumn.textContent || nameColumn.innerText;
+                    var dateValue = dateColumn.textContent || dateColumn.innerText;
 
-                    if (nameValue.toUpperCase().indexOf(filter) > -1 || dateValue.indexOf(filter) > -1) {
+                    var matchesSearch = (nameValue.toUpperCase().indexOf(filter) > -1 || dateValue.indexOf(filter) > -1);
+
+                    var matchesMonth = true;
+                    if (selectedMonth !== "") {
+                        var parts = dateValue.split('/');
+                        if (parts.length === 3) {
+                            var monthOfBirth = parseInt(parts[1], 10);
+                            matchesMonth = (monthOfBirth === parseInt(selectedMonth, 10));
+                        } else {
+                            matchesMonth = false;
+                        }
+                    }
+
+                    if (matchesSearch && matchesMonth) {
                         tr[i].style.display = "";
                     } else {
                         tr[i].style.display = "none";
@@ -294,3 +317,4 @@
     </script>
 </body>
 </html>
+                                                                            
