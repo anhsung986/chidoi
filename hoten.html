@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007bff">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Thành Viên</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--app-font-family, 'Poppins', sans-serif); }
+        
+        body {
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            background: #111827;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            height: 96vh; /* Tăng chiều cao khung tổng thể sát màn hình */
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(8px);
+            border-radius: 23px;
+            animation: steam 20s linear infinite;
+        }
+
+        @keyframes steam {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: #1f2937;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            padding: 5px 12px;
+            background: transparent;
+            border: 1px solid #ff3b30;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            color: #ff3b30;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover { 
+            background: #ff3b30; 
+            color: white; 
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.5);
+        }
+
+        .page-title {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-box {
+            padding: 5px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+            background: #111827;
+            color: white;
+            transition: 0.3s;
+            width: 130px;
+        }
+
+        .search-box:focus { 
+            border-color: var(--app-primary-color, #00ffd5); 
+            box-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+        }
+
+        .custom-dropdown {
+            position: relative;
+            width: 120px;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            padding: 5px 10px;
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            border-color: var(--app-primary-color, #00ffd5);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 160px;
+            background: #1f2937;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .dropdown-menu.show {
+            display: flex;
+        }
+
+        .dropdown-menu::-webkit-scrollbar { width: 4px; }
+        .dropdown-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+        .dropdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .dropdown-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        .dropdown-item span { font-size: 12px; color: #d1d5db; }
+
+        .radio-circle {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item.active .radio-circle { border-color: #00ffd5; }
+
+        .dropdown-item.active .radio-circle::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #00ffd5;
+            border-radius: 50%;
+        }
+
+        .dropdown-item.active span { color: #00ffd5; font-weight: 500; }
+
+        .search-info {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* PHẦN BẢNG DÀI RA TỐI ĐA ĐỂ HIỆN NHIỀU DÒNG TÊN */
+        .table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #111827;
+        }
+
+        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #1f2937;
+            color: var(--app-primary-color, #00ffd5);
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            z-index: 5;
+        }
+
+        td {
+            padding: 9px 14px; /* Tăng nhẹ khoảng cách dòng cho thoáng và dày đều */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 12px;
+            color: #eee;
+        }
+
+        tr:hover { background-color: rgba(0, 255, 213, 0.05); }
+
+        .col-stt { width: 50px; text-align: center; font-weight: 600; color: #ff7300; }
+        .col-name { font-weight: 600; color: #ffffff; }
+        .col-namsinh { width: 110px; text-align: center; color: #fffb00; }
+    </style>
+</head>
+<body>
+    <script>
+        const savedColor = localStorage.getItem('app_theme_color');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--app-primary-color', savedColor);
+        }
+        const savedFont = localStorage.getItem('app_font_family');
+        if (savedFont) {
+            document.documentElement.style.setProperty('--app-font-family', savedFont);
+        }
+    </script>
+
+    <div class="container">
+        <div class="header">
+            <a href="home.html" class="back-btn">⬅ BACK</a>
+            <div class="page-title">DANH SÁCH</div>
+            
+            <div class="filter-controls">
+                <div class="custom-dropdown">
+                    <div class="dropdown-btn" onclick="toggleDropdown()">
+                        <span id="selectedMonthText">Tất cả tháng</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-item active" onclick="selectMonth('', 'Tất cả tháng')">
+                            <span>Tất cả tháng</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('1', 'Tháng 1')">
+                            <span>Tháng 1</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('2', 'Tháng 2')">
+                            <span>Tháng 2</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('3', 'Tháng 3')">
+                            <span>Tháng 3</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('4', 'Tháng 4')">
+                            <span>Tháng 4</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('5', 'Tháng 5')">
+                            <span>Tháng 5</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('6', 'Tháng 6')">
+                            <span>Tháng 6</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('7', 'Tháng 7')">
+                            <span>Tháng 7</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('8', 'Tháng 8')">
+                            <span>Tháng 8</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('9', 'Tháng 9')">
+                            <span>Tháng 9</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('10', 'Tháng 10')">
+                            <span>Tháng 10</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('11', 'Tháng 11')">
+                            <span>Tháng 11</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                        <div class="dropdown-item" onclick="selectMonth('12', 'Tháng 12')">
+                            <span>Tháng 12</span>
+                            <div class="radio-circle"></div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="monthSelect" value="">
+                
+                <input type="text" id="searchInput" onkeyup="filterTable()" class="search-box" placeholder="Tìm tên...">
+            </div>
+
+            <div class="search-info">Chọn tháng hoặc tìm kiếm theo tên, ngày sinh (dd/mm/yyyy)</div>
+        </div>
+
+        <div class="table-container">
+            <table id="myTable">
+                <thead>
+                    <tr>
+                        <th class="col-stt">STT</th>
+                        <th>HỌ VÀ TÊN</th>
+                        <th class="col-namsinh">NGÀY SINH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="col-stt">1</td><td class="col-name">TẨN PHỤ AN</td><td class="col-namsinh">5/5/2012</td></tr>
+                    <tr><td class="col-stt">2</td><td class="col-name">ĐỖ TUẤN ANH</td><td class="col-namsinh">19/10/2012</td></tr>
+                    <tr><td class="col-stt">3</td><td class="col-name">SÙNG TUẤN ANH</td><td class="col-namsinh">10/3/2012</td></tr>
+                    <tr><td class="col-stt">4</td><td class="col-name">MAI HOA BAN</td><td class="col-namsinh">23/3/2012</td></tr>
+                    <tr><td class="col-stt">5</td><td class="col-name">SÙNG THỊ MAI CA</td><td class="col-namsinh">6/8/2012</td></tr>
+                    <tr><td class="col-stt">6</td><td class="col-name">LY THỊ CHẤU</td><td class="col-namsinh">12/5/2012</td></tr>
+                    <tr><td class="col-stt">7</td><td class="col-name">LÒ THỊ CHIÊN</td><td class="col-namsinh">13/12/2012</td></tr>
+                    <tr><td class="col-stt">8</td><td class="col-name">SÙNG XUÂN CHIẾN</td><td class="col-namsinh">20/2/2012</td></tr>
+                    <tr><td class="col-stt">9</td><td class="col-name">VÀNG THỊ CHỢ</td><td class="col-namsinh">14/7/2012</td></tr>
+                    <tr><td class="col-stt">10</td><td class="col-name">LY THỊ CHÚA</td><td class="col-namsinh">15/8/2011</td></tr>
+                    <tr><td class="col-stt">11</td><td class="col-name">HẦU MINH CHUNG</td><td class="col-namsinh">11/12/2012</td></tr>
+                    <tr><td class="col-stt">12</td><td class="col-name">VÀNG XUÂN ĐÔNG</td><td class="col-namsinh">10/5/2012</td></tr>
+                    <tr><td class="col-stt">13</td><td class="col-name">MA MÍ GIÀNG</td><td class="col-namsinh">20/2/2012</td></tr>
+                    <tr><td class="col-stt">14</td><td class="col-name">LÒ THỊ HÀ</td><td class="col-namsinh">18/5/2012</td></tr>
+                    <tr><td class="col-stt">15</td><td class="col-name">LÙ THỊ THANH HẰNG</td><td class="col-namsinh">10/1/2012</td></tr>
+                    <tr><td class="col-stt">16</td><td class="col-name">SÙNG THỊ LAN</td><td class="col-namsinh">30/5/2012</td></tr>
+                    <tr><td class="col-stt">17</td><td class="col-name">VÀNG THỊ LY</td><td class="col-namsinh">14/8/2012</td></tr>
+                    <tr><td class="col-stt">18</td><td class="col-name">LÒ THỊ MÀY</td><td class="col-namsinh">7/3/2012</td></tr>
+                    <tr><td class="col-stt">19</td><td class="col-name">GIÀNG MÍ MINH</td><td class="col-namsinh">26/8/2012</td></tr>
+                    <tr><td class="col-stt">20</td><td class="col-name">VÀNG VĂN NGỌC</td><td class="col-namsinh">3/8/2012</td></tr>
+                    <tr><td class="col-stt">21</td><td class="col-name">VÀNG THỊ PÀ</td><td class="col-namsinh">27/5/2012</td></tr>
+                    <tr><td class="col-stt">22</td><td class="col-name">LÙ VĂN PÁO</td><td class="col-namsinh">16/7/2012</td></tr>
+                    <tr><td class="col-stt">23</td><td class="col-name">HẠNG MÍ PHỨ</td><td class="col-namsinh">12/1/2012</td></tr>
+                    <tr><td class="col-stt">24</td><td class="col-name">LÒ THỊ THANH PHƯƠNG</td><td class="col-namsinh">25/2/2012</td></tr>
+                    <tr><td class="col-stt">25</td><td class="col-name">VÀNG THỊ SAU</td><td class="col-namsinh">1/5/2012</td></tr>
+                    <tr><td class="col-stt">26</td><td class="col-name">GIÀNG MÍ SÁU</td><td class="col-namsinh">10/6/2012</td></tr>
+                    <tr><td class="col-stt">27</td><td class="col-name">LÒ VĂN SƠN</td><td class="col-namsinh">8/7/2012</td></tr>
+                    <tr><td class="col-stt">28</td><td class="col-name">SÙNG THỊ THU</td><td class="col-namsinh">29/1/2012</td></tr>
+                    <tr><td class="col-stt">29</td><td class="col-name">HẠNG THỊ KIM TRANG</td><td class="col-namsinh">4/8/2012</td></tr>
+                    <tr><td class="col-stt">30</td><td class="col-name">GIÀNG THỊ VÀNG</td><td class="col-namsinh">16/9/2012</td></tr>
+                    <tr><td class="col-stt">31</td><td class="col-name">LY THỊ XAY</td><td class="col-namsinh">20/3/2012</td></tr>
+                    <tr><td class="col-stt">32</td><td class="col-name">SÙNG VÂN XUÂN</td><td class="col-namsinh">23/1/2012</td></tr>
+                    <tr><td class="col-stt">33</td><td class="col-name">LY THỊ DÍNH</td><td class="col-namsinh">3/9/2012</td></tr>
+                    <tr><td class="col-stt">34</td><td class="col-name">SÙNG ĐỨC GIANG</td><td class="col-namsinh">23/2/2012</td></tr>
+                    <tr><td class="col-stt">35</td><td class="col-name">MA NGUYÊN GIÁP</td><td class="col-namsinh">17/7/2012</td></tr>
+                    <tr><td class="col-stt">36</td><td class="col-name">SÙNG XUÂN GIỒNG</td><td class="col-namsinh">12/6/2012</td></tr>
+                    <tr><td class="col-stt">37</td><td class="col-name">VÀNG SÚA HÀ</td><td class="col-namsinh">11/1/2012</td></tr>
+                    <tr><td class="col-stt">38</td><td class="col-name">HẠNG THỊ HOA</td><td class="col-namsinh">29/5/2012</td></tr>
+                    <tr><td class="col-stt">39</td><td class="col-name">LÒ THỊ HOA</td><td class="col-namsinh">16/6/2012</td></tr>
+                    <tr><td class="col-stt">40</td><td class="col-name">LY THỊ HOA</td><td class="col-namsinh">28/6/2012</td></tr>
+                    <tr><td class="col-stt">41</td><td class="col-name">VÀNG THÚY HƯƠNG</td><td class="col-namsinh">5/9/2012</td></tr>
+                    <tr><td class="col-stt">42</td><td class="col-name">VÀNG LONG KHÁCH</td><td class="col-namsinh">15/1/2012</td></tr>
+                    <tr><td class="col-stt">43</td><td class="col-name">GIÀNG THỊ LAN</td><td class="col-namsinh">16/9/2012</td></tr>
+                    <tr><td class="col-stt">44</td><td class="col-name">SÙNG THỊ LAN</td><td class="col-namsinh">14/10/2012</td></tr>
+                    <tr><td class="col-stt">45</td><td class="col-name">HẠNG THỊ LIÊN</td><td class="col-namsinh">4/12/2012</td></tr>
+                    <tr><td class="col-stt">46</td><td class="col-name">MA XUÂN LONG</td><td class="col-namsinh">1/3/2012</td></tr>
+                    <tr><td class="col-stt">47</td><td class="col-name">HẠNG MÍ LÙNG</td><td class="col-namsinh">7/5/2012</td></tr>
+                    <tr><td class="col-stt">48</td><td class="col-name">SÙNG MÍ LỬ</td><td class="col-namsinh">17/5/2012</td></tr>
+                    <tr><td class="col-stt">49</td><td class="col-name">LY THỊ MẢY</td><td class="col-namsinh">14/10/2012</td></tr>
+                    <tr><td class="col-stt">50</td><td class="col-name">LY MÍ MÌNH</td><td class="col-namsinh">6/12/2012</td></tr>
+                    <tr><td class="col-stt">51</td><td class="col-name">MA THÚY NGUYỆT</td><td class="col-namsinh">16/8/2012</td></tr>
+                    <tr><td class="col-stt">52</td><td class="col-name">VÀNG MINH NHẤT</td><td class="col-namsinh">4/7/2012</td></tr>
+                    <tr><td class="col-stt">53</td><td class="col-name">MA VĂN QUỐC</td><td class="col-namsinh">5/12/2012</td></tr>
+                    <tr><td class="col-stt">54</td><td class="col-name">GIÀNG VĂN QUÝ</td><td class="col-namsinh">10/1/2012</td></tr>
+                    <tr><td class="col-stt">55</td><td class="col-name">GIÀNG MÍ SÁNG</td><td class="col-namsinh">1/1/2012</td></tr>
+                    <tr><td class="col-stt">56</td><td class="col-name">VÀNG MÍ SÁNG</td><td class="col-namsinh">1/8/2012</td></tr>
+                    <tr><td class="col-stt">57</td><td class="col-name">HẠNG THỊ SANH</td><td class="col-namsinh">15/8/2012</td></tr>
+                    <tr><td class="col-stt">58</td><td class="col-name">GIÀNG QUỐC SƠN</td><td class="col-namsinh">5/2/2012</td></tr>
+                    <tr><td class="col-stt">59</td><td class="col-name">HẠNG VĂN SỸ</td><td class="col-namsinh">1/7/2012</td></tr>
+                    <tr><td class="col-stt">60</td><td class="col-name">MA XUÂN THANH</td><td class="col-namsinh">27/11/2012</td></tr>
+                    <tr><td class="col-stt">61</td><td class="col-name">HẠNG XUÂN THÀNH</td><td class="col-namsinh">4/1/2012</td></tr>
+                    <tr><td class="col-stt">62</td><td class="col-name">MA THỊ TRẤN</td><td class="col-namsinh">8/5/2012</td></tr>
+                    <tr><td class="col-stt">63</td><td class="col-name">LY TUẤN TÚ</td><td class="col-namsinh">18/10/2012</td></tr>
+                    <tr><td class="col-stt">64</td><td class="col-name">HẠNG MÍ TỦA</td><td class="col-namsinh">28/2/2012</td></tr>
+                    <tr><td class="col-stt">65</td><td class="col-name">HẠNG MÍ TỦA</td><td class="col-namsinh">14/11/2012</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("dropdownMenu").classList.toggle("show");
+        }
+
+        function selectMonth(value, text) {
+            document.getElementById("monthSelect").value = value;
+            document.getElementById("selectedMonthText").innerText = text;
+            
+            var items = document.querySelectorAll('.dropdown-item');
+            items.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById("dropdownMenu").classList.remove("show");
+
+            filterTable();
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.custom-dropdown')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function filterTable() {
+            var input, filter, selectedMonth, table, tr, i;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            selectedMonth = document.getElementById("monthSelect").value;
+            
+            table = document.getElementById("myTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                var nameColumn = tr[i].getElementsByTagName("td")[1];
+                var dateColumn = tr[i].getElementsByTagName("td")[2];
+
+                if (nameColumn && dateColumn) {
+                    var nameValue = nameColumn.textContent || nameColumn.innerText;
+                    var dateValue = dateColumn.textContent || dateColumn.innerText;
+
+                    var matchesSearch = (nameValue.toUpperCase().indexOf(filter) > -1 || dateValue.indexOf(filter) > -1);
+
+                    var matchesMonth = true;
+                    if (selectedMonth !== "") {
+                        var parts = dateValue.split('/');
+                        if (parts.length === 3) {
+                            var monthOfBirth = parseInt(parts[1], 10);
+                            matchesMonth = (monthOfBirth === parseInt(selectedMonth, 10));
+                        } else {
+                            matchesMonth = false;
+                        }
+                    }
+
+                    if (matchesSearch && matchesMonth) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
