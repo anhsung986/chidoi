@@ -210,20 +210,26 @@
     .embed-btn-ok { background: linear-gradient(45deg, #00ffd5, #7a00ff); color: white; }
     .embed-btn-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
 </style>
+
+<script>
+    // Khôi phục màu sắc và phông chữ ngay khi tải trang để tránh chớp màn hình[span_1](start_span)[span_1](end_span)
+    const savedColor = localStorage.getItem('app_theme_color');
+    if (savedColor) {
+        document.documentElement.style.setProperty('--app-primary-color', savedColor);
+    }
+    const savedFont = localStorage.getItem('app_font_family');
+    if (savedFont) {
+        document.documentElement.style.setProperty('--app-font-family', savedFont);
+    }
+
+    // KIỂM TRA ĐĂNG NHẬP: Đá về auth.html ngay lập tức nếu chưa đăng nhập[span_2](start_span)[span_2](end_span)
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+        window.location.href = "auth.html";
+    }
+</script>
 </head>
 <body>
-
-    <script>
-        // Khôi phục màu sắc và phông chữ ngay khi tải trang để tránh chớp màn hình
-        const savedColor = localStorage.getItem('app_theme_color');
-        if (savedColor) {
-            document.documentElement.style.setProperty('--app-primary-color', savedColor);
-        }
-        const savedFont = localStorage.getItem('app_font_family');
-        if (savedFont) {
-            document.documentElement.style.setProperty('--app-font-family', savedFont);
-        }
-    </script>
 
     <!-- Nút Hamburger Menu điều hướng -->
     <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
@@ -354,15 +360,7 @@
             });
         }
 
-        // Kiểm tra đăng nhập khi mở trang
-        const loggedInUser = localStorage.getItem("loggedInUser");
-        if (!loggedInUser) {
-            showEmbedAlert("Bạn cần phải đăng nhập trước!").then(() => {
-                window.location.href = "login.html"; 
-            });
-        }
-
-        // Tải các giá trị đã lưu vào form khi khởi tạo
+        // Tải các giá trị đã lưu vào form khi khởi tạo[span_3](start_span)[span_3](end_span)
         if (loggedInUser) {
             document.getElementById("usernameInput").value = loggedInUser;
         }
@@ -424,3 +422,4 @@
     </script>
 </body>
 </html>
+   
