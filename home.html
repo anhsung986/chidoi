@@ -1,217 +1,215 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-   <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
-   
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trang Chủ Hệ Thống</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<style>
-    * {
-        margin: 0; padding: 0; box-sizing: border-box;
-        font-family: var(--app-font-family, 'Poppins', sans-serif);
-    }
-
-    /* NỀN TỐI ĐỂ LÀM NỔI BẬT ĐÈN LED CẦU VỒNG */
-    body {
-        background-color: #ffb3b3;
-        min-height: 100vh;
-        display: flex; justify-content: center; align-items: center;
-        overflow-x: hidden;
-        padding: 20px 15px; /* Thêm padding tránh tràn màn hình di động */
-    }
-
-    /* --- MENU BTN --- */
-    .menu-btn {
-        position: absolute; top: 25px; left: 25px;
-        width: 45px; height: 45px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px; cursor: pointer;
-        display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
-        z-index: 100; transition: 0.3s;
-    }
-    .menu-btn:hover { background: rgba(255, 255, 255, 0.15); }
-    .menu-btn span {
-        display: block; width: 22px; height: 3px;
-        background: white; border-radius: 2px; transition: 0.3s;
-    }
-    .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-    .menu-btn.active span:nth-child(2) { opacity: 0; }
-    .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-    /* --- SIDEBAR CHUẨN HÓA ĐÓNG/MỞ --- */
-    .sidebar {
-        position: fixed;
-        top: 20px;
-        left: -300px;
-        width: 250px;
-        height: auto !important;
-        background: #111827;
-        border-radius: 12px;
-        padding: 15px;
-        padding-top: 80px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007bff">
     
-    .sidebar.active { 
-        left: 20px; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ Hệ Thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    .sidebar a {
-        display: block; padding: 12px 20px;
-        color: #eee; text-decoration: none;
-        font-weight: 500; font-size: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
-        border-radius: 6px;
-    }
-    .sidebar a:hover {
-        background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
-        color: white; padding-left: 25px;
-    }
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: var(--app-font-family, 'Poppins', sans-serif);
+        }
 
-    .overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-        display: none; z-index: 98;
-    }
-    .overlay.active { display: block; }
+        /* NỀN TỐI ĐỂ LÀM NỔI BẬT ĐÈN LED CẦU VỒNG */
+        body {
+            background-color: #ffb3b3;
+            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden;
+            padding: 20px 15px;
+        }
 
-    /* --- MAIN CONTAINER --- */
-    .container {
-        position: relative;
-        width: 100%; max-width: 380px;
-        background: #111827;
-        border-radius: 28px; padding: 35px 25px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        color: white; text-align: center;
-    }
+        /* --- MENU BTN --- */
+        .menu-btn {
+            position: absolute; top: 25px; left: 25px;
+            width: 45px; height: 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+            z-index: 100; transition: 0.3s;
+        }
+        .menu-btn:hover { background: rgba(255, 255, 255, 0.15); }
+        .menu-btn span {
+            display: block; width: 22px; height: 3px;
+            background: white; border-radius: 2px; transition: 0.3s;
+        }
+        .menu-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .menu-btn.active span:nth-child(2) { opacity: 0; }
+        .menu-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-    .container::before {
-        content: '';
-        position: absolute;
-        top: -3px; left: -3px; right: -3px; bottom: -3px;
-        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-        background-size: 400%;
-        z-index: -1;
-        filter: blur(8px);
-        border-radius: 31px;
-        animation: steam 20s linear infinite;
-    }
+        /* --- SIDEBAR CHUẨN HÓA ĐÓNG/MỞ --- */
+        .sidebar {
+            position: fixed;
+            top: 20px;
+            left: -300px;
+            width: 250px;
+            height: auto !important;
+            background: #111827;
+            border-radius: 12px;
+            padding: 15px;
+            padding-top: 80px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar.active { 
+            left: 20px; 
+        }
 
-    @keyframes steam {
-        0% { background-position: 0 0; }
-        50% { background-position: 400% 0; }
-        100% { background-position: 0 0; }
-    }
+        .sidebar a {
+            display: block; padding: 12px 20px;
+            color: #eee; text-decoration: none;
+            font-weight: 500; font-size: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
+            border-radius: 6px;
+        }
+        .sidebar a:hover {
+            background: linear-gradient(45deg, #ff0000, #00ffd5, #7a00ff);
+            color: white; padding-left: 25px;
+        }
 
-    .title { 
-        font-size: 28px; 
-        font-weight: 600; 
-        margin-bottom: 5px; 
-        letter-spacing: 3px;
-        background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .welcome-text { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
-    .welcome-text span { color: var(--app-primary-color, #00ffd5); font-weight: 600; }
-    
-    .card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 20px; margin-bottom: 18px;
-        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
-    }
-    .card h2 { font-size: 17px; font-weight: 500; letter-spacing: 1px; color: #fff; }
-    
-    .card:hover {
-        background: rgba(255, 255, 255, 0.08);
-        transform: translateY(-4px) scale(1.02);
-        border-color: var(--app-primary-color, #00ffd5);
-        box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
-    }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            display: none; z-index: 98;
+        }
+        .overlay.active { display: block; }
 
-    .logout-btn {
-        width: 100%; padding: 15px;
-        border: 2px solid #ff3b30; border-radius: 14px;
-        background: transparent; color: #ff3b30;
-        font-size: 15px; font-weight: 600;
-        cursor: pointer; transition: 0.3s;
-    }
-    .logout-btn:hover {
-        background: #ff3b30; color: white;
-        box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
-    }
+        /* --- MAIN CONTAINER --- */
+        .container {
+            position: relative;
+            width: 100%; max-width: 380px;
+            background: #111827;
+            border-radius: 28px; padding: 35px 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            color: white; text-align: center;
+        }
 
-    /* --- TOAST & CUSTOM MODAL Ở DƯỚI CÙNG --- */
-    #custom-toast {
-        position: fixed;
-        bottom: -120px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(20, 20, 30, 0.95);
-        backdrop-filter: blur(10px);
-        color: #fff;
-        padding: 16px 24px;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        font-size: 14px;
-        font-weight: 500;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        z-index: 9999;
-        width: 90%;
-        max-width: 380px;
-        text-align: center;
-    }
-    #custom-toast.show {
-        bottom: 30px;
-    }
-    .toast-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-    .toast-btn {
-        padding: 8px 20px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 13px;
-        transition: 0.2s;
-    }
-    .toast-btn.confirm {
-        background: #ff3b30;
-        color: white;
-    }
-    .toast-btn.confirm:hover {
-        background: #e02e25;
-    }
-    .toast-btn.cancel {
-        background: rgba(255,255,255,0.1);
-        color: white;
-    }
-    .toast-btn.cancel:hover {
-        background: rgba(255,255,255,0.2);
-    }
-    .toast-btn.ok {
-        background: var(--app-primary-color, #00ffd5);
-        color: #111827;
-    }
-</style>
-</head>
-<body>
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(8px);
+            border-radius: 31px;
+            animation: steam 20s linear infinite;
+        }
+
+        @keyframes steam {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        .title { 
+            font-size: 28px; 
+            font-weight: 600; 
+            margin-bottom: 5px; 
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #ff0055, #00ffd5, #fffb00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .welcome-text { font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; }
+        .welcome-text span { color: var(--app-primary-color, #00ffd5); font-weight: 600; }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 20px; margin-bottom: 18px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+        }
+        .card h2 { font-size: 17px; font-weight: 500; letter-spacing: 1px; color: #fff; }
+        
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--app-primary-color, #00ffd5);
+            box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
+        }
+
+        .logout-btn {
+            width: 100%; padding: 15px;
+            border: 2px solid #ff3b30; border-radius: 14px;
+            background: transparent; color: #ff3b30;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: 0.3s;
+        }
+        .logout-btn:hover {
+            background: #ff3b30; color: white;
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
+        }
+
+        /* --- TOAST & CUSTOM MODAL Ở DƯỚI CÙNG --- */
+        #custom-toast {
+            position: fixed;
+            bottom: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+        }
+        #custom-toast.show {
+            bottom: 30px;
+        }
+        .toast-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .toast-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .toast-btn.confirm {
+            background: #ff3b30;
+            color: white;
+        }
+        .toast-btn.confirm:hover {
+            background: #e02e25;
+        }
+        .toast-btn.cancel {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .toast-btn.cancel:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .toast-btn.ok {
+            background: var(--app-primary-color, #00ffd5);
+            color: #111827;
+        }
+    </style>
 
     <script>
         // Khôi phục màu sắc và phông chữ toàn app ngay khi tải trang để giữ đồng bộ
@@ -224,15 +222,14 @@
             document.documentElement.style.setProperty('--app-font-family', savedFont);
         }
 
+        // KIỂM TRA ĐĂNG NHẬP: Nếu chưa đăng nhập, đá thẳng về auth.html ngay lập tức[span_1](start_span)[span_1](end_span)
         const loggedInUser = localStorage.getItem("loggedInUser");
         if (!loggedInUser) {
-            window.addEventListener("DOMContentLoaded", () => {
-                showCustomToast("Bạn cần phải đăng nhập trước!", "alert", () => {
-                    window.location.href = "login.html";
-                });
-            });
+            window.location.href = "auth.html"; 
         }
     </script>
+</head>
+<body>
 
     <!-- Nút Menu đóng/mở -->
     <div class="menu-btn" id="menuBtn" onclick="toggleMenu()">
