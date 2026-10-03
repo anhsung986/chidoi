@@ -10,6 +10,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tra Cứu Màu Sắc Trực Tuyến Toàn Cầu</title>
+    
+    <script>
+        // BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html[span_5](start_span)[span_5](end_span)[span_6](start_span)[span_6](end_span)
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "auth.html";
+        }
+    </script>
+
     <style>
         @keyframes rainbowBackground {
             0% { background-color: #ff4d4d; }
