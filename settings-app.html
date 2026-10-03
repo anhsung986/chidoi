@@ -7,6 +7,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cài Đặt Toàn Bộ App - Quản Trị Bí Mật</title>
+
+    <!-- BẢO MẬT ĐƯỜNG DẪN: Chặn người dùng chưa đăng nhập, tự động chuyển về trang auth.html -->
+    <script>
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "auth.html";
+        }
+    </script>
+
     <style>
         body {
             margin: 0; padding: 20px;
