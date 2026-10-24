@@ -103,7 +103,7 @@ jobs:
         run: |
           cat > capacitor.config.json <<'EOF'
           {
-            "appId": "com.anhsung.chidoi",
+            "appId": "com.chidoi.appchidoi",
             "appName": "Chi Đội",
             "webDir": "www",
             "server": {
