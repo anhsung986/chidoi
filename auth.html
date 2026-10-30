@@ -7,6 +7,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác Thực - Chidoi</title>
+
+    <!-- Tích hợp OneSignal SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "62c6a850-ef65-4fcb-9a8c-608c3f15acc2",
+        });
+      });
+    </script>
+
     <style>
         :root {
             --app-primary-color: #00ffd5; /* Màu mặc định nếu chưa lưu */
