@@ -194,19 +194,21 @@
         </div>
     </div>
 
-    <!-- Script kiểm tra và hiển thị bảng thông báo cập nhật phiên bản -->
+    <!-- Script kiểm tra phiên bản mới từ GitHub và OneSignal -->
     <script>
-        // Phiên bản hiện tại của app trên máy người dùng
-        const CURRENT_VERSION = "4.0"; 
+        // Phiên bản hiện tại đang chạy trong app của bạn
+        const CURRENT_VERSION = "26.2"; 
 
         async function checkForUpdates() {
             try {
-                // Tạo một file nhỏ tên là version.json trên hosting của bạn (GitHub/Firebase)
-                // Nội dung file version.json ví dụ: {"version": "4.0", "updateUrl": "https://github.com/..."}
-                const response = await fetch('version.json?t=' + new Date().getTime());
+                // Dùng link tuyệt đối trỏ thẳng lên file version.json trên GitHub để app trên điện thoại gọi được qua mạng
+                const jsonUrl = 'https://raw.githubusercontent.com/anhsung986/chidoi/main/version.json?t=' + new Date().getTime();
+                
+                const response = await fetch(jsonUrl);
                 if (!response.ok) return;
                 const data = await response.json();
 
+                // So sánh version trên GitHub với version hiện tại
                 if (data.version && data.version !== CURRENT_VERSION) {
                     showUpdateModal(data.version, data.updateUrl);
                 }
@@ -216,7 +218,6 @@
         }
 
         function showUpdateModal(newVersion, updateUrl) {
-            // Kiểm tra nếu người dùng vừa bấm "Để sau" thì không hiện lại liên tục trong phiên này
             if (sessionStorage.getItem('skip_update') === 'true') return;
 
             const modalHtml = `
@@ -242,14 +243,13 @@
 
         function doUpdate(url) {
             if (url) {
-                window.location.href = url;
+                window.location.href = url; // Mở link tải file APK mới nhất
             } else {
-                alert("Đang tải lại trang để cập nhật...");
                 window.location.reload(true);
             }
         }
 
-        // Gọi hàm kiểm tra khi vừa vào trang auth
+        // Gọi hàm kiểm tra ngay khi mở trang
         window.addEventListener('DOMContentLoaded', () => {
             checkForUpdates();
         });
