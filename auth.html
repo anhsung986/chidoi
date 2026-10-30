@@ -103,11 +103,11 @@
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
 
-        /* Modal thông báo phiên bản mới */
-        .update-modal {
+        /* Modal chung (dùng cho Cập nhật phiên bản & Xin quyền thông báo) */
+        .custom-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -115,7 +115,7 @@
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
-        .update-content {
+        .custom-modal-content {
             background: #111827;
             border: 1px solid var(--app-primary-color);
             border-radius: 20px;
@@ -125,22 +125,29 @@
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,255,213,0.2);
         }
-        .update-content h3 {
+        .custom-modal-content h3 {
             color: var(--app-primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 20px;
         }
-        .update-content p {
+        .custom-modal-content p, .custom-modal-content ul {
             color: #9ca3af;
             font-size: 14px;
             margin-bottom: 20px;
             line-height: 1.5;
+            text-align: left;
         }
-        .update-actions {
+        .custom-modal-content ul {
+            padding-left: 20px;
+        }
+        .custom-modal-content li {
+            margin-bottom: 6px;
+        }
+        .modal-actions {
             display: flex;
             gap: 10px;
         }
-        .btn-update-yes {
+        .btn-modal-primary {
             flex: 1;
             background: var(--app-primary-color);
             color: #0b0f19;
@@ -151,8 +158,8 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .btn-update-yes:hover { opacity: 0.9; }
-        .btn-update-no {
+        .btn-modal-primary:hover { opacity: 0.9; }
+        .btn-modal-secondary {
             flex: 1;
             background: rgba(255,255,255,0.05);
             color: #9ca3af;
@@ -162,7 +169,7 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .btn-update-no:hover { background: rgba(255,255,255,0.1); color: white; }
+        .btn-modal-secondary:hover { background: rgba(255,255,255,0.1); color: white; }
 
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -197,6 +204,7 @@
         // Dòng này sẽ được GitHub Actions tự động thay đổi dựa theo file version.json khi build
         const CURRENT_VERSION = "4.1"; 
 
+        // 1. Kiểm tra cập nhật ứng dụng tự động
         async function checkForUpdates() {
             try {
                 const jsonUrl = 'https://raw.githubusercontent.com/anhsung986/chidoi/main/version.json?t=' + new Date().getTime();
@@ -205,7 +213,6 @@
                 if (!response.ok) return;
                 const data = await response.json();
 
-                // So sánh phiên bản trên GitHub với phiên bản hiện tại đóng gói trong APK
                 if (data.version && data.version !== CURRENT_VERSION) {
                     showUpdateModal(data.version, data.updateUrl);
                 }
@@ -218,13 +225,13 @@
             if (sessionStorage.getItem('skip_update') === 'true') return;
 
             const modalHtml = `
-                <div class="update-modal" id="updateModal">
-                    <div class="update-content">
+                <div class="custom-modal" id="updateModal">
+                    <div class="custom-modal-content">
                         <h3>✨ Đã có phiên bản mới!</h3>
-                        <p>Phiên bản mới <b>v${newVersion}</b> đã sẵn sàng. Bạn có muốn tải phiên bản mới không?</p>
-                        <div class="update-actions">
-                            <button class="btn-update-no" onclick="dismissUpdate()">Để sau</button>
-                            <button class="btn-update-yes" onclick="doUpdate('${updateUrl}')">Tải ngay</button>
+                        <p style="text-align:center;">Phiên bản mới <b>v${newVersion}</b> đã sẵn sàng. Bạn có muốn tải phiên bản mới không?</p>
+                        <div class="modal-actions">
+                            <button class="btn-modal-secondary" onclick="dismissUpdate()">Để sau</button>
+                            <button class="btn-modal-primary" onclick="doUpdate('${updateUrl}')">Tải ngay</button>
                         </div>
                     </div>
                 </div>
@@ -246,8 +253,58 @@
             }
         }
 
+        // 2. Yêu cầu cấp quyền thông báo trực tiếp bằng popup đẹp mắt
+        function checkAndRequestNotificationPermission() {
+            // Kiểm tra xem người dùng đã từ chối trước đó hoặc đã cấp quyền chưa
+            if (localStorage.getItem('notification_prompted') === 'true') return;
+
+            const permissionModalHtml = `
+                <div class="custom-modal" id="notificationModal">
+                    <div class="custom-modal-content">
+                        <h3 class="iam-title">Bật thông báo</h3>
+                        <ul class="iam-list">
+                          <li>Nhận bản tóm tắt những việc bạn đã làm trong tuần qua và mức độ đạt được.</li>
+                          <li>Nhận thông báo khi bạn nhận được phản hồi hoặc điểm số.</li>
+                          <li>Nhận lời nhắc để hoàn thành các mục tiêu và nhiệm vụ hàng tuần của bạn.</li>
+                        </ul>
+                        <div class="modal-actions">
+                            <button class="btn-modal-secondary" onclick="dismissNotificationPrompt()">Để sau</button>
+                            <button class="btn-modal-primary" onclick="requestOneSignalPermission()">Cho phép</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', permissionModalHtml);
+        }
+
+        function dismissNotificationPrompt() {
+            localStorage.setItem('notification_prompted', 'true');
+            const modal = document.getElementById('notificationModal');
+            if (modal) modal.remove();
+        }
+
+        async function requestOneSignalPermission() {
+            localStorage.setItem('notification_prompted', 'true');
+            const modal = document.getElementById('notificationModal');
+            if (modal) modal.remove();
+
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            window.OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    await OneSignal.Notifications.requestPermission();
+                } catch (e) {
+                    console.log("Lỗi yêu cầu quyền thông báo:", e);
+                }
+            });
+        }
+
+        // Khởi chạy khi tải trang xong
         window.addEventListener('DOMContentLoaded', () => {
             checkForUpdates();
+            // Hiển thị bảng xin quyền thông báo sau khi mở app 1.5 giây
+            setTimeout(() => {
+                checkAndRequestNotificationPermission();
+            }, 1500);
         });
 
         const savedColor = localStorage.getItem('app_theme_color');
