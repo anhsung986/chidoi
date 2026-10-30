@@ -99,17 +99,13 @@ jobs:
             @capacitor/android@5.7.0 \
             @capacitor/push-notifications@5.1.0
 
-      - name: Create Capacitor Config (Remote URL)
+      - name: Create Capacitor Config (Local Web Assets)
         run: |
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.chidoi.appchidoi",
             "appName": "Chi Đội",
             "webDir": "www",
-            "server": {
-              "url": "https://cd.chidoi.gt.tc",
-              "cleartext": true
-            },
             "bundledWebRuntime": false,
             "plugins": {
               "PushNotifications": {
@@ -218,7 +214,7 @@ jobs:
           body: |
             ## 🚀 Chi Đội App - Build #${{ github.run_number }}
             
-            Bản cập nhật sửa lỗi cấp quyền Notification trên Android Xiaomi/HyperOS.
+            Bản cập nhật chạy offline/local trực tiếp, không qua remote WebView.
           draft: false
           prerelease: false
           overwrite: true
