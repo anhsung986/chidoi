@@ -81,6 +81,22 @@ jobs:
             exit 1
           fi
 
+      # ------------------------------------------------------------------
+      # BƯỚC MỚI: TỰ ĐỘNG ĐỌC VERSION TỪ VERSION.JSON VÀ INJECT VÀO CODE APP
+      # ------------------------------------------------------------------
+      - name: Auto-Inject App Version from version.json
+        run: |
+          if [ -f "version.json" ]; then
+            APP_VER=$(jq -r '.version' version.json)
+            echo "📌 Phiên bản phát hiện từ version.json: $APP_VER"
+            if [ -f "auth.html" ]; then
+              sed -i "s/const CURRENT_VERSION = \".*\";/const CURRENT_VERSION = \"$APP_VER\";/g" auth.html
+              echo "✅ Đã tự động cập nhật CURRENT_VERSION = \"$APP_VER\" vào auth.html"
+            fi
+          else
+            echo "⚠️ Không tìm thấy version.json, giữ nguyên version mặc định."
+          fi
+
       - name: Prepare Web Directory
         run: |
           mkdir -p www
@@ -214,7 +230,7 @@ jobs:
           body: |
             ## 🚀 Chi Đội App - Build #${{ github.run_number }}
             
-            Bản cập nhật chạy offline/local trực tiếp, không qua remote WebView.
+            Bản APK đóng gói tự động nhận diện version từ version.json.
           draft: false
           prerelease: false
           overwrite: true
