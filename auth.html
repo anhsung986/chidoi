@@ -102,6 +102,72 @@
         .btn-guide:hover {
             background: color-mix(in srgb, var(--app-primary-color) 10%, transparent);
         }
+
+        /* Modal thông báo phiên bản mới */
+        .update-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .update-content {
+            background: #111827;
+            border: 1px solid var(--app-primary-color);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,255,213,0.2);
+        }
+        .update-content h3 {
+            color: var(--app-primary-color);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .update-content p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .update-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-update-yes {
+            flex: 1;
+            background: var(--app-primary-color);
+            color: #0b0f19;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-update-yes:hover { opacity: 0.9; }
+        .btn-update-no {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            color: #9ca3af;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-update-no:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 
     <script>
@@ -128,7 +194,66 @@
         </div>
     </div>
 
+    <!-- Script kiểm tra và hiển thị bảng thông báo cập nhật phiên bản -->
     <script>
+        // Phiên bản hiện tại của app trên máy người dùng
+        const CURRENT_VERSION = "4.0"; 
+
+        async function checkForUpdates() {
+            try {
+                // Tạo một file nhỏ tên là version.json trên hosting của bạn (GitHub/Firebase)
+                // Nội dung file version.json ví dụ: {"version": "4.0", "updateUrl": "https://github.com/..."}
+                const response = await fetch('version.json?t=' + new Date().getTime());
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.version && data.version !== CURRENT_VERSION) {
+                    showUpdateModal(data.version, data.updateUrl);
+                }
+            } catch (e) {
+                console.log("Không thể kiểm tra phiên bản mới:", e);
+            }
+        }
+
+        function showUpdateModal(newVersion, updateUrl) {
+            // Kiểm tra nếu người dùng vừa bấm "Để sau" thì không hiện lại liên tục trong phiên này
+            if (sessionStorage.getItem('skip_update') === 'true') return;
+
+            const modalHtml = `
+                <div class="update-modal" id="updateModal">
+                    <div class="update-content">
+                        <h3>✨ Đã có phiên bản mới!</h3>
+                        <p>Phiên bản mới <b>v${newVersion}</b> đã sẵn sàng. Bạn có muốn tải phiên bản mới không?</p>
+                        <div class="update-actions">
+                            <button class="btn-update-no" onclick="dismissUpdate()">Để sau</button>
+                            <button class="btn-update-yes" onclick="doUpdate('${updateUrl}')">Tải ngay</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function dismissUpdate() {
+            sessionStorage.setItem('skip_update', 'true');
+            const modal = document.getElementById('updateModal');
+            if (modal) modal.remove();
+        }
+
+        function doUpdate(url) {
+            if (url) {
+                window.location.href = url;
+            } else {
+                alert("Đang tải lại trang để cập nhật...");
+                window.location.reload(true);
+            }
+        }
+
+        // Gọi hàm kiểm tra khi vừa vào trang auth
+        window.addEventListener('DOMContentLoaded', () => {
+            checkForUpdates();
+        });
+
         // Đồng bộ màu sắc từ localStorage nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
