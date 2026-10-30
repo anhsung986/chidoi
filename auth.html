@@ -21,7 +21,7 @@
 
     <style>
         :root {
-            --app-primary-color: #00ffd5; /* Màu mặc định nếu chưa lưu */
+            --app-primary-color: #00ffd5;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -171,7 +171,6 @@
     </style>
 
     <script>
-        // KIỂM TRA PHIÊN ĐĂNG NHẬP: Nếu đã đăng nhập rồi mà vào lại trang auth, tự động đẩy về home.html
         const loggedInUser = localStorage.getItem("loggedInUser");
         if (loggedInUser) {
             window.location.href = "home.html";
@@ -194,21 +193,19 @@
         </div>
     </div>
 
-    <!-- Script kiểm tra phiên bản mới từ GitHub và OneSignal -->
     <script>
-        // Phiên bản hiện tại đang chạy trong app của bạn
-        const CURRENT_VERSION = "26.2"; 
+        // Dòng này sẽ được GitHub Actions tự động thay đổi dựa theo file version.json khi build
+        const CURRENT_VERSION = "4.1"; 
 
         async function checkForUpdates() {
             try {
-                // Dùng link tuyệt đối trỏ thẳng lên file version.json trên GitHub để app trên điện thoại gọi được qua mạng
                 const jsonUrl = 'https://raw.githubusercontent.com/anhsung986/chidoi/main/version.json?t=' + new Date().getTime();
                 
                 const response = await fetch(jsonUrl);
                 if (!response.ok) return;
                 const data = await response.json();
 
-                // So sánh version trên GitHub với version hiện tại
+                // So sánh phiên bản trên GitHub với phiên bản hiện tại đóng gói trong APK
                 if (data.version && data.version !== CURRENT_VERSION) {
                     showUpdateModal(data.version, data.updateUrl);
                 }
@@ -243,18 +240,16 @@
 
         function doUpdate(url) {
             if (url) {
-                window.location.href = url; // Mở link tải file APK mới nhất
+                window.location.href = url;
             } else {
                 window.location.reload(true);
             }
         }
 
-        // Gọi hàm kiểm tra ngay khi mở trang
         window.addEventListener('DOMContentLoaded', () => {
             checkForUpdates();
         });
 
-        // Đồng bộ màu sắc từ localStorage nếu có
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
             document.documentElement.style.setProperty('--app-primary-color', savedColor);
