@@ -147,7 +147,6 @@ jobs:
       - name: Inject ALL App Permissions Safely to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          # Chèn toàn bộ các quyền ngay dưới thẻ mở <manifest> để Android nhận diện chính xác tuyệt đối
           PERMISSIONS='
               <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
               <uses-permission android:name="android.permission.INTERNET" />
@@ -163,23 +162,52 @@ jobs:
           python3 -c "
           with open('$MANIFEST', 'r') as f:
               content = f.read()
-          # Chèn vào ngay sau dòng <manifest ...>
           if '<manifest' in content:
               parts = content.split('>', 1)
               new_content = parts[0] + '>' + '''$PERMISSIONS''' + parts[1]
               with open('$MANIFEST', 'w') as f:
                   f.write(new_content)
           "
-          echo "✅ Đã bơm toàn bộ quyền vào Manifest thành công bằng Python script!"
+          echo "✅ Đã bơm toàn bộ quyền vào Manifest thành công!"
 
-      - name: Enable WebView Features & Hardware Acceleration
+      - name: Enable WebView Features & Auto Request Permissions (Java Level)
         run: |
           MAIN_ACTIVITY=$(find android/app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -f "$MAIN_ACTIVITY" ]; then
-            sed -i '/super.onCreate(savedInstanceState);/a \        this.bridge.getWebView().getSettings().setJavaScriptEnabled(true);\n        this.bridge.getWebView().getSettings().setDomStorageEnabled(true);' "$MAIN_ACTIVITY"
-            echo "✅ Đã bật cấu hình WebView thành công trong: $MAIN_ACTIVITY"
+            python3 -c "
+            with open('$MAIN_ACTIVITY', 'r') as f:
+                content = f.read()
+            
+            import_target = 'import com.getcapacitor.BridgeActivity;'
+            new_imports = 'import com.getcapacitor.BridgeActivity;\nimport android.os.Bundle;\nimport androidx.core.app.ActivityCompat;\nimport android.Manifest;\nimport android.content.pm.PackageManager;\nimport android.os.Build;'
+            if import_target in content:
+                content = content.replace(import_target, new_imports)
+            
+            target = 'super.onCreate(savedInstanceState);'
+            addition = '''
+                super.onCreate(savedInstanceState);
+                this.bridge.getWebView().getSettings().setJavaScriptEnabled(true);
+                this.bridge.getWebView().getSettings().setDomStorageEnabled(true);
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{
+                            Manifest.permission.POST_NOTIFICATIONS,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        }, 101);
+                    }
+                }
+            '''
+            if target in content:
+                content = content.replace(target, addition)
+            
+            with open('$MAIN_ACTIVITY', 'w') as f:
+                f.write(content)
+            "
+            echo "✅ Đã tiêm mã xin quyền Native thành công vào MainActivity.java!"
           else
-            echo "⚠️ Không tìm thấy file MainActivity.java, bỏ qua bước này."
+            echo "⚠️ Không tìm thấy file MainActivity.java."
           fi
 
       - name: Set App Name Chi Đội
@@ -252,7 +280,7 @@ jobs:
           body: |
             ## 🚀 Chi Đội App - Build #${{ github.run_number }}
             
-            Bản APK đóng gói tự động nhận diện version từ version.json và tích hợp đầy đủ quyền hệ thống.
+            Bản APK đóng gói tự động nhận diện version từ version.json và tự động hỏi quyền Native khi vừa mở app.
           draft: false
           prerelease: false
           overwrite: true
