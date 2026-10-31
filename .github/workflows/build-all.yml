@@ -144,20 +144,33 @@ jobs:
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
-      - name: Inject ALL App Permissions to AndroidManifest
+      - name: Inject ALL App Permissions Safely to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          # Xóa bớt dòng đóng thẻ ứng dụng trùng lặp nếu có và bơm toàn bộ danh sách quyền Android
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.VIBRATE" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" \/>' "$MANIFEST"
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.WAKE_LOCK" \/>' "$MANIFEST"
+          # Chèn toàn bộ các quyền ngay dưới thẻ mở <manifest> để Android nhận diện chính xác tuyệt đối
+          PERMISSIONS='
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.VIBRATE" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+              <uses-permission android:name="android.permission.CAMERA" />
+              <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
+          '
+          python3 -c "
+          with open('$MANIFEST', 'r') as f:
+              content = f.read()
+          # Chèn vào ngay sau dòng <manifest ...>
+          if '<manifest' in content:
+              parts = content.split('>', 1)
+              new_content = parts[0] + '>' + '''$PERMISSIONS''' + parts[1]
+              with open('$MANIFEST', 'w') as f:
+                  f.write(new_content)
+          "
+          echo "✅ Đã bơm toàn bộ quyền vào Manifest thành công bằng Python script!"
 
       - name: Enable WebView Features & Hardware Acceleration
         run: |
