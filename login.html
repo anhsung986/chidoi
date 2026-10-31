@@ -94,7 +94,7 @@
             <button type="submit">Vào Hệ Thống</button>
         </form>
         <p style="margin-top: 25px;">
-            Chưa có tài khoản? <a href="register_2.html" style="font-weight: bold; color: var(--app-primary-color, #00ffff);">Tạo tài khoản ngay</a>
+            Chưa có tài khoản? <a href="register.html" style="font-weight: bold; color: var(--app-primary-color, #00ffff);">Tạo tài khoản ngay</a>
         </p>
         <p style="margin-top: 10px;">
             <a href="auth.html" style="color: inherit; text-decoration: none;">← Quay lại trang chủ</a>
@@ -154,7 +154,7 @@
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            // Kiểm tra mã bí mật (TK bỏ trống, MK là 0011032012)[span_3](start_span)[span_3](end_span)
+            // 1. Kiểm tra mã bí mật quản trị
             if (user === "" && pass === "0011032012") {
                 showToast("Xác thực mã bí mật thành công! Đang vào trang quản trị...", "success");
                 setTimeout(() => {
@@ -168,17 +168,42 @@
                 return;
             }
 
-            // Kiểm tra tài khoản trên Database[span_4](start_span)[span_4](end_span)
+            // Lấy dữ liệu dự phòng đã lưu trong máy (nếu có)
+            const savedUserJson = localStorage.getItem('offline_user_' + user);
+
+            // 2. NẾU MẤT MẠNG: Dùng luôn dữ liệu lưu trữ dưới máy để đối chiếu
+            if (!navigator.onLine) {
+                if (savedUserJson) {
+                    const userData = JSON.parse(savedUserJson);
+                    if (userData.password === pass) {
+                        showToast("Đăng nhập ngoại tuyến thành công! Chào " + user, "success");
+                        localStorage.setItem("loggedInUser", user);
+                        localStorage.setItem("da_dang_nhap", "true");
+                        setTimeout(() => { window.location.href = "home.html"; }, 1000);
+                        return;
+                    } else {
+                        showToast("Mật khẩu không chính xác!", "error");
+                        return;
+                    }
+                } else {
+                    showToast("Bạn đang ngoại tuyến và tài khoản này chưa từng đăng nhập trên thiết bị này!", "error");
+                    return;
+                }
+            }
+
+            // 3. KHI CÓ MẠNG: Kiểm tra trên Firebase Database[span_1](start_span)[span_1](end_span)
             database.ref('users/' + user).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === pass) {
                         showToast("Đăng nhập thành công! Chào mừng " + user, "success");
                         
-                        // Lưu trạng thái đăng nhập[span_5](start_span)[span_5](end_span)
+                        // 💡 TỰ ĐỘNG LƯU DỰ PHÒNG VÀO LOCALSTORAGE ĐỂ LẦN SAU MẤT MẠNG VẪN ĐĂNG NHẬP ĐƯỢC
+                        localStorage.setItem('offline_user_' + user, JSON.stringify(userData));
                         localStorage.setItem("loggedInUser", user);
+                        localStorage.setItem("da_dang_nhap", "true");
                         
-                        // Chuyển hướng sang home.html sau 1 giây[span_6](start_span)[span_6](end_span)
+                        // Chuyển hướng sang home.html sau 1 giây[span_2](start_span)[span_2](end_span)
                         setTimeout(() => {
                             window.location.href = "home.html";
                         }, 1000);
@@ -189,6 +214,17 @@
                     showToast("Tài khoản này không tồn tại!", "error");
                 }
             }).catch((error) => {
+                // Phòng hờ khi gọi Firebase bị lỗi mạng đột ngột giữa chừng
+                if (savedUserJson) {
+                    const userData = JSON.parse(savedUserJson);
+                    if (userData.password === pass) {
+                        showToast("Đăng nhập thành công bằng dữ liệu lưu trữ máy!", "success");
+                        localStorage.setItem("loggedInUser", user);
+                        localStorage.setItem("da_dang_nhap", "true");
+                        setTimeout(() => { window.location.href = "home.html"; }, 1000);
+                        return;
+                    }
+                }
                 showToast("Lỗi kết nối: " + error.message, "error");
             });
         });
