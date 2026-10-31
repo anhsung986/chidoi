@@ -2,14 +2,12 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
-    
+    <meta name="theme-color" content="#007bff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Đăng Ký - Chidoi</title>
     <style>
-        /* Đồng bộ màu sắc động theo cấu hình hệ thống */
         * {
             font-family: var(--app-font-family, 'Poppins', sans-serif);
         }
@@ -30,27 +28,24 @@
         <h1 class="logo">REGISTER</h1>
         
         <form id="registerForm">
-            <input type="text" id="regUser" placeholder="Tên đăng nhập mới" required>
+            <input type="text" id="regUser" placeholder="Tên đăng nhập mới" required autocomplete="off">
             <input type="email" id="regEmail" placeholder="Địa chỉ Email" required>
             <input type="password" id="regPass" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" required>
             <button type="submit" class="btn">Tạo Tài Khoản</button>
         </form>
         
         <p style="margin-top: 25px;">
-            Đã có tài khoản? <a href="login_2.html" style="font-weight: bold;">Đăng nhập ngay</a>
+            Đã có tài khoản? <a href="login.html" style="font-weight: bold;">Đăng nhập ngay</a>
         </p>
         <p style="margin-top: 10px;">
-            <!-- Sửa auth.html thành index.html theo yêu cầu 1 -->
             <a href="auth.html">← Quay lại trang chủ</a>
         </p>
     </div>
 
-<!-- Nhúng thư viện Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-    // Áp dụng màu sắc và phông chữ đã lưu từ localStorage khi tải trang
     document.addEventListener("DOMContentLoaded", () => {
         const savedColor = localStorage.getItem('app_theme_color');
         if (savedColor) {
@@ -62,7 +57,6 @@
         }
     });
 
-    // CẤU HÌNH FIREBASE CHÍNH XÁC CỦA BẠN
     const firebaseConfig = {
         apiKey: "AIzaSyB0EJxNNis2NB-JjsiihieWVzFYwsgvRi8",
         authDomain: "chidoi.firebaseapp.com",
@@ -74,9 +68,63 @@
         measurementId: "G-RFKJHW3S97"
     };
     
-    // Khởi tạo Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+
+    // 🔄 HÀM TỰ ĐỘNG ĐỒNG BỘ DỮ LIỆU CHỜ (PENDING) LÊN FIREBASE KHI CÓ MẠNG TRỞ LẠI
+    async function syncPendingRegisters() {
+        if (!navigator.onLine) return;
+
+        const pendingStr = localStorage.getItem('offline_pending_registers');
+        if (!pendingStr) return;
+
+        let pendingList = JSON.parse(pendingStr);
+        if (Object.keys(pendingList).length === 0) return;
+
+        console.log("Đang đồng bộ các tài khoản đăng ký lúc mất mạng lên Firebase...");
+
+        for (let username in pendingList) {
+            const userData = pendingList[username];
+            try {
+                // Kiểm tra xem trên Firebase đã có chưa trước khi đẩy lên
+                const snapshot = await database.ref('users/' + username).once('value');
+                if (!snapshot.exists()) {
+                    await database.ref('users/' + username).set(userData);
+                }
+                // Xóa khỏi danh sách chờ sau khi đẩy lên thành công
+                delete pendingList[username];
+            } catch (err) {
+                console.log("Lỗi đồng bộ tài khoản " + username + ":", err);
+                return; // Dừng lại nếu lỗi mạng đột ngột
+            }
+        }
+
+        // Cập nhật lại localStorage sau khi đã dọn sạch danh sách chờ
+        localStorage.setItem('offline_pending_registers', JSON.stringify(pendingList));
+        
+        // Tải lại bộ đệm chính từ Firebase
+        database.ref('users').once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                localStorage.setItem('firebase_users_cache', JSON.stringify(snapshot.val()));
+            }
+        });
+    }
+
+    // Lắng nghe sự kiện có mạng trở lại để tự động đồng bộ ngay lập tức
+    window.addEventListener('online', () => {
+        console.log("Đã có mạng trở lại! Bắt đầu đồng bộ...");
+        syncPendingRegisters();
+    });
+
+    // Khi vừa mở trang, nếu có mạng thì kiểm tra đồng bộ luôn
+    if (navigator.onLine) {
+        syncPendingRegisters();
+        database.ref('users').once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                localStorage.setItem('firebase_users_cache', JSON.stringify(snapshot.val()));
+            }
+        });
+    }
 
     // Xử lý sự kiện đăng ký tài khoản
     document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -90,23 +138,61 @@
             return;
         }
 
-        // Kiểm tra tài khoản trùng lặp trên Database
+        const newUserData = {
+            username: user,
+            email: email,
+            password: pass
+        };
+
+        // Lấy bộ đệm cache hiện tại trong máy để check trùng lặp nhanh
+        const cachedUsersStr = localStorage.getItem('firebase_users_cache');
+        const cachedUsers = cachedUsersStr ? JSON.parse(cachedUsersStr) : {};
+        
+        const pendingStr = localStorage.getItem('offline_pending_registers');
+        const pendingList = pendingStr ? JSON.parse(pendingStr) : {};
+
+        // Kiểm tra xem tên đăng nhập đã tồn tại trong cache hoặc danh sách chờ chưa
+        if (cachedUsers[user] || pendingList[user]) {
+            alert("Tên đăng nhập này đã có người sử dụng rồi!");
+            return;
+        }
+
+        // --- TRƯỜNG HỢP 1: MẤT MẠNG (Đăng ký tạm thời trên máy) ---
+        if (!navigator.onLine) {
+            pendingList[user] = newUserData;
+            localStorage.setItem('offline_pending_registers', JSON.stringify(pendingList));
+
+            // Thêm luôn vào bộ đệm để có thể đăng nhập ngay lập tức lúc offline
+            cachedUsers[user] = newUserData;
+            localStorage.setItem('firebase_users_cache', JSON.stringify(cachedUsers));
+
+            alert("⚠️ Bạn đang mất mạng! Tài khoản đã được lưu tạm trên thiết bị. Khi có mạng trở lại, app sẽ tự động đồng bộ lên hệ thống.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        // --- TRƯỜNG HỢP 2: CÓ MẠNG (Đăng ký trực tiếp lên Firebase) ---
         database.ref('users/' + user).once('value').then((snapshot) => {
             if (snapshot.exists()) {
-                alert("Tên đăng nhập này đã có người sử dụng rồi!");
+                alert("Tên đăng nhập này đã có người sử dụng rồi!");[span_0](start_span)[span_0](end_span)
             } else {
-                // Lưu vào Database thật
-                database.ref('users/' + user).set({
-                    username: user,
-                    email: email,
-                    password: pass
-                }).then(() => {
-                    alert("Đăng ký tài khoản và lưu vào Database thành công!");
-                    window.location.href = "login_2.html";
+                database.ref('users/' + user).set(newUserData).then(() => {
+                    // Cập nhật lại bộ đệm localStorage
+                    cachedUsers[user] = newUserData;
+                    localStorage.setItem('firebase_users_cache', JSON.stringify(cachedUsers));
+
+                    alert("Đăng ký tài khoản và lưu vào Database thành công!");[span_1](start_span)[span_1](end_span)
+                    window.location.href = "login.html";[span_2](start_span)[span_2](end_span)
                 }).catch((error) => {
-                    alert("Lỗi lưu dữ liệu: " + error.message);
+                    alert("Lỗi lưu dữ liệu: " + error.message);[span_3](start_span)[span_3](end_span)
                 });
             }
+        }).catch((error) => {
+            // Phòng hờ nếu lúc bấm đăng ký mạng bị rớt đột ngột
+            pendingList[user] = newUserData;
+            localStorage.setItem('offline_pending_registers', JSON.stringify(pendingList));
+            alert("⚠️ Mất kết nối đột ngột! Tài khoản đã được lưu tạm trên máy và sẽ tự động đồng bộ sau.");
+            window.location.href = "login.html";
         });
     });
 </script>
