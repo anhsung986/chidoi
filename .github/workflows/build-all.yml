@@ -81,9 +81,6 @@ jobs:
             exit 1
           fi
 
-      # ------------------------------------------------------------------
-      # BƯỚC MỚI: TỰ ĐỘNG ĐỌC VERSION TỪ VERSION.JSON VÀ INJECT VÀO CODE APP
-      # ------------------------------------------------------------------
       - name: Auto-Inject App Version from version.json
         run: |
           if [ -f "version.json" ]; then
@@ -106,14 +103,16 @@ jobs:
           cp *.json www/ 2>/dev/null || true
           cp icon.png www/icon.png
 
-      - name: Initialize Node Project
+      - name: Initialize Node Project & Install Plugins
         run: |
           npm init -y
           npm install \
             @capacitor/core@5.7.0 \
             @capacitor/cli@5.7.0 \
             @capacitor/android@5.7.0 \
-            @capacitor/push-notifications@5.1.0
+            @capacitor/push-notifications@5.1.0 \
+            @capacitor/camera@5.0.9 \
+            @capacitor/filesystem@5.1.4
 
       - name: Create Capacitor Config (Local Web Assets)
         run: |
@@ -145,19 +144,29 @@ jobs:
           sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/chidoi_icon"|g' "$MANIFEST"
           sed -i 's|android:label="@string/app_name"|android:label="Chi Đội"|g' "$MANIFEST"
 
-      - name: Add Notification Permissions to AndroidManifest
+      - name: Inject ALL App Permissions to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
+          # Xóa bớt dòng đóng thẻ ứng dụng trùng lặp nếu có và bơm toàn bộ danh sách quyền Android
           sed -i '/<application/i \    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" \/>' "$MANIFEST"
           sed -i '/<application/i \    <uses-permission android:name="android.permission.VIBRATE" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.CAMERA" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" \/>' "$MANIFEST"
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.WAKE_LOCK" \/>' "$MANIFEST"
 
-      - name: Enable WebView Features
+      - name: Enable WebView Features & Hardware Acceleration
         run: |
-          MAIN_ACTIVITY="android/app/src/main/java/com/anhsung/chidoi/MainActivity.java"
+          MAIN_ACTIVITY=$(find android/app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -f "$MAIN_ACTIVITY" ]; then
             sed -i '/super.onCreate(savedInstanceState);/a \        this.bridge.getWebView().getSettings().setJavaScriptEnabled(true);\n        this.bridge.getWebView().getSettings().setDomStorageEnabled(true);' "$MAIN_ACTIVITY"
+            echo "✅ Đã bật cấu hình WebView thành công trong: $MAIN_ACTIVITY"
+          else
+            echo "⚠️ Không tìm thấy file MainActivity.java, bỏ qua bước này."
           fi
 
       - name: Set App Name Chi Đội
@@ -230,7 +239,7 @@ jobs:
           body: |
             ## 🚀 Chi Đội App - Build #${{ github.run_number }}
             
-            Bản APK đóng gói tự động nhận diện version từ version.json.
+            Bản APK đóng gói tự động nhận diện version từ version.json và tích hợp đầy đủ quyền hệ thống.
           draft: false
           prerelease: false
           overwrite: true
