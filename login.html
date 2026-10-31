@@ -2,8 +2,7 @@
 <html lang="vi">
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#007bff">
-    
+    <meta name="theme-color" content="#007bff">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập Hệ Thống</title>
@@ -51,7 +50,6 @@
             opacity: 0.9;
         }
 
-        /* --- STYLING CHO THÔNG BÁO Ở DƯỚI CÙNG (TOAST) --- */
         #custom-toast {
             position: fixed;
             bottom: -100px;
@@ -101,15 +99,12 @@
         </p>
     </div>
 
-    <!-- Khung thông báo trượt lên ở dưới cùng -->
     <div id="custom-toast"><span id="toast-icon">✨</span> <span id="toast-msg">Thông báo</span></div>
 
-    <!-- Nhúng thư viện Firebase cấu hình của bạn -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // Đồng bộ màu sắc và phông chữ từ localStorage khi vừa vào trang
         document.addEventListener("DOMContentLoaded", () => {
             const savedColor = localStorage.getItem('app_theme_color');
             if (savedColor) {
@@ -135,6 +130,18 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // 🔄 TỰ ĐỘNG KÉO DỮ LIỆU TỪ FIREBASE VỀ MÁY KHI CÓ MẠNG ĐỂ LÀM BỘ ĐỆM OFFLINE
+        if (navigator.onLine) {
+            database.ref('users').once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    // Lưu toàn bộ danh sách users xuống localStorage làm "file" lưu trữ dự phòng
+                    localStorage.setItem('firebase_users_cache', JSON.stringify(snapshot.val()));
+                }
+            }).catch(err => {
+                console.log("Không thể tải cache từ Firebase:", err);
+            });
+        }
+
         let toastTimer = null;
         function showToast(message, type = "success") {
             const toast = document.getElementById('custom-toast');
@@ -157,9 +164,7 @@
             // 1. Kiểm tra mã bí mật quản trị
             if (user === "" && pass === "0011032012") {
                 showToast("Xác thực mã bí mật thành công! Đang vào trang quản trị...", "success");
-                setTimeout(() => {
-                    window.location.href = "settings-app.html"; 
-                }, 1000);
+                setTimeout(() => { window.location.href = "settings-app.html"; }, 1000);
                 return;
             }
 
@@ -168,42 +173,37 @@
                 return;
             }
 
-            // Lấy dữ liệu dự phòng đã lưu trong máy (nếu có)
-            const savedUserJson = localStorage.getItem('offline_user_' + user);
+            // Lấy bộ đệm danh sách users đã lưu trong máy
+            const cachedUsersStr = localStorage.getItem('firebase_users_cache');
+            const cachedUsers = cachedUsersStr ? JSON.parse(cachedUsersStr) : {};
 
-            // 2. NẾU MẤT MẠNG: Dùng luôn dữ liệu lưu trữ dưới máy để đối chiếu
+            // 2. KHI MẤT MẠNG: Lôi bộ đệm trong máy ra xử lý ngay lập tức
             if (!navigator.onLine) {
-                if (savedUserJson) {
-                    const userData = JSON.parse(savedUserJson);
-                    if (userData.password === pass) {
-                        showToast("Đăng nhập ngoại tuyến thành công! Chào " + user, "success");
-                        localStorage.setItem("loggedInUser", user);
-                        localStorage.setItem("da_dang_nhap", "true");
-                        setTimeout(() => { window.location.href = "home.html"; }, 1000);
-                        return;
-                    } else {
-                        showToast("Mật khẩu không chính xác!", "error");
-                        return;
-                    }
+                if (cachedUsers[user] && cachedUsers[user].password === pass) {
+                    showToast("Đăng nhập ngoại tuyến thành công! Chào " + user, "success");
+                    localStorage.setItem("loggedInUser", user);
+                    localStorage.setItem("da_dang_nhap", "true");
+                    setTimeout(() => { window.location.href = "home.html"; }, 1000);
                 } else {
-                    showToast("Bạn đang ngoại tuyến và tài khoản này chưa từng đăng nhập trên thiết bị này!", "error");
-                    return;
+                    showToast("Mất mạng và tài khoản/mật khẩu không khớp với dữ liệu lưu trong máy!", "error");
                 }
+                return;
             }
 
-            // 3. KHI CÓ MẠNG: Kiểm tra trên Firebase Database[span_1](start_span)[span_1](end_span)
+            // 3. KHI CÓ MẠNG: Kiểm tra trực tiếp trên Firebase
             database.ref('users/' + user).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === pass) {
                         showToast("Đăng nhập thành công! Chào mừng " + user, "success");
                         
-                        // 💡 TỰ ĐỘNG LƯU DỰ PHÒNG VÀO LOCALSTORAGE ĐỂ LẦN SAU MẤT MẠNG VẪN ĐĂNG NHẬP ĐƯỢC
-                        localStorage.setItem('offline_user_' + user, JSON.stringify(userData));
                         localStorage.setItem("loggedInUser", user);
                         localStorage.setItem("da_dang_nhap", "true");
                         
-                        // Chuyển hướng sang home.html sau 1 giây[span_2](start_span)[span_2](end_span)
+                        // Cập nhật lại bộ đệm mới nhất vào máy
+                        cachedUsers[user] = userData;
+                        localStorage.setItem('firebase_users_cache', JSON.stringify(cachedUsers));
+                        
                         setTimeout(() => {
                             window.location.href = "home.html";
                         }, 1000);
@@ -214,18 +214,15 @@
                     showToast("Tài khoản này không tồn tại!", "error");
                 }
             }).catch((error) => {
-                // Phòng hờ khi gọi Firebase bị lỗi mạng đột ngột giữa chừng
-                if (savedUserJson) {
-                    const userData = JSON.parse(savedUserJson);
-                    if (userData.password === pass) {
-                        showToast("Đăng nhập thành công bằng dữ liệu lưu trữ máy!", "success");
-                        localStorage.setItem("loggedInUser", user);
-                        localStorage.setItem("da_dang_nhap", "true");
-                        setTimeout(() => { window.location.href = "home.html"; }, 1000);
-                        return;
-                    }
+                // Phòng hờ nếu lúc gọi mạng bị rớt đột ngột, tự động fallback sang bộ đệm máy
+                if (cachedUsers[user] && cachedUsers[user].password === pass) {
+                    showToast("Đăng nhập thành công bằng dữ liệu lưu trữ máy!", "success");
+                    localStorage.setItem("loggedInUser", user);
+                    localStorage.setItem("da_dang_nhap", "true");
+                    setTimeout(() => { window.location.href = "home.html"; }, 1000);
+                } else {
+                    showToast("Lỗi kết nối: " + error.message, "error");
                 }
-                showToast("Lỗi kết nối: " + error.message, "error");
             });
         });
     </script>
