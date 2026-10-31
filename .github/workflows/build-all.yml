@@ -147,28 +147,29 @@ jobs:
       - name: Inject ALL App Permissions Safely to AndroidManifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          PERMISSIONS='
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-              <uses-permission android:name="android.permission.VIBRATE" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-              <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-              <uses-permission android:name="android.permission.WAKE_LOCK" />
-          '
           python3 -c "
           with open('$MANIFEST', 'r') as f:
               content = f.read()
-          if '<manifest' in content:
-              parts = content.split('>', 1)
-              new_content = parts[0] + '>' + '''$PERMISSIONS''' + parts[1]
+
+          permissions_to_add = '''
+              <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" />
+              <uses-permission android:name=\"android.permission.INTERNET\" />
+              <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />
+              <uses-permission android:name=\"android.permission.VIBRATE\" />
+              <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />
+              <uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />
+              <uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\" />
+              <uses-permission android:name=\"android.permission.CAMERA\" />
+              <uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />
+              <uses-permission android:name=\"android.permission.WAKE_LOCK\" />
+          '''
+
+          if '<application' in content:
+              content = content.replace('<application', permissions_to_add + '\n    <application')
               with open('$MANIFEST', 'w') as f:
-                  f.write(new_content)
+                  f.write(content)
+              print('✅ Đã chèn quyền an toàn vào AndroidManifest.xml')
           "
-          echo "✅ Đã bơm toàn bộ quyền vào Manifest thành công!"
 
       - name: Enable WebView Features & Auto Request Permissions (Java Level)
         run: |
